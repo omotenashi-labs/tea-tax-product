@@ -36,3 +36,11 @@ This repository is the source of truth for Tea Tax strategy, research, and execu
 - Keep key decisions documented as markdown files.
 - Prefer small, frequent updates so documentation stays current.
 - If a doc changes expected behavior or scope, call it out in the commit message.
+
+## Safe Commit Command
+
+- This repo includes `scripts/commit-safe.sh` to force anonymized author and committer identity.
+- To use `git safe-commit` without editing git config, add the repo bin folder to PATH in your shell session:
+  - `export PATH="$PWD/bin:$PATH"`
+- Then run:
+  - `git safe-commit "Docs: your message" [optional paths...]`
