@@ -1,4 +1,4 @@
-# Tea Tax - Quick Thesis
+# Tea Tax Background
 
 Tea Tax is a free, AI-powered front door for tax filing. It helps people turn messy tax inputs into a structured tax situation, then compares filing options with transparent pricing and fit so they can choose with confidence.
 
@@ -21,14 +21,7 @@ Most taxpayers face opaque pricing, confusing choices, and a stressful intake pr
 
 ## Read In This Order
 
-1. Core thesis and product strategy: `docs/vision/tea-tax-thesis.md`
-2. Distribution strategy: `docs/strategy/tea-tax-distribution-strategy.md`
-3. Active execution focus: `docs/requirements/current-priorities.md`
-4. Concept implementation details: `docs/product-concepts/calypso-blueprint/README.md`
+1. Core thesis and product strategy: `docs/vision/tea-tax-thesis.md` 
+2. Active execution focus: `docs/requirements/current-priorities.md`
+3. Concept implementation details: `docs/product-concepts/calypso-blueprint/README.md`
 
-## Reference Logs (Optional Background)
-
-- Thesis chat transcript: `docs/vision/tea-tax-thesis-chat-transcript.md`
-- Thesis review session: `docs/vision/tea-tax-thesis-review-session.md`
-
-These logs are useful for historical context, not for first-pass orientation.
