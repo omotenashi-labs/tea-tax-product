@@ -96,6 +96,8 @@ The vibe is *we the people*. Think Team Blind for tax pricing - anonymous, crowd
 
 The intake process produces a structured, portable data object that represents the user's complete tax situation. This is a first-class feature, not a technical detail.
 
+Implementation note for launch MVP: this concept is persisted as `tax_objects` and `tax_returns`, with creator-only access enforced by `tax_objects.created_by_user_id`. Sharing roles and memberships are post-launch. Canonical source: `docs/requirements/tax-object-ownership-and-access-spec.md`.
+
 **Today:** The object powers the intake-to-comparison pipeline. It's what allows Tea Tax to compare providers accurately and route users to the right tier.
 
 **Tomorrow:** The object becomes the universal API between taxpayers and any tax-filing system - human or AI. As agentic tax filing emerges (frontier model SDKs, MCP servers), this object is what an AI agent consumes to file taxes on a user's behalf.

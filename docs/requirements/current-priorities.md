@@ -7,6 +7,10 @@ This file captures the near-term organizational focus for Tea Tax.
 - Align on MVP scope boundaries from the thesis and blueprint docs.
 - Agree on the minimum intake workflow and required user inputs.
 - Confirm trust, privacy, and data handling requirements for launch.
+- Lock MVP persistence model and access rule:
+  - Launch tables: `users`, `tax_objects`, `tax_returns`
+  - Launch authorization: access only where `tax_objects.created_by_user_id = current_user.id`
+  - `tax_object_memberships` deferred to follow-on sharing phase
 
 ## Next
 

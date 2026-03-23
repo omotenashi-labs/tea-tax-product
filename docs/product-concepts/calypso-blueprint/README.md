@@ -15,6 +15,7 @@ Based on the [Tea Tax Product Thesis](../tea-tax/tea-tax-thesis.md).
 | 3 | **Practitioner Layer** | No | Marketplace + coordination layer for credentialed practitioners. Integrates with existing filing software. |
 
 V1 ships Verticals 1 and 2. The tax situation object is the connective tissue between all three verticals.
+The canonical MVP ownership and access contract is defined in `docs/requirements/tax-object-ownership-and-access-spec.md`.
 
 ---
 
@@ -40,6 +41,7 @@ Tax Second Opinion is sequenced as an early distribution wedge and can run in pa
 | Prerequisite | Description |
 |-------------|-------------|
 | Pricing Discovery Project | Research-driven mapping of baseline (Layer 1) pricing for top 5 providers. Required before Phase 4. |
+| Ownership and access contract | Launch persistence is `users`, `tax_objects`, `tax_returns` with creator-only access (`created_by_user_id`). Membership sharing is post-launch. |
 
 ### V1 Success Metrics
 

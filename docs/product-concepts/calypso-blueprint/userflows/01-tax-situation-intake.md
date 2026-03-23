@@ -2,6 +2,7 @@
 
 ## Entry Condition
 User is authenticated and has not yet completed a tax situation intake for the current tax year (or has chosen to start a new one).
+An active `tax_object_id` is selected or created before intake begins.
 
 ## Exit Condition (Goal Achieved)
 User has a structurally complete tax situation object and is presented with a personalized three-vector comparison of filing options. Target: 10 minutes or less from entry to comparison.
@@ -14,6 +15,8 @@ User has a structurally complete tax situation object and is presented with a pe
 **Meaning:** User has just signed in and has no (or an empty) tax situation object. The system introduces the intake experience, sets expectations, and establishes trust.
 **Entry:** User authenticates for the first time, or starts a new tax year intake.
 **Available Actions:**
+  - Select existing tax object -> CONVERSATIONAL_INTAKE (triggered by: user picks an existing context)
+  - Create new tax object -> CONVERSATIONAL_INTAKE (triggered by: user creates personal, business, or dependent context)
   - Begin intake -> CONVERSATIONAL_INTAKE (triggered by: user starts chat or selects an intake modality)
   - Upload a completed return instead -> (exits to Tax Second Opinion flow)
 **Feedback:**
@@ -22,7 +25,8 @@ User has a structurally complete tax situation object and is presented with a pe
   - Trust signals: who built this, what happens to your data, what Tea Tax will never do with it
   - Framing: "When we're done, you'll have a structured picture of your tax situation that you own - and honest comparisons of every filing option available to you."
 **Invariants:**
-  - Tax situation object exists but is empty
+  - Intake is always scoped to one active `tax_object_id`
+  - Tax situation payload for that context may be empty at first
   - No user data has been collected yet
 
 ---
@@ -43,6 +47,7 @@ User has a structurally complete tax situation object and is presented with a pe
   - Contextual prompts to use other modalities ("Have your W-2 handy? Upload it and I'll pull the numbers automatically")
   - Time indicator showing progress toward the 10-minute target
 **Invariants:**
+  - Active `tax_object_id` remains fixed unless user explicitly switches context
   - Tax situation object is partially populated and being actively enriched
   - Chat context (conversation history) is preserved
   - The AI collects and clarifies information; it does not provide tax advice (Circular 230 boundary)
@@ -135,7 +140,7 @@ User has a structurally complete tax situation object and is presented with a pe
   - On return: "Welcome back! You were 62% done - let's pick up where you left off"
   - Reminder notification (if opted in): "Your tax intake is waiting - you're almost done"
 **Invariants:**
-  - Tax situation object and conversation context are preserved
+  - Tax situation object and conversation context are preserved for the active `tax_object_id`
   - No data is lost or expired
 
 ---

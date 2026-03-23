@@ -20,6 +20,12 @@ Tea Tax is three distinct product verticals that compose into a single platform.
 
 The tax situation object is the connective tissue. The Intake Engine produces it; every other vertical consumes it. V1's architecture must ensure the object schema is compatible with the Practitioner Layer when it comes online, including export formats that existing filing software (Drake, Lacerte, ProConnect, CCH) can consume.
 
+Launch persistence and authorization contract:
+
+- `users -> tax_objects -> tax_returns`
+- access control enforced by `tax_objects.created_by_user_id` in MVP
+- `tax_object_memberships` is deferred to a follow-on sharing phase
+
 ---
 
 ## V1 Success Metrics
@@ -46,7 +52,7 @@ These form a funnel: users who start -> users who finish -> users who act. If an
 | Tax Situation Object | [features/02-tax-situation-object.md](features/02-tax-situation-object.md) |
 | Privacy & Encryption Architecture | [features/03-privacy-encryption.md](features/03-privacy-encryption.md) |
 
-**Exit criteria:** A user can register, authenticate, and create/read/update/delete an encrypted tax situation object.
+**Exit criteria:** A user can register, authenticate, create and manage multiple tax objects, and create/read returns under a tax object with creator-only access enforcement.
 
 ---
 
@@ -61,7 +67,7 @@ These form a funnel: users who start -> users who finish -> users who act. If an
 | Voice & Video Intake | [features/06-voice-video-intake.md](features/06-voice-video-intake.md) |
 | Plaid Financial Account Connection | [features/07-plaid-integration.md](features/07-plaid-integration.md) |
 
-**Depends on:** Phase 1 (tax situation object schema, encryption)
+**Depends on:** Phase 1 (tax object schema, return scoping, encryption)
 **Exit criteria:** A user can complete a guided intake session through at least two input modalities (chat + document upload) and produce a structurally complete tax situation object in 10 minutes or less.
 
 ---

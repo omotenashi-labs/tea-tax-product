@@ -5,6 +5,8 @@
 **Interviewer:** AI Agent
 **Source material:** Tea Tax Product Thesis, Tea Tax Distribution Strategy, Tea Tax Thesis Chat Transcript
 
+Note: This transcript captures point-in-time interview language. For launch MVP data model and access control decisions, use `docs/requirements/tax-object-ownership-and-access-spec.md` as the canonical source.
+
 ---
 
 ## Pre-filled Questionnaire (Confirmed)

@@ -21,6 +21,7 @@ This repository is the source of truth for Tea Tax strategy, research, and execu
 - Use `docs/research` for supporting tax and regulatory research.
 - Review `docs/product-concepts` for concept blueprints and scoped plans.
 - Use `docs/requirements/current-priorities.md` as the current working focus.
+- Use `docs/requirements/tax-object-ownership-and-access-spec.md` for launch data model and access rules.
 
 ## Current Structure
 
