@@ -1,0 +1,25 @@
+name: Full-Page User Story Tests
+
+on:
+  push:
+    branches: [main, 'UX/**', 'feat/**', 'fix/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+      - name: Install Dependencies
+        run: bun install
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+      - name: Run E2E Tests
+        # Spins up a fresh postgres container and Bun server per test module.
+        # Docker is available on ubuntu-latest runners by default.
+        run: bun --bun vitest run --config tests/e2e/vitest.config.ts
