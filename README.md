@@ -6,7 +6,7 @@ This repository is the source of truth for Tea Tax strategy, research, and execu
 
 - Read `THESIS.md` first for the quickest entry point.
 - Full working document: `docs/vision/tea-tax-thesis.md`
-- Related discussion and review notes are in `docs/vision`.
+- Reference logs (optional background): `docs/vision/tea-tax-thesis-chat-transcript.md` and `docs/vision/tea-tax-thesis-review-session.md`
 
 ## Purpose
 
