@@ -15,7 +15,7 @@ Based on the [Tea Tax Product Thesis](../tea-tax/tea-tax-thesis.md).
 | 3 | **Practitioner Layer** | No | Marketplace + coordination layer for credentialed practitioners. Integrates with existing filing software. |
 
 V1 ships Verticals 1 and 2. The tax situation object is the connective tissue between all three verticals.
-The canonical MVP ownership and access contract is defined in `docs/requirements/tax-object-ownership-and-access-spec.md`.
+The canonical MVP ownership and access contract is defined in `docs/requirements/users-tax-objects-ownership-access-spec.md`.
 
 ---
 

@@ -14,7 +14,7 @@ For MVP persistence and access rules, this concept maps to:
 - `tax_returns` (year and jurisdiction scoped records under a tax object)
 - creator-only access via `tax_objects.created_by_user_id` in launch scope
 
-Canonical reference: `docs/requirements/tax-object-ownership-and-access-spec.md`.
+Canonical reference: `docs/requirements/users-tax-objects-ownership-access-spec.md`.
 
 ---
 

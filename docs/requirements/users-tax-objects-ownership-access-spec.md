@@ -1,4 +1,4 @@
-# Users, Tax Objects, Ownership and Access Spec
+# Users, Tax Objects, Ownership, and Access Spec
 
 Status: Draft v1
 Owner: Product + Platform
@@ -205,4 +205,3 @@ Example C - future 1065 partnership:
 2. Backfill one `owner` membership per existing tax object using `user_id`.
 3. Update authorization checks to read membership table.
 4. Keep `user_id` during transition, then deprecate.
-
