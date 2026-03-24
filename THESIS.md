@@ -21,8 +21,7 @@ Most taxpayers face opaque pricing, confusing choices, and a stressful intake pr
 
 ## Read In This Order
 
-1. Core thesis and product strategy: `docs/vision/tea-tax-thesis.md` 
+1. Core thesis and product strategy: `docs/vision/tea-tax-thesis.md`
 2. Active execution focus: `docs/requirements/current-priorities.md`
 3. Concept implementation details: `docs/product-concepts/calypso-blueprint/README.md`
 4. MVP ownership and access model: `docs/requirements/users-tax-objects-ownership-access-spec.md`
-

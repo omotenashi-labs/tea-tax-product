@@ -46,6 +46,7 @@ Drafted the initial product description:
 > Calypso is a tax filing super-aggregator that serves as the impartial front door for anyone who needs to do their taxes. It provides a white-glove, AI-powered intake experience - collecting your tax situation through chat, document capture, and financial account connections - then delivers transparent, side-by-side recommendations across every filing option available to you, with honest pricing and no hidden fees. Think of it as the savvy CPA friend everyone wishes they had: impartial, informed, and always on your side.
 
 Raised three questions:
+
 - Revenue model tension (agnostic vs. monetization)
 - The portable tax situation object as a first-class feature
 - Scope of V1
@@ -55,6 +56,7 @@ Raised three questions:
 ## Turn 3: Revenue Model, Portable Object, V1 Scope
 
 **User:**
+
 - Revenue model: What do you recommend? What does Kayak or Expedia do?
 - The portable tax situation object: It should be first-class, AI-first through the lens of what exists today in the tax prep industry, but also where it's likely headed (frontier model agentic SDKs or MCPs).
 - Scope of V1: Both together as inseparable, though the routing might be dependent on the revenue model and industry/distribution partnerships.
@@ -67,6 +69,7 @@ Raised three questions:
 - Credit Karma as precedent (~$8B acquisition by Intuit)
 
 Framed the portable tax situation object as the long-term platform play:
+
 - Today: powers the intake-to-recommendation pipeline
 - Tomorrow: universal API between taxpayers and any tax-filing system (human or AI)
 - Analogy: what Plaid did for banking data
@@ -100,12 +103,14 @@ Plus elevator pitch:
 ## Turn 6: Strategic Framework Footnote - Filing to Strategy Spectrum
 
 **User:** Provided strategic context for a footnote:
+
 - V1 is reactionary (tax year done, need to file). Future should be forward-thinking: "what's happening this year that will impact tax time come April next year."
 - The spectrum: tax filing (transactional) -> tax advice -> tax strategy
 - Tax strategy is the golden ticket - only available to the ultra-wealthy today, gated behind expensive CPA firms
 - The tax pro marketplace opportunity: no open marketplace exists, TurboTax has cornered it through DIWM/DIFM contract work, taking a significant cut as middleman
 
 **Assistant:** Added the strategic framework footnote covering:
+
 - The filing -> advice -> strategy spectrum
 - Tax strategy as democratization play
 - The Tea Tax Professional Marketplace (direct, no-middleman connection to credentialed pros)
@@ -117,6 +122,7 @@ Plus elevator pitch:
 **User:** As the product evolves further right on the spectrum, a constant "tax-code" listener and persistent Plaid integration become critical. An AI-native version history of the tax code with real-time updates as legislation is enacted will be essential for informing end-users about changes that impact them.
 
 **Assistant:** Added "The Tax Code Listener and Continuous Financial Context" section:
+
 - Living, AI-native tax code knowledge base (version-controlled `.md` files with real-time diffs)
 - Persistent Plaid integration as a continuous financial picture (evolving from V1 snapshot to year-round feed)
 - The intersection: system knows both what's happening in the user's financial life AND what's changing in the tax code
@@ -130,6 +136,7 @@ Plus elevator pitch:
 **Assistant:** Conducted extensive market research. Key findings:
 
 **What holds up:**
+
 - Core problem statement is rock solid
 - No dynamic, intake-driven recommendation tool exists (NerdWallet et al. are static editorial)
 - AI tax startups (Taxu, Magnetic, Black Ore) are building preparation tools, not aggregators
@@ -137,11 +144,13 @@ Plus elevator pitch:
 - Affiliate programs exist (TurboTax 10-15% rev share)
 
 **What needs correction:**
+
 - IRS Direct File is dead (killed by Trump administration for 2026)
 - Credit Karma precedent is more cautionary (DOJ forced divestiture, now TurboTax funnel)
 - Data portability between providers is better than implied (H&R Block direct import from TurboTax)
 
 **What the document doesn't address:**
+
 - Pricing data acquisition is the hardest unsolved problem
 - Affiliate revenue economics may be thin
 - Regulatory risk (Circular 230) for advice/strategy
@@ -153,12 +162,14 @@ Plus elevator pitch:
 ## Turn 9: User Responds to Stress Test
 
 **User:**
+
 - Pricing data acquisition: Workaround is making the portable object easy to upload into any provider to get a real quote quickly. Crowdsource pricing data like Team Blind. "We the people" vibe. War against opacity won by the community.
 - Regulatory risk: Advice/strategy should remain behind HITL credentialed marketplace for full compliance.
 - Moat: Portable tax situation object and AI-first intake are harder to replicate. Informed by extensive insight as a SaaS tax product manager.
 - Seasonality: Need to launch ASAP to show POC and validate virality in-season.
 
 **Assistant:** Further pressure tested the moat:
+
 - IRS MeF XML schema exists for completed returns (output) but nothing for the pre-return tax situation (input) - object's novelty holds
 - NerdWallet ($836M revenue, 24M+ users) could build this but would require a strategic pivot from content to product/platform company
 - Moat is a speed moat, not permanent. Domain expertise from SaaS tax PM is real alpha.
@@ -180,6 +191,7 @@ Updated document with all corrections, the pricing data problem (with crowdsourc
 **User:** Called out a critical industry insight: the supply of credentialed advice is a massive constraint, particularly acute in the seasonal crescendo before the tax deadline. The marketplace should include tax profiles of all credentialed users. "Look up my profile on Tea Tax." Supply-side strategy through direct relationships with regional CPA orgs.
 
 **Assistant:** Added three pieces to the marketplace section:
+
 - The supply constraint insight (structural, seasonal, never solved)
 - The professional profile layer (agnostic, third-party-verified, "look me up on Tea Tax")
 - Supply-side GTM via regional CPA societies and EA associations
@@ -199,6 +211,7 @@ Updated document with all corrections, the pricing data problem (with crowdsourc
 **User:** Who are potential players who would acquire this? Is there an Anthropic partnership or angle here?
 
 **Assistant:** Identified acquirer tiers:
+
 - Incumbents (Intuit, H&R Block) - highest brand risk
 - Financial platforms (Block/Square, SoFi, Robinhood, PayPal)
 - Financial data infrastructure (Plaid - cleanest strategic fit)
@@ -206,6 +219,7 @@ Updated document with all corrections, the pricing data problem (with crowdsourc
 - Big tech (Google, Apple)
 
 Anthropic angle:
+
 - MCP as the native protocol for the tax situation object (infrastructure in the agent economy)
 - Flagship use case for responsible AI (high-stakes, multi-modal, trust-critical, massive market)
 - Agentic filing future (Tea Tax = data layer for AI agents in tax)
@@ -222,6 +236,7 @@ Anthropic angle:
 **User:** Is there also an angle for creating proprietary local models that don't fully depend on frontier model big players?
 
 **Assistant:** Yes - significant strategic value:
+
 - Tax domain is unusually well-suited for fine-tuned smaller models (structured, rule-based, pattern-driven)
 - Trust (process sensitive data locally)
 - Cost (collapse unit economics at scale)
@@ -278,6 +293,7 @@ Key insight: strengthens Anthropic partnership (shifts from vendor-customer to c
 **User:** Read the contents in the tea-tax-superhuman-cpa folder. Don't consider the multi-modal methods as final product spec - the idea of the OS is what I want to drive home.
 
 **Assistant:** Read the full scaffold design spec (576 lines) and implementation plan. Extracted the OS concept:
+
 - Complete AI-native practice management platform for the full tax engagement lifecycle
 - Multi-tenant, white-label by design (solo practitioners through 200-person firms)
 - Circular 230 compliance as architectural enforcement (return lifecycle state machine with authority boundaries)
@@ -293,6 +309,7 @@ Added The Superhuman CPA OS subsection to the thesis.
 **User:** Audit the thesis again and stress test for market appetite and "why now." What is our hardest problem to solve, assuming the tech stack is accounted for?
 
 **Assistant:** Researched current market data:
+
 - $14.3B industry (2025), 150M+ filers
 - TurboTax 1.2/5 on Trustpilot, NPS of 38
 - 80% of consumers reuse last year's software (inertia)
@@ -363,6 +380,7 @@ The complete product thesis lives at `sandbox/tea-tax/product-thesis.md` (363 li
 - **Constitutional principle.** Non-negotiable. Cannot be overridden by business convenience, investor pressure, or growth metrics. If a feature requires compromising privacy, the feature doesn't ship.
 
 Also threaded privacy into downstream sections:
+
 - **Intake section:** Every piece of data encrypted immediately, never visible to administrators
 - **Portable tax situation object:** Explicitly the user's property with granular consent for sharing
 - **Superhuman CPA OS:** Privacy is equally architectural - one firm's data cryptographically invisible to every other firm and to Tea Tax itself

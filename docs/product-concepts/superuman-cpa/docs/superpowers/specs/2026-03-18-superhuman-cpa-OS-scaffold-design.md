@@ -49,11 +49,13 @@ superhuman-cpa-OS-tax/
 ### 2.2 Request Flow
 
 **Sync path (CRUD, auth):**
+
 ```
 browser → frontend → api → db
 ```
 
 **AI path (streaming):**
+
 ```
 browser → api: POST /ai/start-session → { sessionId }
 browser → api: GET /ai/stream/:sessionId (SSE)
@@ -64,6 +66,7 @@ api → db
 ```
 
 **Pro workflow path:**
+
 ```
 pro browser → frontend → api (proxy) → practitioner: POST /tasks/:id/resolve
 practitioner → api: POST /internal/returns/:id/status (status advance)
@@ -78,6 +81,7 @@ api → db
 `api` exposes two route namespaces:
 
 **Public routes** (browser-facing, JWT-authenticated):
+
 - `POST /ai/start-session`, `GET /ai/stream/:sessionId`
 - `GET /notifications/stream`
 - `POST /auth/register`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`
@@ -91,6 +95,7 @@ api → db
 - `POST /webhooks/twilio/sms-status` — delivery status callback for outbound SMS
 
 **Internal routes** (`X-Internal-Secret` authenticated, not browser-accessible):
+
 - `POST /internal/returns/:id/fields` — set a return field
 - `POST /internal/returns/:id/flag-for-pro-review` — create pro_tasks + set pending_pro_review
 - `POST /internal/returns/:id/status` — advance status (restricted by caller identity)
@@ -103,6 +108,7 @@ api → db
 ### 2.4 Inter-Service Transport
 
 Internal HTTP within the K8s cluster (cluster DNS). All inter-service calls include:
+
 - `X-Internal-Secret: $INTER_SERVICE_SECRET` — shared secret for service authentication
 - `X-Caller: api|ai-worker|practitioner` — identity of the calling service
 
@@ -112,11 +118,11 @@ All services validate `X-Internal-Secret` on **inbound** internal calls, includi
 
 ### 2.5 DB Write Ownership
 
-| Service | Status transitions permitted via `api` |
-|---------|---------------------------------------|
-| `ai-worker` | `intake → ai_prep`, `ai_prep → pending_pro_review` |
-| `practitioner` | `pending_pro_review → review`, `review → signed` |
-| `api` (staff) | `signed → filed` |
+| Service        | Status transitions permitted via `api`             |
+| -------------- | -------------------------------------------------- |
+| `ai-worker`    | `intake → ai_prep`, `ai_prep → pending_pro_review` |
+| `practitioner` | `pending_pro_review → review`, `review → signed`   |
+| `api` (staff)  | `signed → filed`                                   |
 
 `api` rejects transitions outside this matrix based on `X-Caller` header.
 
@@ -139,6 +145,7 @@ Superhuman-cpa-OS Tax supports multiple firms operating the service — each wit
 ### 3.1 Firms Table
 
 **firms**
+
 - `id` uuid pk
 - `name` text — display name (e.g., "Superhuman-cpa-OS Tax", "Acme Tax Partners")
 - `slug` text unique — used for subdomain routing (e.g., `acme.superhuman-cpa-OS.tax`)
@@ -157,6 +164,7 @@ Superhuman-cpa-OS Tax supports multiple firms operating the service — each wit
 ### 3.3 Firm Routing
 
 Requests are associated with a firm by one of two mechanisms:
+
 - **Subdomain:** `acme.superhuman-cpa-OS.tax` → resolved to `firms` row by slug
 - **Header:** `X-Firm-ID: <uuid>` — used for internal and API clients
 
@@ -166,13 +174,14 @@ Unauthenticated requests (register, login) resolve firm from the subdomain/heade
 
 ## 4. User Roles
 
-| Role | Description | Circular 230 |
-|------|-------------|--------------|
-| `taxpayer` | End customer. Submits info, pays, receives filed return. | No credentials required |
-| `pro` | Credentialed tax professional (CPA, EA, attorney) with PTIN. Reviews, advises, signs. | Accountable under Circular 230 |
-| `staff` | Internal ops. Manages assignments, escalations, call assist, QA. Superhuman-cpa-OS staff are platform-wide; firm staff are firm-scoped. | No credentials required |
+| Role       | Description                                                                                                                             | Circular 230                   |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `taxpayer` | End customer. Submits info, pays, receives filed return.                                                                                | No credentials required        |
+| `pro`      | Credentialed tax professional (CPA, EA, attorney) with PTIN. Reviews, advises, signs.                                                   | Accountable under Circular 230 |
+| `staff`    | Internal ops. Manages assignments, escalations, call assist, QA. Superhuman-cpa-OS staff are platform-wide; firm staff are firm-scoped. | No credentials required        |
 
 **Pro registration and activation flow:**
+
 1. Pro registers via standard form → `users.status = pending_ptin_verification`
 2. Pro can log in and sees a "pending verification" screen; no dashboard or task queue access
 3. Staff calls `POST /admin/users/:id/verify-ptin` from staff dashboard. `api` validates staff JWT, then calls `practitioner POST /users/:id/verify-ptin` as a backend step. `practitioner` calls `api POST /internal/users/:id/activate`.
@@ -187,6 +196,7 @@ Unauthenticated requests (register, login) resolve firm from the subdomain/heade
 **firms** — see Section 3.1
 
 **users**
+
 - `id` uuid pk
 - `firm_id` → firms
 - `email` text
@@ -199,6 +209,7 @@ Unauthenticated requests (register, login) resolve firm from the subdomain/heade
 - unique constraint: `(firm_id, email)`
 
 **tax_returns**
+
 - `id` uuid pk
 - `firm_id` → firms
 - `taxpayer_id` → users
@@ -213,6 +224,7 @@ Unauthenticated requests (register, login) resolve firm from the subdomain/heade
 - `created_at` timestamptz
 
 **intake_sessions**
+
 - `id` uuid pk
 - `return_id` → tax_returns
 - `channel` chat|voice|wizard|upload|phone
@@ -221,6 +233,7 @@ Unauthenticated requests (register, login) resolve firm from the subdomain/heade
 - `created_at` timestamptz
 
 **documents**
+
 - `id` uuid pk
 - `return_id` → tax_returns
 - `doc_type` w2|1099-nec|1099-misc|1099-b|1099-div|1099-int|1099-r|k1|schedule-c-records|receipt|other
@@ -230,6 +243,7 @@ Unauthenticated requests (register, login) resolve firm from the subdomain/heade
 - `created_at` timestamptz
 
 **pro_tasks** (Circular 230 gates)
+
 - `id` uuid pk
 - `return_id` → tax_returns
 - `pro_id` → users (nullable — null = unassigned; visible to all pros and staff in the unassigned queue)
@@ -240,6 +254,7 @@ Unauthenticated requests (register, login) resolve firm from the subdomain/heade
 - `created_at` timestamptz
 
 **orders** — invoice header, one per return
+
 - `id` uuid pk
 - `firm_id` → firms
 - `return_id` → tax_returns
@@ -250,6 +265,7 @@ Unauthenticated requests (register, login) resolve firm from the subdomain/heade
 - `created_at` timestamptz
 
 **order_items** — one row per product on the order
+
 - `id` uuid pk
 - `order_id` → orders
 - `product_type` tax_preparation|audit_protection|refund_transfer|refund_advance
@@ -263,6 +279,7 @@ New product types are additive: add an enum value, handle it in billing logic, n
 ### Communications Tables
 
 **threads**
+
 - `id` uuid pk
 - `firm_id` → firms
 - `return_id` → tax_returns (nullable)
@@ -273,6 +290,7 @@ New product types are additive: add an enum value, handle it in billing logic, n
 - `created_at` timestamptz
 
 **thread_messages**
+
 - `id` uuid pk
 - `thread_id` → threads
 - `sender_id` → users (nullable — null = AI-authored)
@@ -282,6 +300,7 @@ New product types are additive: add an enum value, handle it in billing logic, n
 - `created_at` timestamptz
 
 **notifications**
+
 - `id` uuid pk
 - `firm_id` → firms
 - `recipient_id` → users
@@ -294,6 +313,7 @@ New product types are additive: add an enum value, handle it in billing logic, n
 - `created_at` timestamptz
 
 **call_sessions** (first-class intake channel)
+
 - `id` uuid pk
 - `intake_session_id` → intake_sessions (set post-call; links to phone intake_sessions row)
 - `return_id` → tax_returns (nullable)
@@ -314,13 +334,13 @@ New product types are additive: add an enum value, handle it in billing logic, n
 intake → ai_prep → pending_pro_review → review → signed → filed
 ```
 
-| From | To | Authority |
-|------|----|-----------|
-| `intake` | `ai_prep` | `ai-worker` → `api` |
-| `ai_prep` | `pending_pro_review` | `ai-worker` → `api` |
-| `pending_pro_review` | `review` | `practitioner` → `api` |
-| `review` | `signed` | `practitioner` → `api` |
-| `signed` | `filed` | `api` (staff-initiated) |
+| From                 | To                   | Authority               |
+| -------------------- | -------------------- | ----------------------- |
+| `intake`             | `ai_prep`            | `ai-worker` → `api`     |
+| `ai_prep`            | `pending_pro_review` | `ai-worker` → `api`     |
+| `pending_pro_review` | `review`             | `practitioner` → `api`  |
+| `review`             | `signed`             | `practitioner` → `api`  |
+| `signed`             | `filed`              | `api` (staff-initiated) |
 
 ---
 
@@ -332,38 +352,38 @@ Superhuman-cpa-OS Tax v1 targets TurboTax parity for individual returns. The can
 
 **Schedules:**
 
-| Schedule | Purpose |
-|----------|---------|
-| Schedule A | Itemized deductions |
-| Schedule B | Interest and dividend income |
-| Schedule C | Self-employment / sole proprietor income |
-| Schedule D | Capital gains and losses |
-| Schedule E | Supplemental income (rentals, royalties, pass-through K-1s) |
-| Schedule F | Farming income |
-| Schedule SE | Self-employment tax |
+| Schedule    | Purpose                                                     |
+| ----------- | ----------------------------------------------------------- |
+| Schedule A  | Itemized deductions                                         |
+| Schedule B  | Interest and dividend income                                |
+| Schedule C  | Self-employment / sole proprietor income                    |
+| Schedule D  | Capital gains and losses                                    |
+| Schedule E  | Supplemental income (rentals, royalties, pass-through K-1s) |
+| Schedule F  | Farming income                                              |
+| Schedule SE | Self-employment tax                                         |
 
 **Common supplemental forms:**
 
-| Form | Purpose |
-|------|---------|
-| Form 1099-NEC / 1099-MISC | Non-employee compensation |
-| Form 1099-B | Broker proceeds |
-| Form 1099-DIV | Dividends |
-| Form 1099-INT | Interest income |
-| Form 1099-R | Retirement distributions |
-| Form 1099-G | Government payments (unemployment, state refunds) |
-| Schedule K-1 (1065) | Partnership income |
-| Schedule K-1 (1120-S) | S-corporation income |
-| Schedule K-1 (1041) | Estate/trust income |
-| Form 8949 | Capital asset sales detail |
-| Form 4562 | Depreciation and amortization |
-| Form 8863 | Education credits |
-| Form 8962 | ACA premium tax credit reconciliation |
-| Form 2441 | Child and dependent care |
-| Form 8812 | Child tax credit |
-| Form 5695 | Residential energy credits |
-| Form 1116 | Foreign tax credit |
-| Form 2555 | Foreign earned income exclusion |
+| Form                      | Purpose                                           |
+| ------------------------- | ------------------------------------------------- |
+| Form 1099-NEC / 1099-MISC | Non-employee compensation                         |
+| Form 1099-B               | Broker proceeds                                   |
+| Form 1099-DIV             | Dividends                                         |
+| Form 1099-INT             | Interest income                                   |
+| Form 1099-R               | Retirement distributions                          |
+| Form 1099-G               | Government payments (unemployment, state refunds) |
+| Schedule K-1 (1065)       | Partnership income                                |
+| Schedule K-1 (1120-S)     | S-corporation income                              |
+| Schedule K-1 (1041)       | Estate/trust income                               |
+| Form 8949                 | Capital asset sales detail                        |
+| Form 4562                 | Depreciation and amortization                     |
+| Form 8863                 | Education credits                                 |
+| Form 8962                 | ACA premium tax credit reconciliation             |
+| Form 2441                 | Child and dependent care                          |
+| Form 8812                 | Child tax credit                                  |
+| Form 5695                 | Residential energy credits                        |
+| Form 1116                 | Foreign tax credit                                |
+| Form 2555                 | Foreign earned income exclusion                   |
 
 **Extensibility:** `tax_returns.schedules` is a `text[]` array. Adding support for a new form requires: (1) adding it to `supported-forms.md`, (2) defining its required fields in `packages/types`, and (3) updating the `ai-worker` field validation logic. No schema migration is needed for the return itself — `tax_returns.data` is a jsonb bag that grows with new fields.
 
@@ -376,6 +396,7 @@ Superhuman-cpa-OS Tax v1 targets TurboTax parity for individual returns. The can
 All channels except phone feed into a multi-turn Claude session per return, backed by `intake_sessions`. Phone intake uses stateless AI assist prompts (Section 8); its output merges into the return post-call.
 
 **Channels:**
+
 - **Chat:** taxpayer text → Claude session
 - **Voice AI:** audio → Whisper → text → Claude session
 - **Document upload:** OCR pipeline (Section 11); output merged into return fields directly
@@ -384,15 +405,15 @@ All channels except phone feed into a multi-turn Claude session per return, back
 
 ### 7.2 Claude Tool Set
 
-| Tool | Purpose | Calls |
-|------|---------|-------|
-| `set_return_field` | Fill a return field, cite source | `api POST /internal/returns/:id/fields` |
-| `add_schedule` | Add a schedule/form to `tax_returns.schedules` | `api POST /internal/returns/:id/schedules` |
-| `request_document` | Ask taxpayer to upload a doc | `api POST /internal/notifications` (type=doc_request) |
-| `flag_for_pro_review` | Trigger Circular 230 gate | `api POST /internal/returns/:id/flag-for-pro-review` |
-| `advance_return_status` | Move return to `ai_prep` only | `api POST /internal/returns/:id/status` (validates required fields for all active schedules first) |
-| `send_message` | Send async inbox message | `api POST /internal/threads/message` |
-| `create_notification` | Trigger email, in-app, or SMS alert | `api POST /internal/notifications` |
+| Tool                    | Purpose                                        | Calls                                                                                              |
+| ----------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `set_return_field`      | Fill a return field, cite source               | `api POST /internal/returns/:id/fields`                                                            |
+| `add_schedule`          | Add a schedule/form to `tax_returns.schedules` | `api POST /internal/returns/:id/schedules`                                                         |
+| `request_document`      | Ask taxpayer to upload a doc                   | `api POST /internal/notifications` (type=doc_request)                                              |
+| `flag_for_pro_review`   | Trigger Circular 230 gate                      | `api POST /internal/returns/:id/flag-for-pro-review`                                               |
+| `advance_return_status` | Move return to `ai_prep` only                  | `api POST /internal/returns/:id/status` (validates required fields for all active schedules first) |
+| `send_message`          | Send async inbox message                       | `api POST /internal/threads/message`                                                               |
+| `create_notification`   | Trigger email, in-app, or SMS alert            | `api POST /internal/notifications`                                                                 |
 
 **`add_schedule` tool:** Claude calls this when the taxpayer's situation reveals a new applicable schedule (e.g., "I freelanced this year" → adds `schedule-c`). This updates `tax_returns.schedules` and expands the required-field checklist Claude must satisfy before advancing.
 
@@ -418,6 +439,7 @@ All channels except phone feed into a multi-turn Claude session per return, back
 ### 7.4 flag_for_pro_review — Pause and Resume
 
 **Pause:**
+
 1. `ai-worker` calls `api POST /internal/returns/:id/flag-for-pro-review { reason, gate_type }`
 2. `api` creates `pro_tasks` row with `pro_id = tax_returns.pro_id` (nullable — if null, task enters the unassigned queue)
 3. `api` sets `tax_returns.status = pending_pro_review`
@@ -425,6 +447,7 @@ All channels except phone feed into a multi-turn Claude session per return, back
 5. `api` notifies assigned pro via email + in-app + SMS (if `pro_id` null, notifies staff to assign)
 
 **Resume:**
+
 1. Pro resolves via `POST /pro/tasks/:id/resolve` → `api` → `practitioner`
 2. `practitioner` calls `api` to advance to `review`
 3. `practitioner` calls `ai-worker POST /sessions/resume/:returnId` with resolution notes
@@ -445,6 +468,7 @@ Internal-only. Browser calls reach it via `api` after JWT validation.
 **Authentication:** `X-Internal-Secret` on all inbound calls. Outbound calls include `X-Internal-Secret` + `X-Caller: practitioner`.
 
 **API surface:**
+
 - `GET /tasks?pro_id=` — list pro_tasks (firm-scoped)
 - `POST /tasks/:id/accept` — sets `in_review`
 - `POST /tasks/:id/resolve` — approve/reject; triggers `api` status advance + `ai-worker` resume
@@ -455,14 +479,14 @@ Internal-only. Browser calls reach it via `api` after JWT validation.
 
 ## 9. Communications Layer
 
-| Channel | Description |
-|---------|-------------|
-| Chat | Real-time text via AI SSE stream or thread messages |
-| Async message | Threaded inbox. One taxpayer + one pro/staff per thread. |
-| Email | Transactional via Resend |
-| SMS | Transactional reminders and alerts via Twilio SMS |
-| Voice AI | Taxpayer ↔ Claude directly. Audio → Whisper → Claude session. |
-| Phone | Human agent + stateless AI assist prompts per transcript chunk. |
+| Channel       | Description                                                     |
+| ------------- | --------------------------------------------------------------- |
+| Chat          | Real-time text via AI SSE stream or thread messages             |
+| Async message | Threaded inbox. One taxpayer + one pro/staff per thread.        |
+| Email         | Transactional via Resend                                        |
+| SMS           | Transactional reminders and alerts via Twilio SMS               |
+| Voice AI      | Taxpayer ↔ Claude directly. Audio → Whisper → Claude session.   |
+| Phone         | Human agent + stateless AI assist prompts per transcript chunk. |
 
 **Deferred:** Voice AI ↔ Phone handoff.
 
@@ -481,6 +505,7 @@ SMS is delivered via Twilio (same account used for phone calls). `api` sends out
 Stateless Claude calls per transcript chunk generate real-time prompts for the human agent.
 
 **Post-call processing:**
+
 1. Twilio webhook POSTs to `api POST /webhooks/twilio/call-complete`
 2. `api` calls `ai-worker POST /process-call { callSessionId }` (internal, authenticated)
 3. `ai-worker` fetches recording from DO Spaces, runs Whisper transcription, extracts fields
@@ -521,24 +546,24 @@ Stateless Claude calls per transcript chunk generate real-time prompts for the h
 
 ## 12. Deployment
 
-| Layer | Technology |
-|-------|-----------|
-| CI/CD | GitHub Actions — typecheck + Vitest + Playwright on PR; deploy on `main` |
-| Hosting | DigitalOcean Kubernetes — single `api` replica in v1 |
-| Storage | DigitalOcean Spaces — documents, recordings |
-| Edge | Cloudflare — DNS, CDN, DDoS; subdomain routing for firms |
-| Email | Resend |
-| SMS / Phone | Twilio |
+| Layer       | Technology                                                               |
+| ----------- | ------------------------------------------------------------------------ |
+| CI/CD       | GitHub Actions — typecheck + Vitest + Playwright on PR; deploy on `main` |
+| Hosting     | DigitalOcean Kubernetes — single `api` replica in v1                     |
+| Storage     | DigitalOcean Spaces — documents, recordings                              |
+| Edge        | Cloudflare — DNS, CDN, DDoS; subdomain routing for firms                 |
+| Email       | Resend                                                                   |
+| SMS / Phone | Twilio                                                                   |
 
 ### K8s Deployments
 
-| Deployment | Notes |
-|-----------|-------|
-| `frontend` | Nginx |
-| `api` | Public-facing; single replica in v1 |
-| `ai-worker` | Internal only |
-| `practitioner` | Internal only |
-| `db` | PostgreSQL + persistent volume |
+| Deployment         | Notes                                |
+| ------------------ | ------------------------------------ |
+| `frontend`         | Nginx                                |
+| `api`              | Public-facing; single replica in v1  |
+| `ai-worker`        | Internal only                        |
+| `practitioner`     | Internal only                        |
+| `db`               | PostgreSQL + persistent volume       |
 | `db-migrate` (Job) | Runs `migrate.ts` before each deploy |
 
 ### Document Upload Path
@@ -552,15 +577,15 @@ Stateless Claude calls per transcript chunk generate real-time prompts for the h
 
 ### Environment Variables
 
-| Variable | Used by |
-|----------|---------|
-| `INTER_SERVICE_SECRET` | All services |
-| `ANTHROPIC_API_KEY` | `ai-worker` |
-| `RESEND_API_KEY` | `api` |
+| Variable                                                           | Used by                                               |
+| ------------------------------------------------------------------ | ----------------------------------------------------- |
+| `INTER_SERVICE_SECRET`                                             | All services                                          |
+| `ANTHROPIC_API_KEY`                                                | `ai-worker`                                           |
+| `RESEND_API_KEY`                                                   | `api`                                                 |
 | `TWILIO_ACCOUNT_SID` / `TWILIO_AUTH_TOKEN` / `TWILIO_PHONE_NUMBER` | `api` (SMS + webhooks), `ai-worker` (call processing) |
-| `DATABASE_URL` | `api`, `db-migrate` |
-| `DO_SPACES_KEY` / `DO_SPACES_SECRET` / `DO_SPACES_BUCKET` | `api` (presign), `ai-worker` (OCR + call recordings) |
-| `JWT_SECRET` | `api` |
+| `DATABASE_URL`                                                     | `api`, `db-migrate`                                   |
+| `DO_SPACES_KEY` / `DO_SPACES_SECRET` / `DO_SPACES_BUCKET`          | `api` (presign), `ai-worker` (OCR + call recordings)  |
+| `JWT_SECRET`                                                       | `api`                                                 |
 
 ---
 

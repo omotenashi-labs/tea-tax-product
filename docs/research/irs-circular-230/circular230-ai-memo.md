@@ -64,17 +64,16 @@ Circular 230 does not preserve manual prep work by default, but it does preserve
 
 ## Citations
 
-[1] Federal Register, *Regulations Governing Practice Before the Internal Revenue Service* (REG-116610-20; Dec. 26, 2024): https://www.federalregister.gov/documents/2024/12/26/2024-29371/regulations-governing-practice-before-the-internal-revenue-service  
+[1] Federal Register, _Regulations Governing Practice Before the Internal Revenue Service_ (REG-116610-20; Dec. 26, 2024): https://www.federalregister.gov/documents/2024/12/26/2024-29371/regulations-governing-practice-before-the-internal-revenue-service
 
-[2] IRS Newsroom (IR-2024-315), *Treasury and IRS propose regulations to update rules for tax professionals who can practice before the IRS* (Dec. 20, 2024): https://www.irs.gov/newsroom/treasury-and-irs-propose-regulations-to-update-rules-for-tax-professionals-who-can-practice-before-the-irs  
+[2] IRS Newsroom (IR-2024-315), _Treasury and IRS propose regulations to update rules for tax professionals who can practice before the IRS_ (Dec. 20, 2024): https://www.irs.gov/newsroom/treasury-and-irs-propose-regulations-to-update-rules-for-tax-professionals-who-can-practice-before-the-irs
 
-[3] IRS National Tax Forum PDF, *Circular 230: Professional Responsibility* (2024): https://www.irs.gov/pub/irs-npl/2024ntf-circular-230-professional-responsibility.pdf  
+[3] IRS National Tax Forum PDF, _Circular 230: Professional Responsibility_ (2024): https://www.irs.gov/pub/irs-npl/2024ntf-circular-230-professional-responsibility.pdf
 
-[4] GovInfo hearing transcript, House Ways and Means Subcommittee on Oversight, *IRS Return on Investment and the Need for Modernization* (Feb. 11, 2025): https://www.govinfo.gov/content/pkg/CHRG-119hhrg59659/html/CHRG-119hhrg59659.htm  
+[4] GovInfo hearing transcript, House Ways and Means Subcommittee on Oversight, _IRS Return on Investment and the Need for Modernization_ (Feb. 11, 2025): https://www.govinfo.gov/content/pkg/CHRG-119hhrg59659/html/CHRG-119hhrg59659.htm
 
-[5] Ways and Means witness testimony (Nina Olson), *IRS Return on Investment and the Need for Modernization* (Feb. 2025 PDF): https://waysandmeans.house.gov/wp-content/uploads/2025/02/Olson-Testimony.pdf  
+[5] Ways and Means witness testimony (Nina Olson), _IRS Return on Investment and the Need for Modernization_ (Feb. 2025 PDF): https://waysandmeans.house.gov/wp-content/uploads/2025/02/Olson-Testimony.pdf
 
-[6] Senate Finance Committee hearing page and witness materials, *The President's Fiscal Year 2025 IRS Budget and the IRS 2024 Filing Season* (Apr. 16, 2024): https://www.finance.senate.gov/hearings/the-presidents-fiscal-year-2025-irs-budget-and-the-irs-2024-filing-season and https://www.finance.senate.gov/download/0416-werfel-testimony&download=1  
+[6] Senate Finance Committee hearing page and witness materials, _The President's Fiscal Year 2025 IRS Budget and the IRS 2024 Filing Season_ (Apr. 16, 2024): https://www.finance.senate.gov/hearings/the-presidents-fiscal-year-2025-irs-budget-and-the-irs-2024-filing-season and https://www.finance.senate.gov/download/0416-werfel-testimony&download=1
 
-[7] Congress.gov hearing transcript, House Ways and Means Oversight Subcommittee, *The Implementation of the IRS Paid Tax Return Preparer Program* (July 28, 2011): https://congress.gov/112/chrg/CHRG-112hhrg70890/generated/CHRG-112hhrg70890.htm
-
+[7] Congress.gov hearing transcript, House Ways and Means Oversight Subcommittee, _The Implementation of the IRS Paid Tax Return Preparer Program_ (July 28, 2011): https://congress.gov/112/chrg/CHRG-112hhrg70890/generated/CHRG-112hhrg70890.htm

@@ -168,20 +168,24 @@ The specific elected officials most likely to endorse, organized by appeal angle
 
 **Right-of-Center:**
 
-*Anti-Crony Capitalism / Libertarian-Leaning:*
+_Anti-Crony Capitalism / Libertarian-Leaning:_
+
 - **Rand Paul (KY)** - Multiple tax simplification bills, hostile to IRS complexity. Tea Tax arms citizens to navigate the system without growing government.
 - **Mike Lee (UT)** - Co-authored the Tax Simplification Act. Tea Tax is the private sector doing what he's been asking government to do.
 - **Thomas Massie (KY)** - Anti-corporate-welfare. Intuit spending $30M+ lobbying to kill free filing is the kind of crony capitalism he opposes.
 
-*Populist Right / Anti-Big Tech:*
+_Populist Right / Anti-Big Tech:_
+
 - **Josh Hawley (MO)** - Introduced the "Bust Up Big Tech Act." Intuit as a $180B tech monopolist extracting rent from working Americans fits his target profile.
 - **John Kennedy (LA)** - Folksy, consumer-advocate persona. Made for a 60-second clip about TurboTax deception. Sits on Appropriations (IRS funding).
 
-*Small Business Champions:*
+_Small Business Champions:_
+
 - **Tim Scott (SC)** - Economic empowerment, small business tax credits. Tea Tax empowering sole proprietors is his sweet spot.
 - **Joni Ernst (IA)** - "Squeal Award" for waste. Billions in unnecessary tax prep spend is private-sector waste enabled by government complexity.
 
 **Left-of-Center (Natural Advocates):**
+
 - **Elizabeth Warren (MA)** - Longstanding critic of Intuit and tax prep industry opacity.
 - **Bernie Sanders (VT)** - Consumer protection, anti-corporate messaging.
 - **AOC (NY)** - Social media reach, populist consumer advocacy.
@@ -189,6 +193,7 @@ The specific elected officials most likely to endorse, organized by appeal angle
 - **Ro Khanna (CA)** - Pro-tech but anti-monopoly. Can speak to the "free market done right" angle.
 
 **Bipartisan Vehicles:**
+
 - **The Taxpayer First Act Coalition** - Passed with overwhelming bipartisan support (2019). Tea Tax as the private-sector fulfillment of that legislation's intent.
 - **The Problem Solvers Caucus** - 58 members (29D, 29R). Tax transparency is a low-controversy, high-optics issue they'd co-sign.
 
@@ -235,12 +240,12 @@ Pick a purple state with a governor who cares about economic empowerment (Virgin
 
 Each layer builds on the credibility of the previous one. Resist the temptation to lead with the flashy plays.
 
-| Phase | Timing | Channels | Purpose |
-|-------|--------|----------|---------|
-| **1. Product wedge** | Month 1-4 | Tax Second Opinion, "What Did You Actually Pay?", open-source launch | Generate users, data, and developer credibility with zero external dependencies |
-| **2. Creator + platform outreach** | Month 3-6 | Tax content creators, gig platform integrations, payroll provider conversations | Reach high-pain cohorts through trusted intermediaries |
-| **3. Professional credibility** | Month 4-8 | CPA societies, AICPA outreach, AARP conversations | Add institutional trust signals that lift conversion rates across all channels |
-| **4. Political amplification** | Month 6-10 | Transparency Pledge, congressional outreach, AG coalition | Amplify an already-credible product into a cultural moment, timed for peak tax season |
-| **5. Long-horizon groundwork** | Ongoing | Life event partnerships, multilingual communities, faith networks, state pilots | Lay foundation for year 2+ distribution that extends beyond tax season |
+| Phase                              | Timing     | Channels                                                                        | Purpose                                                                               |
+| ---------------------------------- | ---------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **1. Product wedge**               | Month 1-4  | Tax Second Opinion, "What Did You Actually Pay?", open-source launch            | Generate users, data, and developer credibility with zero external dependencies       |
+| **2. Creator + platform outreach** | Month 3-6  | Tax content creators, gig platform integrations, payroll provider conversations | Reach high-pain cohorts through trusted intermediaries                                |
+| **3. Professional credibility**    | Month 4-8  | CPA societies, AICPA outreach, AARP conversations                               | Add institutional trust signals that lift conversion rates across all channels        |
+| **4. Political amplification**     | Month 6-10 | Transparency Pledge, congressional outreach, AG coalition                       | Amplify an already-credible product into a cultural moment, timed for peak tax season |
+| **5. Long-horizon groundwork**     | Ongoing    | Life event partnerships, multilingual communities, faith networks, state pilots | Lay foundation for year 2+ distribution that extends beyond tax season                |
 
 The mistake is leading with political endorsements or viral plays before the product has earned credibility on its own. The political angle is a megaphone - it shouldn't be the message itself.

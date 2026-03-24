@@ -39,7 +39,7 @@ The tax filing industry is opaque by design. Consumers face three compounding fr
 
 1. **Pricing opacity.** "I start my taxes thinking it'll be free, then they get me in the end with a bill that's ridiculous - it feels like a bait-and-switch." Tier upgrades, add-on fees, and ancillary product bundles are hidden until you're deep in the flow.
 2. **Decision paralysis.** There is no impartial way to compare filing options. People rely on word-of-mouth from friends and family instead of informed recommendations tailored to their actual tax situation.
-3. **Preparation anxiety.** The average person doesn't know the tax code. They know *something happened* this year that matters - but they don't know what to do about it, what documents they need, or where to start. The friction of getting organized keeps them frozen.
+3. **Preparation anxiety.** The average person doesn't know the tax code. They know _something happened_ this year that matters - but they don't know what to do about it, what documents they need, or where to start. The friction of getting organized keeps them frozen.
 
 ## What Tea Tax Does
 
@@ -80,15 +80,15 @@ Default sort is always "best fit for you," never "highest bidder."
 
 ### The Pricing Data Problem
 
-Getting accurate, real-time, all-in pricing across every provider is the hardest unsolved execution challenge. Tax software pricing is deliberately opaque - prices change mid-season (TurboTax gets more expensive as the deadline approaches), tier placement depends on forms detected *during* filing, and add-on fees are contextual and upsold dynamically. Providers have zero incentive to make this transparent.
+Getting accurate, real-time, all-in pricing across every provider is the hardest unsolved execution challenge. Tax software pricing is deliberately opaque - prices change mid-season (TurboTax gets more expensive as the deadline approaches), tier placement depends on forms detected _during_ filing, and add-on fees are contextual and upsold dynamically. Providers have zero incentive to make this transparent.
 
 **The workaround: make the portable object a shopping weapon, and let the people win.**
 
-Rather than trying to acquire complete pricing data top-down, the portable tax situation object should be designed so users can quickly upload it into any SaaS provider's intake flow and fly through to a real quote. The object does the prep; the user shops the market. This turns the object from just a data asset into a *pricing discovery tool*.
+Rather than trying to acquire complete pricing data top-down, the portable tax situation object should be designed so users can quickly upload it into any SaaS provider's intake flow and fly through to a real quote. The object does the prep; the user shops the market. This turns the object from just a data asset into a _pricing discovery tool_.
 
 But the real unlock is crowdsourced, community-driven pricing data. When a user gets a quote from a provider, they can snapshot that price - provider, tier, tax situation complexity, add-on fees, total cost, timestamp - and share it back to the Tea Tax community. Over time, this builds an aggregated, user-verified, time-stamped pricing database that no provider controls. Agentic SDKs can accelerate this further: an AI agent armed with the tax situation object could programmatically shop multiple providers, capture quotes, and feed the data back - automating what users do manually today.
 
-The vibe is *we the people*. Think Team Blind for tax pricing - anonymous, crowdsourced, unbiased, user-upvoted, and impossible for providers to game. The war against pricing opacity should be won by the community, and it should appeal to anyone across the political spectrum who loathes the tax prep industry's bait-and-switch tactics. Tea Tax doesn't need to crack provider pricing from the inside. It needs to arm the people to expose it from the outside.
+The vibe is _we the people_. Think Team Blind for tax pricing - anonymous, crowdsourced, unbiased, user-upvoted, and impossible for providers to game. The war against pricing opacity should be won by the community, and it should appeal to anyone across the political spectrum who loathes the tax prep industry's bait-and-switch tactics. Tea Tax doesn't need to crack provider pricing from the inside. It needs to arm the people to expose it from the outside.
 
 ---
 
@@ -223,7 +223,7 @@ Intake and comparison ship together as inseparable halves of one experience. The
 - **"Take your data and shop"** - export the tax situation object and bring it to any provider manually
 - **"Connect with a tax pro"** - captures demand for the Practitioner Layer marketplace (post-V1)
 
-*Note: IRS Direct File was reported as discontinued for the 2026 filing season. If reinstated, it becomes an obvious routing destination. Its absence makes the Free File Alliance and the "take your data and shop" portability even more important.*[^ap-direct-file]
+_Note: IRS Direct File was reported as discontinued for the 2026 filing season. If reinstated, it becomes an obvious routing destination. Its absence makes the Free File Alliance and the "take your data and shop" portability even more important._[^ap-direct-file]
 
 This provides a working product and revenue path on day one without requiring a single signed distribution partnership. Routing sophistication grows as industry partnerships develop.
 
@@ -285,9 +285,9 @@ Tax Filing (transactional) → Tax Advice → Tax Strategy
 
 **Tax Filing** is where V1 lives. It's the moment of need: "I need to file." Tea Tax meets users here, builds trust, and captures their tax situation.
 
-**Tax Advice** is the next step: year-round, forward-looking guidance. "What's happening in my life *this year* that will impact tax time come April *next year*?" New job, marriage, starting a business, buying a home - these events happen throughout the year, and the tax implications are real but invisible until filing season. Tea Tax should become the place users turn to *as life happens*, not just when the deadline looms.
+**Tax Advice** is the next step: year-round, forward-looking guidance. "What's happening in my life _this year_ that will impact tax time come April _next year_?" New job, marriage, starting a business, buying a home - these events happen throughout the year, and the tax implications are real but invisible until filing season. Tea Tax should become the place users turn to _as life happens_, not just when the deadline looms.
 
-**Tax Strategy** is the golden ticket. Today, proactive tax strategy - structuring decisions to optimize long-term tax outcomes - is gated behind expensive white-glove CPA firms and available almost exclusively to the ultra-wealthy. The legal risk management alone keeps it locked behind high fees. No one is doing this at scale for everyday consumers. An AI-first approach, built on a growing longitudinal picture of a user's financial life, can begin to democratize this - shifting from "here's what you owe" to "here's what you should consider doing *before* you owe it."
+**Tax Strategy** is the golden ticket. Today, proactive tax strategy - structuring decisions to optimize long-term tax outcomes - is gated behind expensive white-glove CPA firms and available almost exclusively to the ultra-wealthy. The legal risk management alone keeps it locked behind high fees. No one is doing this at scale for everyday consumers. An AI-first approach, built on a growing longitudinal picture of a user's financial life, can begin to democratize this - shifting from "here's what you owe" to "here's what you should consider doing _before_ you owe it."
 
 **Regulatory constraint:** Tax advice and strategy are regulated under IRS Circular 230, which governs who can practice before the IRS and provide personalized tax guidance. Circular 230 does not broadly regulate all tax preparation, but it does impose enforceable standards when practitioners represent taxpayers and render written advice. Recent IRS commentary and proposed rulemaking make clear that AI-assisted workflows still require human due diligence, competence, and technological competence. Tea Tax navigates this by keeping the advice and strategy domain explicitly behind the **human-in-the-loop credentialed professional marketplace** - the AI surfaces insights and context, the credentialed pro delivers the advice. This is where the filing → advice → strategy spectrum and the tea tax professional marketplace converge: the marketplace isn't just a distribution play, it's a compliance architecture.[^c230][^fr-c230-proposed][^irs-c230-release][^irs-ntf-ai]
 
@@ -297,7 +297,7 @@ As Tea Tax moves right on the spectrum toward advice and strategy, two infrastru
 
 **A living, AI-native tax code knowledge base.** The U.S. tax code doesn't stand still - legislation is enacted, provisions sunset, thresholds adjust, and new rules take effect mid-year. Tea Tax should maintain a version-controlled, AI-native representation of the tax code (think `.md` files with real-time diffs) that tracks every change over time. When new tax-impact legislation is enacted, the system can immediately cross-reference it against a user's financial profile and surface what changed, how it might impact them, and what they should watch out for. This turns Tea Tax from a point-in-time tool into a persistent, always-current tax intelligence layer - the equivalent of having a CPA who reads every piece of tax legislation the moment it passes and calls you if it matters.
 
-**Persistent Plaid integration as a living financial picture.** In V1, Plaid pulls a snapshot of financial context at intake time. As the product moves toward advice and strategy, that connection becomes persistent - a continuous, consented feed of financial activity that keeps the tax situation object current year-round. Combined with the tax code listener, this creates a powerful feedback loop: the system knows what's happening in the user's financial life *and* what's changing in the tax code, and can proactively surface the intersection - "You started receiving 1099 income in Q2. Under the current rules, here's what that means for estimated payments. Here's what you might want to do before December 31."
+**Persistent Plaid integration as a living financial picture.** In V1, Plaid pulls a snapshot of financial context at intake time. As the product moves toward advice and strategy, that connection becomes persistent - a continuous, consented feed of financial activity that keeps the tax situation object current year-round. Combined with the tax code listener, this creates a powerful feedback loop: the system knows what's happening in the user's financial life _and_ what's changing in the tax code, and can proactively surface the intersection - "You started receiving 1099 income in Q2. Under the current rules, here's what that means for estimated payments. Here's what you might want to do before December 31."
 
 Together, these two capabilities are what make the move from filing to strategy real. Without them, advice is stale and strategy is impossible at scale.
 
@@ -375,7 +375,7 @@ This is not a peripheral point. It is the connective tissue between every major 
 
 **Editorial comparison sites (NerdWallet, Investopedia, Wirecutter):** These publish annual "best tax software" rankings using affiliate revenue models. NerdWallet alone has $836M in annual revenue and 23-29M monthly users. However, they are media companies - static editorial content, not dynamic intake-driven recommendation engines. None collect the user's actual tax situation and recommend based on it. The gap between "here are the top 5 tools" and "based on YOUR situation, here's the best option" is real and unoccupied. Building an AI-first, multi-modal intake with voice, video, OCR, Plaid integration, and a structured portable data object would require NerdWallet to make a strategic pivot from content company to product/platform company - possible, but unlikely to be fast or natural.
 
-**AI tax startups (Taxu, Magnetic, Black Ore, Filed, Abacus):** Several well-funded AI tax startups exist, but they are all building **tax preparation tools** - not aggregators. They're the providers Tea Tax would route *to*, not competitors for the front-door position. None are doing the recommendation layer.
+**AI tax startups (Taxu, Magnetic, Black Ore, Filed, Abacus):** Several well-funded AI tax startups exist, but they are all building **tax preparation tools** - not aggregators. They're the providers Tea Tax would route _to_, not competitors for the front-door position. None are doing the recommendation layer.
 
 **Incumbents (TurboTax, H&R Block):** They benefit from opacity and have no incentive to build a transparent comparison tool. TurboTax actively lobbied against IRS Direct File. Their moat is brand lock-in and inertia, not a superior product experience.
 
@@ -383,7 +383,7 @@ This is not a peripheral point. It is the connective tissue between every major 
 
 The portable tax situation object and the AI-first intake experience are harder to replicate than the comparison engine. The comparison is a feature; the intake is a product capability that requires deep domain expertise - knowing what questions to ask, what data matters, how tier placement works, where the gotchas are. A generalist organization would need to learn this the hard way.
 
-This is a **speed moat, not a permanent one.** Domain expertise from SaaS tax product management is real alpha for getting the intake right on the first try. The IRS MeF XML schema defines standardized formats for completed tax *returns* (the output), but nothing standardized exists for the pre-return *tax situation* (the input) - the human's messy life before it becomes a clean filing. That's the object Tea Tax creates and owns.
+This is a **speed moat, not a permanent one.** Domain expertise from SaaS tax product management is real alpha for getting the intake right on the first try. The IRS MeF XML schema defines standardized formats for completed tax _returns_ (the output), but nothing standardized exists for the pre-return _tax situation_ (the input) - the human's messy life before it becomes a clean filing. That's the object Tea Tax creates and owns.
 
 The community-driven pricing database, once it has critical mass, becomes a second moat - a user-generated data asset that is self-reinforcing and defensible through network effects.
 
@@ -416,6 +416,7 @@ Tea Tax is not just a consumer product - it's potentially a flagship use case fo
 **The agentic filing future.** As frontier models become more agentic, the portable tax situation object + MCP becomes the handoff protocol. The spectrum becomes: Tea Tax handles intake → the object is exposed via MCP → an AI agent consumes the object and files, or routes to a credentialed pro for advice/strategy. Tea Tax isn't competing with AI providers - it's the data layer that makes their agents useful in a $30B+ market.
 
 **What a partnership could look like:**
+
 - Preferred API pricing or co-development resources as a flagship partner
 - Strategic investment (Anthropic has invested in companies building on their platform)
 - Joint go-to-market: "Powered by Claude" as a consumer trust signal
@@ -441,6 +442,7 @@ Building this proprietary model layer strengthens the position on multiple dimen
 **Open source and brand alignment.** "Tea Tax" with open-source, tax-specific models is a natural extension of the populist identity. The community contributes data, the models improve, everyone benefits. This is the "we the people" ethos applied to the AI layer itself.
 
 **The hybrid architecture:**
+
 - **Proprietary local models** for: document extraction, tax form classification, PII handling, routine intake conversation, tax code parsing, pricing data normalization
 - **Frontier models** for: complex situational reasoning, conversational quality on edge cases and novel life events, agentic filing capabilities, strategy-layer insights
 
@@ -460,7 +462,7 @@ Tea Tax asks for the most sensitive personal information a consumer has - in a d
 
 ### 2. Breaking Inertia in a Compressed Window
 
-Tax season is 4 months. You don't get to slowly build awareness over a year. The consumer decision happens once annually, and most people make it passively - "I'll just use TurboTax again." Tea Tax needs a distribution channel or viral moment that reaches people *before* they default, and the window is narrow. Every day of tax season that passes without traction is a day closer to waiting an entire year to try again.
+Tax season is 4 months. You don't get to slowly build awareness over a year. The consumer decision happens once annually, and most people make it passively - "I'll just use TurboTax again." Tea Tax needs a distribution channel or viral moment that reaches people _before_ they default, and the window is narrow. Every day of tax season that passes without traction is a day closer to waiting an entire year to try again.
 
 ### 3. The Marketplace Cold Start
 
@@ -472,7 +474,7 @@ V1 can launch as aggregator + affiliate routing (no marketplace required). But t
 
 **A single, sharp distribution wedge.** Not "everyone who files taxes" - a specific, reachable, high-pain cohort. Freelancers and gig workers facing the 2026 tax changes are the obvious candidate: they're already anxious, their tax situation just got more complex (shrunken standard deduction, stricter enforcement, and more data-driven IRS compliance initiatives), they over-index on digital-first tools, and they're reachable through creator/freelancer communities (Twitter/X, Reddit, YouTube tax content, freelancer Slack groups). Win this cohort first, then expand.[^senate-finance-werfel][^house-roi-hearing]
 
-**A content/community play that precedes the product.** The Team Blind for tax pricing community could launch *before* the full product. A subreddit, a simple tool that shows crowdsourced pricing data, a "what did you actually pay TurboTax this year" viral post. Build the audience, build the trust, build the brand - then introduce the intake. The community IS the product in the early days, and the intake is the upgrade path.
+**A content/community play that precedes the product.** The Team Blind for tax pricing community could launch _before_ the full product. A subreddit, a simple tool that shows crowdsourced pricing data, a "what did you actually pay TurboTax this year" viral post. Build the audience, build the trust, build the brand - then introduce the intake. The community IS the product in the early days, and the intake is the upgrade path.
 
 **The empowerment narrative as distribution.** The framing of AI as empowerment - not replacement, not surveillance, not automation for its own sake - is inherently shareable. In a media landscape saturated with AI fear, a product that says "AI is here to help you navigate a system designed to confuse you" stands out. This is a story people want to tell each other. It's the kind of positioning that earns media coverage, social sharing, and word-of-mouth - not because of growth hacks, but because the narrative resonates with a frustration that 150 million Americans share every spring.
 
@@ -480,12 +482,20 @@ V1 can launch as aggregator + affiliate routing (no marketplace required). But t
 
 ## Citations
 
-[^c230]: IRS, *Treasury Department Circular No. 230* (31 C.F.R. Part 10): https://www.irs.gov/pub/irs-pdf/pcir230.pdf
-[^fr-c230-proposed]: Federal Register, *Regulations Governing Practice Before the Internal Revenue Service* (REG-116610-20, Dec. 26, 2024): https://www.federalregister.gov/documents/2024/12/26/2024-29371/regulations-governing-practice-before-the-internal-revenue-service
-[^irs-c230-release]: IRS Newsroom (IR-2024-315), *Treasury and IRS propose regulations to update rules for tax professionals who can practice before the IRS* (Dec. 20, 2024): https://www.irs.gov/newsroom/treasury-and-irs-propose-regulations-to-update-rules-for-tax-professionals-who-can-practice-before-the-irs
-[^irs-ntf-ai]: IRS National Tax Forum, *Circular 230: Professional Responsibility* (2024): https://www.irs.gov/pub/irs-npl/2024ntf-circular-230-professional-responsibility.pdf
-[^ftc-intuit]: FTC, *FTC Issues Opinion Finding that TurboTax Maker Intuit Inc. Engaged in Deceptive Practices* (Jan. 2024): https://www.ftc.gov/news-events/news/press-releases/2024/01/ftc-issues-opinion-finding-turbotax-maker-intuit-inc-engaged-deceptive-practices
-[^ftc-hrb]: FTC, *FTC Finalizes Order with H&R Block Requiring Them to Pay $7 Million and Overhaul Advertising and Customer Service Practices for 2025 and 2026 Tax Seasons* (Jan. 2025): https://www.ftc.gov/news-events/news/press-releases/2025/01/ftc-finalizes-order-hr-block-requiring-them-pay-7-million-overhaul-advertising-customer-service
-[^ap-direct-file]: AP News, *IRS Direct File won't be available next year for submitting tax returns for free* (2025): https://apnews.com/article/irs-direct-file-not-available-2026-04f2d0c31bec80b55d122a0e76e08c36
-[^senate-finance-werfel]: U.S. Senate Finance Committee, Commissioner Werfel testimony download for *The President's Fiscal Year 2025 IRS Budget and the IRS 2024 Filing Season* (Apr. 16, 2024): https://www.finance.senate.gov/download/0416-werfel-testimony&download=1
-[^house-roi-hearing]: GovInfo, House Ways and Means Subcommittee on Oversight hearing transcript, *IRS Return on Investment and the Need for Modernization* (Feb. 11, 2025): https://www.govinfo.gov/content/pkg/CHRG-119hhrg59659/html/CHRG-119hhrg59659.htm
+[^c230]: IRS, _Treasury Department Circular No. 230_ (31 C.F.R. Part 10): https://www.irs.gov/pub/irs-pdf/pcir230.pdf
+
+[^fr-c230-proposed]: Federal Register, _Regulations Governing Practice Before the Internal Revenue Service_ (REG-116610-20, Dec. 26, 2024): https://www.federalregister.gov/documents/2024/12/26/2024-29371/regulations-governing-practice-before-the-internal-revenue-service
+
+[^irs-c230-release]: IRS Newsroom (IR-2024-315), _Treasury and IRS propose regulations to update rules for tax professionals who can practice before the IRS_ (Dec. 20, 2024): https://www.irs.gov/newsroom/treasury-and-irs-propose-regulations-to-update-rules-for-tax-professionals-who-can-practice-before-the-irs
+
+[^irs-ntf-ai]: IRS National Tax Forum, _Circular 230: Professional Responsibility_ (2024): https://www.irs.gov/pub/irs-npl/2024ntf-circular-230-professional-responsibility.pdf
+
+[^ftc-intuit]: FTC, _FTC Issues Opinion Finding that TurboTax Maker Intuit Inc. Engaged in Deceptive Practices_ (Jan. 2024): https://www.ftc.gov/news-events/news/press-releases/2024/01/ftc-issues-opinion-finding-turbotax-maker-intuit-inc-engaged-deceptive-practices
+
+[^ftc-hrb]: FTC, _FTC Finalizes Order with H&R Block Requiring Them to Pay $7 Million and Overhaul Advertising and Customer Service Practices for 2025 and 2026 Tax Seasons_ (Jan. 2025): https://www.ftc.gov/news-events/news/press-releases/2025/01/ftc-finalizes-order-hr-block-requiring-them-pay-7-million-overhaul-advertising-customer-service
+
+[^ap-direct-file]: AP News, _IRS Direct File won't be available next year for submitting tax returns for free_ (2025): https://apnews.com/article/irs-direct-file-not-available-2026-04f2d0c31bec80b55d122a0e76e08c36
+
+[^senate-finance-werfel]: U.S. Senate Finance Committee, Commissioner Werfel testimony download for _The President's Fiscal Year 2025 IRS Budget and the IRS 2024 Filing Season_ (Apr. 16, 2024): https://www.finance.senate.gov/download/0416-werfel-testimony&download=1
+
+[^house-roi-hearing]: GovInfo, House Ways and Means Subcommittee on Oversight hearing transcript, _IRS Return on Investment and the Need for Modernization_ (Feb. 11, 2025): https://www.govinfo.gov/content/pkg/CHRG-119hhrg59659/html/CHRG-119hhrg59659.htm

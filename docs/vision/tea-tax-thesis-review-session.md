@@ -17,25 +17,21 @@ The full Tea Tax corpus - product thesis, distribution strategy, Calypso bluepri
 
 The product was restructured from a narrative thesis into three distinct, composable verticals:
 
-
-| Vertical | Name               | V1  | What It Does                                                                     |
-| -------- | ------------------ | --- | -------------------------------------------------------------------------------- |
-| 1        | Intake Engine      | Yes | Multi-modal AI intake -> portable tax situation object                           |
-| 2        | Comparison Engine  | Yes | Three-vector transparency: pricing, ancillary risk, sentiment                    |
+| Vertical | Name               | V1  | What It Does                                                                             |
+| -------- | ------------------ | --- | ---------------------------------------------------------------------------------------- |
+| 1        | Intake Engine      | Yes | Multi-modal AI intake -> portable tax situation object                                   |
+| 2        | Comparison Engine  | Yes | Three-vector transparency: pricing, ancillary risk, sentiment                            |
 | 3        | Practitioner Layer | No  | CPA/EA marketplace + coordination layer over existing filing software and HITL workflows |
-
 
 The tax situation object is the connective tissue between all three. V1 builds the data layer that everything else plugs into.
 
 ### 2. Three V1 Metrics to Obsess Over
-
 
 | Metric                        | Target             | Why It Matters                                                            |
 | ----------------------------- | ------------------ | ------------------------------------------------------------------------- |
 | Intake Completion Rate        | 60%+               | Product-market fit signal for the intake. Below 40% = fundamental rework. |
 | End-to-End Time to Value      | 10 minutes or less | If it takes 20 minutes, you're the tax software you're trying to replace. |
 | Comparison Click-Through Rate | 40%+               | The entire revenue model in a single number. No CTR, no business.         |
-
 
 These form a funnel: start -> finish -> act. If any stage breaks, everything below it is meaningless.
 
@@ -100,21 +96,19 @@ The sentiment data (public reviews, Reddit, Trustpilot scores) can be scraped an
 
 Nine files updated:
 
-
-| File                                         | Change                                                                                                                                                                                                                                    |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| File                                         | Change                                                                                                                                                                                                                                                                                                      |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `implementation-plan.md`                     | Restructured around three verticals (Practitioner Layer replaces Prep & Filing + Professional Layer). V1 metrics added. Pricing Discovery Project added as prerequisite for Comparison Engine. Tax Second Opinion sequenced ahead of Comparison as the first distribution wedge. Phase 5 scoped to Layer 2. |
-| `features/08-comparison-engine.md`           | New file (replaces `08-recommendation-engine.md`). Three-vector model, CPA friend framing, portable object as shopping weapon.                                                                                                            |
-| `features/11-community-pricing-database.md`  | Scoped to Layer 2 ancillary pricing. Contribution form captures upsell product breakdown.                                                                                                                                                 |
-| `features/09-provider-routing-affiliates.md` | Renamed to "Provider Routing, Affiliate Integration & Practitioner Connect." Practitioner connect replaces filing waitlist. Portable export reframed as "Take your data and shop."                                                        |
-| `userflows/03-provider-selection-handoff.md` | `PRACTITIONER_CONNECT` state replaces `FILING_WAITLIST` and `PROFESSIONAL_PLACEHOLDER`. Three vectors in comparison view. Ancillary risk and sentiment in provider disclosure.                                                            |
-| `userflows/01-tax-situation-intake.md`       | 10-minute target (was 10-20). Shopping weapon framing. Terminal states renamed to `COMPARISON_READY`.                                                                                                                                     |
-| `userflows/04-pricing-contribution.md`       | Ancillary product breakdown (offered vs. accepted). Cross-validation.                                                                                                                                                                     |
-| `README.md`                                  | Three verticals (Practitioner Layer), updated phases, V1 metrics, Pricing Discovery prerequisite.                                                                                                                                         |
-| `interview-transcript.md`                    | Session 2 confirmations added covering all decisions from this conversation.                                                                                                                                                              |
+| `features/08-comparison-engine.md`           | New file (replaces `08-recommendation-engine.md`). Three-vector model, CPA friend framing, portable object as shopping weapon.                                                                                                                                                                              |
+| `features/11-community-pricing-database.md`  | Scoped to Layer 2 ancillary pricing. Contribution form captures upsell product breakdown.                                                                                                                                                                                                                   |
+| `features/09-provider-routing-affiliates.md` | Renamed to "Provider Routing, Affiliate Integration & Practitioner Connect." Practitioner connect replaces filing waitlist. Portable export reframed as "Take your data and shop."                                                                                                                          |
+| `userflows/03-provider-selection-handoff.md` | `PRACTITIONER_CONNECT` state replaces `FILING_WAITLIST` and `PROFESSIONAL_PLACEHOLDER`. Three vectors in comparison view. Ancillary risk and sentiment in provider disclosure.                                                                                                                              |
+| `userflows/01-tax-situation-intake.md`       | 10-minute target (was 10-20). Shopping weapon framing. Terminal states renamed to `COMPARISON_READY`.                                                                                                                                                                                                       |
+| `userflows/04-pricing-contribution.md`       | Ancillary product breakdown (offered vs. accepted). Cross-validation.                                                                                                                                                                                                                                       |
+| `README.md`                                  | Three verticals (Practitioner Layer), updated phases, V1 metrics, Pricing Discovery prerequisite.                                                                                                                                                                                                           |
+| `interview-transcript.md`                    | Session 2 confirmations added covering all decisions from this conversation.                                                                                                                                                                                                                                |
 
 **Sequencing note:** Tax Second Opinion is treated as the #1 distribution wedge and moved earlier than the Comparison Engine in execution sequencing. Comparison remains core to the thesis and V1 value proposition, while Second Opinion is the fastest path to trust and pre-season traction.
-
 
 ---
 
@@ -126,4 +120,3 @@ Nine files updated:
 4. **Mobile-first vs. responsive web.** Still TBD. Affects the intake UX decisions in Phase 2.
 5. **Tax situation object export formats.** The portable object must export in formats that existing filing software (Drake, Lacerte, ProConnect, CCH) can consume when the Practitioner Layer comes online. Research which import formats each tool supports.
 6. **Regulatory/compliance advisor.** Circular 230 is central to the long-term thesis. No in-house legal counsel is assumed. Before moving past V1, the organization needs dedicated expertise in this domain.
-

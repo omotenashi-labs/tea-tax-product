@@ -66,13 +66,13 @@ Paragraph 1. ...................................................................
 
 § 10.0 Scope of part. ......................................................................5
 
-Subpart A — Rules Governing Authority to Practice  ...........................................5
+Subpart A — Rules Governing Authority to Practice ...........................................5
 
- 10.1 Offices.  ...........................................................................5
+10.1 Offices. ...........................................................................5
 §
- 10.2 Definitions. ........................................................................6
+10.2 Definitions. ........................................................................6
 §
-§ 10.3 Who may practice.  .................................................................6
+§ 10.3 Who may practice. .................................................................6
 
 § 10.4 Eligibility to become an enr olled agent, enrolled retirement plan agent, or
 
@@ -80,27 +80,27 @@ registered tax return preparer. ................................................
 
 § 10.5 Application to become an enr olled agent, enrolled retirement plan agent, or
 
-registered tax return preparer.  .......................................................9
+registered tax return preparer. .......................................................9
 
 § 10.6 T erm and renewal of status as an enrolled agent, enrolled retirement plan agent, or
 
 registered tax return preparer. .......................................................10
 
-§ 10.7 Representing oneself; participating in rulemaking; limited practice; and special appearances.  ..16
+§ 10.7 Representing oneself; participating in rulemaking; limited practice; and special appearances. ..16
 
-§ 10.8 Return preparation and application of rules to other individuals.  ..........................17
+§ 10.8 Return preparation and application of rules to other individuals. ..........................17
 
-§ 10.9 Continuing education providers and continuing education programs.  .......................17
+§ 10.9 Continuing education providers and continuing education programs. .......................17
 
-Subpart B — Duties and Restrictions Relating to Practice Before the Internal Revenue Service  .......19
+Subpart B — Duties and Restrictions Relating to Practice Before the Internal Revenue Service .......19
 
- 10.20 Information to be furnished.  ........................................................19
+10.20 Information to be furnished. ........................................................19
 §
 § 10.21 Knowledge of client’s omission. ......................................................19
 
 § 10.22 Diligence as to accuracy. ............................................................19
 
-§ 10.23 Prompt disposition of pending matters.  ...............................................20
+§ 10.23 Prompt disposition of pending matters. ...............................................20
 
 § 10.24 Assistance fr om or to disbarred or suspended persons and former
 
@@ -108,29 +108,29 @@ Internal Revenue Service employees. ............................................
 
 § 10.25 Practice by former government employees, their partners and their associates. ..............20
 
- 10.26 Notaries. .........................................................................21
+10.26 Notaries. .........................................................................21
 §
- 10.27 Fees.  ............................................................................21
+10.27 Fees. ............................................................................21
 §
- 10.28 Return of client’s records.  ..........................................................22
+10.28 Return of client’s records. ..........................................................22
 §
 § 10.29 Conflicting interests. ...............................................................22
 
- 10.30 Solicitation.  ......................................................................23
+10.30 Solicitation. ......................................................................23
 §
 § 10.31 Negotiation of taxpayer checks. ......................................................24
 
- 10.32 Practice of law.  ...................................................................24
+10.32 Practice of law. ...................................................................24
 §
-§ 10.33 Best practices for tax advisors.  ......................................................24
+§ 10.33 Best practices for tax advisors. ......................................................24
 
 § 10.34 Standards with respect to tax returns and documents, affidavits and other papers. ..........24
 
-§ 10.35 Competence.  .....................................................................25
+§ 10.35 Competence. .....................................................................25
 
-§ 10.36 Procedures to ensure compliance.  ....................................................26
+§ 10.36 Procedures to ensure compliance. ....................................................26
 
-§ 10.37 Requirements for written advice.  ....................................................26
+§ 10.37 Requirements for written advice. ....................................................26
 
 § 10.38 Establishment of advisory committees. ................................................27
 
@@ -139,75 +139,75 @@ Page 3
 
 ## Page 4
 
-Subpart C — Sanctions for Violation of the Regulations  ........................................28
+Subpart C — Sanctions for Violation of the Regulations ........................................28
 
- 10.50 Sanctions. ........................................................................28
+10.50 Sanctions. ........................................................................28
 §
 § 10.51 Incompetence and disreputable conduct. ..............................................28
 
-§ 10.52 Violations subject to sanction.  .......................................................30
+§ 10.52 Violations subject to sanction. .......................................................30
 
-§ 10.53 Receipt of information concerning practitioner.  ........................................30
+§ 10.53 Receipt of information concerning practitioner. ........................................30
 
-Subpart D — Rules Applicable to Disciplinary Proceedings  .....................................31
+Subpart D — Rules Applicable to Disciplinary Proceedings .....................................31
 
 § 10.60 Institution of proceeding. ...........................................................31
 
- 10.61 Conferences.. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
+10.61 Conferences.. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 31
 
-§ 10.63 Service of complaint; service of other  papers; service of evidence in support of complaint;
+§ 10.63 Service of complaint; service of other papers; service of evidence in support of complaint;
 §
-§ 10.62 Contents of complaint.  .............................................................31
+§ 10.62 Contents of complaint. .............................................................31
 
 filing of papers. ...................................................................32
 
-§ 10.64 Answer; default.  ..................................................................33
+§ 10.64 Answer; default. ..................................................................33
 
-§ 10.65 Supplemental charges.  .............................................................33
+§ 10.65 Supplemental charges. .............................................................33
 
-§ 10.66 Reply to answer.  ..................................................................34
+§ 10.66 Reply to answer. ..................................................................34
 
 § 10.67 Proof; variance; amendment of pleadings. .............................................34
 
 § 10.68 Motions and requests. ..............................................................34
 
-§ 10.69 Representation; ex parte communication.  .............................................34
+§ 10.69 Representation; ex parte communication. .............................................34
 
-§ 10.70 Administrative Law Judge.  .........................................................35
+§ 10.70 Administrative Law Judge. .........................................................35
 
 § 10.71 Discovery. .......................................................................35
 
-§ 10.72 Hearings.  ........................................................................36
+§ 10.72 Hearings. ........................................................................36
 
- 10.73 Evidence.  ........................................................................38
+10.73 Evidence. ........................................................................38
 §
 § 10.74 Transcript. .......................................................................39
 
-§ 10.75 Proposed findings and conclusions.  ...................................................39
+§ 10.75 Proposed findings and conclusions. ...................................................39
 
-§ 10.76 Decision of Administrative Law Judge.  ...............................................39
+§ 10.76 Decision of Administrative Law Judge. ...............................................39
 
-§ 10.77 Appeal of decision of Administrative Law Judge.  .......................................40
+§ 10.77 Appeal of decision of Administrative Law Judge. .......................................40
 
- 10.78 Decision on review.  ................................................................40
+10.78 Decision on review. ................................................................40
 §
-§ 10.79 Effect of disbarment, suspension, or censure.  ..........................................40
+§ 10.79 Effect of disbarment, suspension, or censure. ..........................................40
 
-§ 10.80 Notice of disbarment, suspension, censure, or disqualification.  ............................41
+§ 10.80 Notice of disbarment, suspension, censure, or disqualification. ............................41
 
- 10.81 Petition for reinstatement.  ..........................................................41
+10.81 Petition for reinstatement. ..........................................................41
 §
 § 10.82 Expedited suspension. ..............................................................41
 
-Subpart E — General Provisions  ...........................................................43
+Subpart E — General Provisions ...........................................................43
 
- 10.90 Records.  .........................................................................43
+10.90 Records. .........................................................................43
 §
 § 10.91 Saving provision. ..................................................................44
 
 § 10.92 Special orders. ....................................................................44
 
-§ 10.93 Effective date.  ....................................................................44
+§ 10.93 Effective date. ....................................................................44
 
 Page 4
 Treasury Department Circular No. 230
@@ -237,7 +237,7 @@ regulations; subpart D of this part contains the rules
 applicable to disciplinary proceedings; and subpart E
 of this part contains general provisions relating to the
 availability of official records.
-(b) Effective/applicability date.   This section is
+(b) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 Subpart A — Rules Governing Authority to
 Practice
@@ -270,16 +270,15 @@ established under this part may perform acts necessary
 or appropriate to carry out the responsibilities of their
 office(s) under this part or as otherwise prescribed by
 the Commissioner.
-(c) Acting.   The Commissioner will designate an
+(c) Acting. The Commissioner will designate an
 officer or employee of the Internal Revenue Service
 to perform the duties of an individual appointed
 under paragraph (a) of this section in the absence of
 that officer or employee or during a vacancy in that
 office.
-(d) Effective/applicability date.   This section is
+(d) Effective/applicability date. This section is
 applicable beginning August 2, 2011, except that
-paragraph (a)(1) is applicable beginning June 12,
-2014.
+paragraph (a)(1) is applicable beginning June 12, 2014.
 Treasury Department Circular No. 230
 § 10.1 — Page 5
 
@@ -293,7 +292,7 @@ in good standing of the bar of the highest court of
 any state, territory, or possession of the United
 States, including a Commonwealth, or the District of
 Columbia.
-(2) Certified public accountant  means any person
+(2) Certified public accountant means any person
 who is duly qualified to practice as a certified public
 accountant in any state, territory, or possession of the
 United States, including a Commonwealth, or the
@@ -306,7 +305,7 @@ presentation to the Internal Revenue Service or any
 of its officers or employees relating to a taxpayer’s
 rights, privileges, or liabilities under laws or
 regulations administered by the Internal Revenue
-Service.  Such presentations include, but are not
+Service. Such presentations include, but are not
 limited to, preparing documents; filing documents;
 corresponding and communicating with the Internal
 Revenue Service; rendering written advice with
@@ -316,16 +315,16 @@ tax avoidance or evasion; and representing a client at
 conferences, hearings, and meetings.
 (5) Practitioner means any individual described
 in paragraphs (a), (b), (c), (d), (e), or (f) of §10.3.
-(6) A  tax return includes an amended tax return
+(6) A tax return includes an amended tax return
 and a claim for refund.
 (7) Service means the Internal Revenue Service.
 (8) Tax return preparer means any individual
 within the meaning of section 7701(a)(36) and 26
 CFR 301.7701-15.
-(b) Effective/applicability date.  This section is
+(b) Effective/applicability date. This section is
 applicable on August 2, 2011.
 § 10.3 Who may practice.
-(a) Attorneys.  Any attorney who is not currently
+(a) Attorneys. Any attorney who is not currently
 under suspension or disbarment from practice
 Page 6 — § 10.2
 before the Internal Revenue Service may practice
@@ -356,7 +355,7 @@ are not required to file a written declaration with the
 IRS before rendering written advice covered under
 §10.37, but their rendering of this advice is practice
 before the Internal Revenue Service.
-(c) Enrolled agents.  Any individual enrolled as an
+(c) Enrolled agents. Any individual enrolled as an
 agent pursuant to this part who is not currently under
 suspension or disbarment from practice before the
 Internal Revenue Service may practice before the
@@ -380,7 +379,7 @@ Treasury Department Circular No. 230
 to representation with respect to issues involving
 the following statutory provisions in title 26 of
 the United States Code: sections 401 (relating to
-qualification of employee  plans), 403(a) (relating
+qualification of employee plans), 403(a) (relating
 to whether an annuity plan meets the requirements
 of section 404(a) (2)), 404 (relating to deductibility
 of employer contributions), 405 (relating to
@@ -456,10 +455,10 @@ Revenue Service.
 (2) Practice as a registered tax return preparer
 is limited to preparing and signing tax returns
 and claims for refund, and other documents for
-submission to the Internal Revenue Service.  A
+submission to the Internal Revenue Service. A
 registered tax return preparer may prepare all or
 substantially all of a tax return or claim for refund of
-tax.  The Internal Revenue Service will prescribe by
+tax. The Internal Revenue Service will prescribe by
 forms, instructions, or other appropriate guidance the
 tax returns and claims for refund that a registered tax
 return preparer may prepare and sign.
@@ -474,13 +473,13 @@ registered tax return preparer signed the tax return
 ## Page 8
 
 or claim for refund for the taxable year or period
-under examination.  Unless otherwise prescribed by
+under examination. Unless otherwise prescribed by
 regulation or notice, this right does not permit such
 individual to represent the taxpayer, regardless of
 the circumstances requiring representation, before
 appeals officers, revenue officers, Counsel or similar
 officers or employees of the Internal Revenue
-Service or the Treasury Department.  A  registered tax
+Service or the Treasury Department. A registered tax
 return preparer’s authorization to practice under this
 part also does not include the authority to provide
 tax advice to a client or another person except as
@@ -493,19 +492,19 @@ Internal Revenue Service pursuant to paragraph (f)
 part in the same manner as attorneys, certified public
 accountants, enrolled agents, enrolled retirement
 plan agents, and enrolled actuaries.
-(g) Others.  Any individual qualifying under
+(g) Others. Any individual qualifying under
 paragraph §10.5(e) or §10.7 is eligible to practice
 before the Internal Revenue Service to the extent
 provided in those sections.
 (h) Government officers and employees, and
-others.  An individual, who is an officer or employee
+others. An individual, who is an officer or employee
 of the executive, legislative, or judicial branch of the
 United States Government; an officer or employee
 of the District of Columbia; a Member of Congress;
 or a Resident Commissioner may not practice before
 the Internal Revenue Service if such practice violates
 18 U.S.C. §§ 203 or 205.
-(i) State officers and employees.  No officer or
+(i) State officers and employees. No officer or
 employee of any State, or subdivision of any State,
 whose duties require him or her to pass upon,
 investigate, or deal with tax matters for such State
@@ -562,7 +561,7 @@ that would
 justify the suspension or disbarment of any
 practitioner under the provisions of this part.
 (d) Enrollment of former Internal Revenue Service
-employees.  The Commissioner, or delegate, may
+employees. The Commissioner, or delegate, may
 Treasury Department Circular No. 230
 
 ## Page 9
@@ -593,7 +592,7 @@ may be limited to permit the presentation of matters
 only of the particular specialty or only before the
 particular unit or division of the Internal Revenue
 Service for which the applicant’s former employment
-has qualified the applicant.  Enrollment as an enrolled
+has qualified the applicant. Enrollment as an enrolled
 retirement plan agent based on an applicant’s former
 employment with the Internal Revenue Service will
 be limited to permit the presentation of matters only
@@ -633,7 +632,7 @@ the five years preceding the date of application, is the
 equivalent of five years continuous employment.
 (e) Natural persons. Enrollment to practice may be
 granted only to natural persons.
-(f) Effective/applicability date.  This section is
+(f) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.5 Application to become an enrolled agent,
 enrolled retirement plan agent, or registered tax
@@ -649,10 +648,10 @@ the address under which a successful applicant is
 enrolled or registered and is the address to which all
 correspondence concerning enrollment or registration
 will be sent.
-(b) Fee.  A  reasonable nonrefundable fee may be
+(b) Fee. A reasonable nonrefundable fee may be
 charged for each application to become an enrolled
 agent, enrolled retirement plan agent, or registered
-tax return preparer.  See 26 CFR part 300.
+tax return preparer. See 26 CFR part 300.
 (c) Additional information; examination. The Internal
 Revenue Service may require the applicant, as a
 condition to consideration of an application, to file
@@ -712,7 +711,7 @@ or delegate, has information indicating that the
 statements in the application are untrue or that the
 applicant would not otherwise qualify to become
 an enrolled agent, enrolled retirement plan agent, or
-registered tax return preparer.  Issuance of temporary
+registered tax return preparer. Issuance of temporary
 recognition does not constitute either a designation
 or a finding of eligibility as an enrolled agent,
 enrolled retirement plan agent, or registered tax
@@ -727,13 +726,13 @@ prescribed by the Internal Revenue Service in forms,
 guidance, or other appropriate guidance. A protest
 under this section is not governed by subpart D of
 this part.
-(f) Effective/applicability date.  This section is
+(f) Effective/applicability date. This section is
 applicable to applications received on or after
 August 2, 2011.
 § 10.6 Term and renewal of status as an enrolled
 agent, enrolled retirement plan agent, or
 registered tax return preparer.
-(a) Term.  Each individual authorized to practice
+(a) Term. Each individual authorized to practice
 before the Internal Revenue Service as an enrolled
 agent, enrolled retirement plan agent, or registered
 tax return preparer will be accorded active enrollment
@@ -848,20 +847,20 @@ approval, the Internal Revenue Service will notify
 
 ## Page 12
 
- (B) Ethics. An individual who receives
+(B) Ethics. An individual who receives
 initial enrollment during an enrollment cycle must
 complete two hours of ethics or professional conduct
 for each enrollment year during the enrollment cycle.
 Enrollment for any part of an enrollment year is
 considered enrollment for the entire year.
- (A) Be a qualifying continuing education
+(A) Be a qualifying continuing education
 program designed to enhance professional
 knowledge in Federal taxation or Federal tax related
 matters (programs comprised of current subject
 matter in Federal taxation or Federal tax related
 matters, including accounting, tax return preparation
 software, taxation, or ethics); and
- (B) Be a qualifying continuing education
+(B) Be a qualifying continuing education
 program consistent with the Internal Revenue Code
 and effective tax administration.
 
@@ -889,13 +888,13 @@ of continuing education hours.
 (1) Definitions. For purposes of this section —
 (i) Enrollment year means January 1 to
 December 31 of each year of an enrollment cycle.
-(ii) Enrollment cycle  means the three successive
+(ii) Enrollment cycle means the three successive
 enrollment years preceding the effective date of
 renewal.
 (iii) Registration year means each 12-month
 period the registered tax return preparer is authorized
 to practice before the Internal Revenue Service.
-(iv) The effective date of renewal  is the first day
+(iv) The effective date of renewal is the first day
 of the fourth month following the close of the period
 for renewal described in paragraph (d) of this section.
 (2) For renewed enrollment as an enrolled agent
@@ -944,14 +943,14 @@ Treasury Department Circular No. 230
 
 ## Page 13
 
- (A) Be a qualifying continuing education
+(A) Be a qualifying continuing education
 program designed to enhance professional
 knowledge in Federal taxation or Federal tax related
 matters (programs comprised of current subject
 matter in Federal taxation or Federal tax related
 matters, including accounting, tax return preparation
 software, taxation, or ethics); and
- (B) Be a qualifying continuing education
+(B) Be a qualifying continuing education
 program consistent with the Internal Revenue Code
 and effective tax administration.
 qualify for continuing education credit for a registered
@@ -1109,7 +1108,7 @@ required to furnish any additional documentation
 or explanation deemed necessary. Examples of
 appropriate documentation could be a medical
 certificate or military orders.
-(3) A  request for waiver must be filed no later
+(3) A request for waiver must be filed no later
 than the last day of the renewal application period.
 (4) If a request for waiver is not approved, the
 individual will be placed in inactive status. The
@@ -1120,7 +1119,7 @@ plan agents, or registered tax return preparers.
 (5) If the request for waiver is not approved, the
 individual may file a protest as prescribed by the
 Internal Revenue Service in forms, instructions, or
-other appropriate guidance. A  protest filed under this
+other appropriate guidance. A protest filed under this
 section is not governed by subpart D of this part.
 (6) If a request for waiver is approved, the
 individual will be notified and issued a card or
@@ -1187,7 +1186,7 @@ preparer, the designations “EA” or “ERPA” or other
 form of reference to eligibility to practice before the
 Internal Revenue Service.
 (5) An individual placed in inactive status
-may be reinstated to an active status by filing  an
+may be reinstated to an active status by filing an
 application for renewal and providing evidence of
 the completion of all required continuing education
 hours for the enrollment cycle or registration year.
@@ -1235,12 +1234,12 @@ Internal Revenue Service by virtue of disciplinary
 action under this part is required to conform to the
 requirements for renewal of enrollment or registration
 before the individual’s eligibility is restored.
-(m) Enrolled actuaries.  The enrollment and renewal
+(m) Enrolled actuaries. The enrollment and renewal
 of enrollment of actuaries authorized to practice
 under paragraph (d) of §10.3 are governed by the
 regulations of the Joint Board for the Enrollment of
 Actuaries at 20 CFR 901.1 through 901.72.
-(n) Effective/applicability date.  This section is
+(n) Effective/applicability date. This section is
 applicable to enrollment or registration effective
 beginning August 2, 2011.
 § 10.7 Representing oneself; participating
@@ -1253,7 +1252,7 @@ provided they present satisfactory identification.
 may participate in rulemaking as provided by the
 Administrative Procedure Act. See 5 U.S.C. § 553.
 (c) Limited practice —
-(1) In general.  Subject to the limitations in
+(1) In general. Subject to the limitations in
 paragraph (c)(2) of this section, an individual who
 is not a practitioner may represent a taxpayer before
 the Internal Revenue Service in the circumstances
@@ -1270,7 +1269,7 @@ employer may represent the employer.
 (iii) A general partner or a regular full-time
 employee of a partnership may represent the
 partnership.
-(iv) A  bona fide officer or a regular full-
+(iv) A bona fide officer or a regular full-
 time employee of a corporation (including a
 Page 16 — § 10.6
 parent, subsidiary, or other affiliated corporation),
@@ -1322,7 +1321,7 @@ Treasury Department Circular No. 230
 
 ## Page 17
 
-  § 10.8 Return preparation and application of
+§ 10.8 Return preparation and application of
 rules to other individuals.
 (a) Preparing all or substantially all of a tax return.
 Any individual who for compensation prepares or
@@ -1442,7 +1441,7 @@ be maintained to verify completion of the program
 and attendance by each participant at each segment
 of the program.
 
- (4) Program numbers —
+(4) Program numbers —
 (i) In general. Every continuing education
 provider is required to obtain a continuing education
 provider program number and pay any applicable
@@ -1540,7 +1539,7 @@ information unless the practitioner believes in good
 Treasury Department Circular No. 230
 faith and on reasonable grounds that the record or
 information is privileged.
-(c) Effective/applicability date.  This section is
+(c) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.21 Knowledge of client’s omission.
 A practitioner who, having been retained by a
@@ -1557,7 +1556,7 @@ of the consequences as provided under the Code
 and regulations of such noncompliance, error, or
 omission.
 § 10.22 Diligence as to accuracy.
-(a) In general.  A practitioner must exercise due
+(a) In general. A practitioner must exercise due
 diligence —
 (1) In preparing or assisting in the preparation
 of, approving, and filing tax returns, documents,
@@ -1570,7 +1569,7 @@ the Department of the Treasury; and
 written representations made by the practitioner to
 clients with reference to any matter administered by
 the Internal Revenue Service.
-(b) Reliance on others.  Except as modified by
+(b) Reliance on others. Except as modified by
 §§10.34 and 10.37, a practitioner will be presumed
 to have exercised due diligence for purposes of
 this section if the practitioner relies on the work
@@ -1610,7 +1609,7 @@ their partners and their associates.
 (1) Assist means to act in such a way as to advise,
 furnish information to, or otherwise aid another
 person, directly, or indirectly.
-(2) Government employee  is an officer or
+(2) Government employee is an officer or
 employee of the United States or any agency of
 the United States, including a special Government
 employee as defined in 18 U.S.C. 202(a), or of the
@@ -1710,7 +1709,7 @@ associates with respect to representation in particular
 matters involving specific parties where actual
 representation commenced before the effective date
 of this regulation.
-(e) Effective/applicability date.  This section is
+(e) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.26 Notaries.
 A practitioner may not take acknowledgments,
@@ -1723,7 +1722,7 @@ attorney, or agent, or in which he or she may be in any
 way in
 terested.
 § 10.27 Fees.
-(a) In general.  A practitioner may not charge an
+(a) In general. A practitioner may not charge an
 unconscionable fee in connection with any matter
 before the Internal Revenue Service.
 (b) Contingent fees —
@@ -1731,8 +1730,7 @@ before the Internal Revenue Service.
 and (4) of this section, a practitioner may not charge
 a contingent fee for services rendered in connection
 with any matter before the Internal Revenue Service.
-(
-2) A practitioner may charge a contingent
+( 2) A practitioner may charge a contingent
 fee for services rendered in connection with the
 Service’s examination of, or challenge to —
 (i) An original tax return; or
@@ -1746,7 +1744,7 @@ for services rendered in connection with a claim
 for credit or refund filed solely in connection with
 the determination of statutory interest or penalties
 assessed by the Internal Revenue Service.
-(4) A  practitioner may charge a contingent fee
+(4) A practitioner may charge a contingent fee
 for services rendered in connection with any judicial
 proceeding arising under the Internal Revenue Code.
 (c) Definitions. For purposes of this section —
@@ -1786,7 +1784,7 @@ Revenue Service, rendering written advice with
 respect to any entity, transaction, plan or arrangement,
 and representing a client at conferences, hearings,
 and meetings.
-(d) Effective/applicability date.  This section is
+(d) Effective/applicability date. This section is
 applicable for fee arrangements entered into after
 March 26, 2008.
 § 10.28 Return of client’s records.
@@ -1850,7 +1848,7 @@ practitioner may represent a client if —
 (1) The practitioner reasonably believes that the
 practitioner will be able to provide competent and
 diligent representation to each affected client;
-(2)  The representation is not prohibited by law;
+(2) The representation is not prohibited by law;
 and
 (3) Each affected client waives the conflict of
 Treasury Department Circular No. 230
@@ -1869,7 +1867,7 @@ date of the conclusion of the representation of the
 affected clients, and the written consents must be
 provided to any officer or employee of the Internal
 Revenue Service on request.
-(d) Effective/applicability date.  This section is
+(d) Effective/applicability date. This section is
 applicable on September 26, 2007.
 § 10.30 Solicitation.
 (a) Advertising and solicitation restrictions.
@@ -1955,32 +1953,32 @@ communication was mailed or otherwise distributed.
 The copy must be retained by the practitioner for a
 period of at least 36 months from the date of the last
 transmission or use.
-(d) Improper associations.  A practitioner may not,
+(d) Improper associations. A practitioner may not,
 in matters related to the Internal Revenue Service,
 assist, or accept assistance from, any person or entity
 who, to the knowledge of the practitioner, obtains
 clients or otherwise practices in a manner forbidden
 under this section.
-(e) Effective/applicability date.  This section is
+(e) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 (Approved by the Office of Management and Budget
 under Control No. 1545-1726)
 § 10.31 Negotiation of taxpayer checks.
- (a) A practitioner may not endorse or otherwise
+(a) A practitioner may not endorse or otherwise
 negotiate any check (including directing or accepting
 payment by any means, electronic or otherwise, into
 an account owned or controlled by the practitioner or
 any firm or other entity with whom the practitioner
 is associated) issued to a client by the government in
 respect of a Federal tax liability.
-(b) Effective/applicability date.  This section is
+(b) Effective/applicability date. This section is
 applicable beginning June 12, 2014.
 § 10.32 Practice of law.
 Nothing in the regulations in this part may be
 construed as authorizing persons not members of the
 bar to practice law.
 § 10.33 Best practices for tax advisors.
-(a) Best practices.  Tax advisors should provide
+(a) Best practices. Tax advisors should provide
 clients with the highest quality representation
 concerning Federal tax issues by adhering to best
 practices in providing advice and in preparing or
@@ -2018,9 +2016,9 @@ Internal Revenue Service should take reasonable steps
 to ensure that the firm’s procedures for all members,
 associates, and employees are consistent with the best
 practices set forth in paragraph (a) of this section.
-(c) Applicability date.  This section is effective after
+(c) Applicability date. This section is effective after
 June 20, 2005.
-§ 10.34  Standards with respect to tax returns and
+§ 10.34 Standards with respect to tax returns and
 documents, affidavits and other papers.
 (a) Tax returns.
 (1) A practitioner may not willfully, recklessly, or
@@ -2066,7 +2064,7 @@ gross incompetence.
 a position on a document, affidavit or other paper
 submitted to the Internal Revenue Service unless the
 position is not frivolous.
-(2) A  practitioner may not advise a client to
+(2) A practitioner may not advise a client to
 submit a document, affidavit or other paper to the
 Internal Revenue Service —
 (i) The purpose of which is to delay or impede
@@ -2116,8 +2114,7 @@ be incorrect, inconsistent with an important fact or
 another factual assumption, or incomplete.
 (e) Effective/applicability date. Paragraph (a) of
 this section is applicable for returns or claims for
-refund filed, or advice provided, beginning August 2,
-2011. Paragraphs (b) through (d) of this section are
+refund filed, or advice provided, beginning August 2, 2011. Paragraphs (b) through (d) of this section are
 applicable to tax returns, documents, affidavits, and
 other papers filed on or after September 26, 2007.
 § 10.35 Competence.
@@ -2126,7 +2123,7 @@ competence to engage in practice before the Internal
 Revenue Service. Competent practice requires the
 appropriate level of knowledge, skill, thoroughness,
 and preparation necessary for the matter for which the
-practitioner is engaged. A  practitioner may become
+practitioner is engaged. A practitioner may become
 competent for the matter for which the practitioner
 has been engaged through various methods, such
 § 10.35 — Page 25
@@ -2188,7 +2185,7 @@ practice with the firm, that does not comply with
 this part, as applicable, and the individual, through
 willfulness, recklessness, or gross incompetence fails
 to take prompt action to correct the noncompliance.
-(c) Effective/applicability date.  This section is
+(c) Effective/applicability date. This section is
 applicable beginning June 12, 2014.
 § 10.37 Requirements for written advice.
 (a) Requirements.
@@ -2236,7 +2233,7 @@ practitioner knows or reasonably should know that
 one or more representations or assumptions on which
 any representation is based are incorrect, incomplete,
 or inconsistent.
-(b) Reliance on advice of others.  A  practitioner
+(b) Reliance on advice of others. A practitioner
 may only rely on the advice of another person if the
 advice was reasonable and the reliance is in good
 faith considering all the facts and circumstances.
@@ -2275,10 +2272,10 @@ additional risk caused by the practitioner’s lack of
 knowledge of the taxpayer’s particular circumstances,
 when determining whether a practitioner has failed
 to comply with this section.
-(d) Federal tax matter.  A Federal tax matter, as
+(d) Federal tax matter. A Federal tax matter, as
 used in this section, is any matter concerning the
 application or interpretation of---
-(1) A  revenue provision as defined in section
+(1) A revenue provision as defined in section
 6110(i)(1)(B) of the Internal Revenue Code;
 (2) Any provision of law impacting a person’s
 obligations under the internal revenue laws and
@@ -2286,11 +2283,10 @@ regulations, including but not limited to the person’s
 liability to pay tax or obligation to file returns; or
 (3) Any other law or regulation administered by
 the Internal Revenue Service.
-(e) Effective/applicability date.  This section is
-applicable to written advice rendered after June 12,
-2014.
+(e) Effective/applicability date. This section is
+applicable to written advice rendered after June 12, 2014.
 § 10.38 Establishment of advisory committees.
-(a) Advisory committees.  To promote and maintain
+(a) Advisory committees. To promote and maintain
 the public’s confidence in tax advisors, the Internal
 Revenue Service is authorized to establish one or
 more advisory committees composed of at least
@@ -2305,7 +2301,7 @@ Service, an advisory committee may review and make
 general recommendations regarding the practices,
 procedures, and policies of the offices described in
 §10.1.
-(b) Effective date.  This section is applicable
+(b) Effective date. This section is applicable
 beginning August 2, 2011.
 Treasury Department Circular No. 230
 § 10.38 — Page 27
@@ -2326,7 +2322,7 @@ regulation in this part (under the prohibited conduct
 standards of §10.52), or with intent to defraud,
 willfully and knowingly misleads or threatens a client
 or prospective client. Censure is a public reprimand.
-(b) Authority  to disqualify.  The Secretary of the
+(b) Authority to disqualify. The Secretary of the
 Treasury, or delegate, after due notice and opportunity
 for hearing, may disqualify any appraiser for a
 violation of these rules as applicable to appraisers.
@@ -2366,7 +2362,7 @@ Secretary of the Treasury, or delegate, may impose
 a monetary penalty on the employer, firm, or entity
 if it knew, or reasonably should have known of such
 conduct.
-(2) Amount of penalty.  The amount of the penalty
+(2) Amount of penalty. The amount of the penalty
 shall not exceed the gross income derived (or to be
 derived) from the conduct giving rise to the penalty.
 (3) Coordination with other sanctions. Subject to
@@ -2386,17 +2382,17 @@ sanction. The Internal Revenue Service may accept
 a practitioner’s offer of consent to be sanctioned
 under §10.50 in lieu of instituting or continuing a
 proceeding under §10.60(a).
-(e) Sanctions to be imposed.  The sanctions imposed
+(e) Sanctions to be imposed. The sanctions imposed
 by this section shall take into account all relevant
 facts and circumstances.
-(f) Effective/applicability date.  This section is
+(f) Effective/applicability date. This section is
 applicable to conduct occurring on or after August 2,
 2011, except that paragraphs (a), (b)(2), and (e) apply
 to conduct occurring on or after September 26, 2007,
 and paragraph (c) applies to prohibited conduct that
 occurs after October 22, 2004.
 § 10.51 Incompetence and disreputable conduct.
-(a) Incompetence  and disreputable conduct.
+(a) Incompetence and disreputable conduct.
 Incompetence and disreputable conduct for which
 a practitioner may be sanctioned under §10.50
 includes, but is not limited to —
@@ -2499,7 +2495,7 @@ or through gross incompetence. Gross incompetence
 
 ## Page 30
 
- includes conduct that reflects gross indifference,
+includes conduct that reflects gross indifference,
 preparation which is grossly inadequate under the
 circumstances, and a consistent failure to perform
 obligations to the client.
@@ -2528,7 +2524,7 @@ or other prescribed identifying number.
 an officer or employee of the Internal Revenue
 Service unless the practitioner is authorized to do so
 pursuant to this part.
-(b) Effective/applicability date.  This section is
+(b) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.52 Violations subject to sanction.
 (a) A practitioner may be sanctioned under §10.50
@@ -2538,7 +2534,7 @@ than §10.33) contained in this part; or
 (2) Recklessly or through gross incompetence
 (within the meaning of §10.51(a)(13)) violates §§
 10.34, 10.35, 10.36 or 10.37.
-(b) Effective/applicability date.  This section is
+(b) Effective/applicability date. This section is
 applicable to conduct occurring on or after September
 26, 2007.
 § 10.53 Receipt of information concerning
@@ -2617,10 +2613,10 @@ such action and has been accorded an opportunity
 to dispute facts, assert additional facts, and make
 arguments (including an explanation or description
 of mitigating circumstances).
-(d) Effective/applicability date.  This section is
+(d) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.61 Conferences.
-(a) In general.  The Commissioner, or delegate,
+(a) In general. The Commissioner, or delegate,
 may confer with a practitioner, employer, firm or
 other entity, or an appraiser concerning allegations of
 misconduct irrespective of whether a proceeding has
@@ -2636,7 +2632,7 @@ instituted or continued under §10.60(a), a practitioner
 or appraiser (or employer, firm or other entity, if
 applicable) may offer a consent to be sanctioned
 under §10.50.
-(2) Discretion; acceptance or declination.  The
+(2) Discretion; acceptance or declination. The
 Commissioner, or delegate, may accept or decline
 the offer described in paragraph (b)(1) of this
 section. When the decision is to decline the offer,
@@ -2647,7 +2643,7 @@ The Commissioner, or delegate, has the discretion to
 accept or reject a revised offer submitted in response
 to the declination or may counteroffer and act upon
 any accepted counteroffer.
-(c) Effective/applicability date.  This section is
+(c) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.62 Contents of complaint.
 (a) Charges. A complaint must name the
@@ -2680,13 +2676,13 @@ to whom a copy of the answer must be served, and
 that a decision by default may be rendered against
 the respondent in the event an answer is not filed as
 required.
-(d) Effective/applicability date.  This section is
+(d) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
-§ 10.63  Service of complaint; service of other
+§ 10.63 Service of complaint; service of other
 papers; service of evidence in support of
 complaint; filing of papers.
 (a) Service of complaint.
-(1) In general.  The complaint or a copy of the
+(1) In general. The complaint or a copy of the
 complaint must be served on the respondent by any
 manner described in paragraphs (a) (2) or (3) of this
 section.
@@ -2745,7 +2741,7 @@ or appraiser named in the complaint or any other
 person having the authority to accept mail on behalf
 of the practitioner, employer, firm or other entity or
 appraiser.
-(b) Service of papers other than complaint.  Any
+(b) Service of papers other than complaint. Any
 paper other than the complaint may be served on the
 respondent, or his or her authorized representative
 under §10.69(a)(2) by:
@@ -2763,8 +2759,8 @@ of the respondent or the respondent’s authorized
 representative, or
 (3) as provided in paragraphs (a)(3)(ii) and (a)(3)
 (iii) of this section.
-(c) Service  of papers on the Internal Revenue
-Service.  Whenever a paper is required or permitted
+(c) Service of papers on the Internal Revenue
+Service. Whenever a paper is required or permitted
 to be served on the Internal Revenue Service in
 Treasury Department Circular No. 230
 
@@ -2780,7 +2776,7 @@ in a notice of appearance, service will be made on
 the office(s) established to enforce this part under the
 authority of §10.1, Internal Revenue Service, 1111
 Constitution Avenue, NW, Washington, DC 20224.
-(d) Service  of evidence in support of complaint.
+(d) Service of evidence in support of complaint.
 Within 10 days of serving the complaint, copies of
 the evidence in support of the complaint must be
 served on the respondent in any manner described in
@@ -2798,7 +2794,7 @@ Administrative Law Judge directs otherwise. A
 certificate evidencing such must be attached to the
 original paper filed with the Administrative Law
 Judge.
-(f) Effective/applicability date.  This section is
+(f) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.64 Answer; default.
 (a) Filing. The respondent’s answer must be filed
@@ -2828,7 +2824,7 @@ complaint. Every allegation in the complaint that is
 not denied in the answer is deemed admitted and will
 be considered proved; no further evidence in respect
 of such allegation need be adduced at a hearing.
-(d) Default.  Failure to file an answer within the time
+(d) Default. Failure to file an answer within the time
 prescribed (or within the time for answer as extended
 by the Administrative Law Judge), constitutes an
 admission of the allegations of the complaint and
@@ -2836,7 +2832,7 @@ a waiver of hearing, and the Administrative Law
 Judge may make the decision by default without a
 hearing or further procedure. A decision by default
 constitutes a decision under §10.76.
-(e) Signature.  The answer must be signed by
+(e) Signature. The answer must be signed by
 the respondent or the respondent’s authorized
 representative under §10.69(a)(2) and must
 include a statement directly above the signature
@@ -2863,12 +2859,12 @@ respondent possesses such information; or
 
 introduced false testimony during the proceedings
 against the respondent.
-(b) Hearing.  The supplemental charges may be
+(b) Hearing. The supplemental charges may be
 heard with other charges in the case, provided the
 respondent is given due notice of the charges and
 is afforded a reasonable opportunity to prepare a
 defense to the supplemental charges.
-(c) Effective/applicability date.  This section is
+(c) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.66 Reply to answer.
 (a) The Internal Revenue Service may file a reply
@@ -2876,7 +2872,7 @@ to the respondent’s answer, but unless otherwise
 ordered by the Administrative Law Judge, no reply
 to the respondent’s answer is required. If a reply is
 not filed, new matter in the answer is deemed denied.
-(b) Effective/applicability date.  This section is
+(b) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.67 Proof; variance; amendment of pleadings.
 In the case of a variance between the allegations in
@@ -2934,10 +2930,10 @@ motions and oral opposition to motions.
 (2) The Administrative Law Judge may, within
 his or her discretion, permit oral argument on any
 motion.
-(d) Orders.  The Administrative Law Judge should
+(d) Orders. The Administrative Law Judge should
 issue written orders disposing of any motion or
 request and any response thereto.
-(e) Effective/applicability date.  This section is
+(e) Effective/applicability date. This section is
 applicable on September 26, 2007.
 § 10.69 Representation; ex parte communication.
 (a) Representation.
@@ -2976,7 +2972,7 @@ proceeding, addressed to the Administrative Law
 Judge, by or on behalf of any party shall be regarded
 as an argument in the proceeding and shall be served
 on the othe party.
- (c) Effective/applicability date. This section is
+(c) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.70 Administrative Law Judge.
 (a) Appointment. Proceedings on complaints for the
@@ -2984,7 +2980,7 @@ sanction (as described in §10.50) of a practitioner,
 employer, firm or other entity, or appraiser will be
 conducted by an Administrative Law Judge appointed
 as provided by 5 U.S.C. 3105.
-(b) Powers of the Administrative Law Judge.  The
+(b) Powers of the Administrative Law Judge. The
 Administrative Law Judge, among other powers,
 has the authority, in connection with any proceeding
 under §10.60 assigned or referred to him or her, to do
@@ -3013,7 +3009,7 @@ the consent of the parties;
 are necessary or appropriate to the efficient conduct
 of any proceeding; and
 (10) Make decisions.
-(c) Effective/applicability date.  This section is
+(c) Effective/applicability date. This section is
 applicable on September 26, 2007.
 § 10.71 Discovery.
 (a) In general. Discovery may be permitted, at the
@@ -3031,7 +3027,7 @@ Administrative Law Judge may order —
 (1) Depositions upon oral examination; or
 (2) Answers to requests for admission.
 (b) Depositions upon oral examination —
-(1) A  deposition must be taken before an officer
+(1) A deposition must be taken before an officer
 duly authorized to administer an oath for general
 purposes or before an officer or employee of the
 Internal Revenue Service who is authorized to
@@ -3075,9 +3071,9 @@ impressions, conclusions, of legal theories of any
 party, attorney, or other representative, or a party
 prepared in the anticipation of a proceeding; or
 (8) The material sought is available generally
-to the public,  equally to the parties, or to the party
+to the public, equally to the parties, or to the party
 seeking the discovery through another source.
-(e) Failure to comply.  Where a party fails to comply
+(e) Failure to comply. Where a party fails to comply
 with an order of the Administrative Law Judge under
 this section, the Administrative Law Judge may, among
 other things, infer that the information would be adverse
@@ -3086,7 +3082,7 @@ from evidence or issue a decision by default.
 (f) Other discovery. No discovery other than that
 specifically provided for in this section is permitted.
 Page 36 — § 10.71
-(g) Effective/applicability date.  This section
+(g) Effective/applicability date. This section
 is applicable to proceedings initiated on or after
 September 26, 2007.
 § 10.72 Hearings.
@@ -3123,7 +3119,7 @@ written record without a hearing; or
 (E) The Administrative Law Judge issues a
 decision under §10.68(d) or rules on another motion
 that disposes of the case prior to the hearing.
-(b) Cross-examination.  A party is entitled to present
+(b) Cross-examination. A party is entitled to present
 his or her case or defense by oral or documentary
 evidence, to submit rebuttal evidence, and to
 conduct cross-examination, in the presence of the
@@ -3171,7 +3167,7 @@ paragraph (d)(4) of this section.
 (3) Returns and return information —
 (i) Disclosure to practitioner or appraiser.
 Pursuant to section 6103(l)(4) of the Internal
-Revenue Code,  the Secretary of the Treasury,
+Revenue Code, the Secretary of the Treasury,
 or delegate, may disclose returns and return
 information to any practitioner or appraiser, or to
 the authorized representative of the practitioner
@@ -3185,7 +3181,7 @@ returns or return information are or may be relevant
 and material to the action or proceeding.
 (ii) Disclosure to officers and employees of
 the Department of the Treasury. Pursuant to section
-6103(l)(4)(B) of the Internal Revenue Code  the
+6103(l)(4)(B) of the Internal Revenue Code the
 Secretary of the Treasury, or delegate, may disclose
 returns and return information to officers and
 employees of the Department of the Treasury for
@@ -3199,7 +3195,7 @@ information solely in the action or proceeding, or
 in preparation for the action or proceeding, with
 respect to which the disclosure was made.
 (iv) Procedures for disclosure of returns and
-return information.  When providing returns or
+return information. When providing returns or
 return information to the practitioner or appraiser,
 or authorized representative, the Secretary of the
 Treasury, or delegate, will —
@@ -3228,14 +3224,12 @@ Judge for purposes of the proceeding, but is not
 
 ## Page 38
 
- (1) That disclosure of information be made
+(1) That disclosure of information be made
 only on specified terms and conditions, including a
 designation of the time or place;
- (2) That a trade secret or other information
+(2) That a trade secret or other information
 not be disclosed, or be disclosed only in a designated
 way.
-
-
 
 disclosed to, or open to inspection by, the public.
 (ii) Authorized orders.
@@ -3253,36 +3247,36 @@ Law Judge may, on such terms or conditions as
 the Administrative Law Judge deems just, order
 any party or person to comply with, or respond in
 accordance with, the procedure involved.
-(iv) Public inspection of documents.  The
+(iv) Public inspection of documents. The
 Secretary of the Treasury, or delegate, shall ensure
 that all names, addresses or other identifying details
 of third party taxpayers are redacted and replaced
 with the code assigned to the corresponding taxpayer
 in all documents prior to public inspection of such
 documents.
-(e) Location.  The location of the hearing will be
+(e) Location. The location of the hearing will be
 determined by the agreement of the parties with the
 approval of the Administrative Law Judge, but, in
 the absence of such agreement and approval, the
 hearing will be held in Washington, D.C.
-(f) Failure to appear.  If either party to the
+(f) Failure to appear. If either party to the
 proceeding fails to appear at the hearing, after
 notice of the proceeding has been sent to him or her,
 the party will be deemed to have waived the right
 to a hearing and the Administrative Law Judge may
 make his or her decision against the absent party by
 default.
-(g) Effective/applicability date.  This section is
+(g) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 Page 38 — § 10.72
 § 10.73 Evidence.
-(a) In general.  The rules of evidence prevailing
+(a) In general. The rules of evidence prevailing
 in courts of law and equity are not controlling in
 hearings or proceedings conducted under this part.
 The Administrative Law Judge may, however,
 exclude evidence that is irrelevant, immaterial, or
 unduly repetitious.
-(b) Depositions.  The deposition of any witness
+(b) Depositions. The deposition of any witness
 taken pursuant to §10.71 may be admitted into
 evidence in any proceeding instituted under §10.60.
 (c) Requests for admission. Any matter admitted
@@ -3303,7 +3297,7 @@ documents, records, and papers may be evidenced
 by a copy attested to or identified by an officer or
 employee of the Internal Revenue Service or the
 Treasury Department, as the case may be.
-(e) Withdrawal of exhibits.  If any document,
+(e) Withdrawal of exhibits. If any document,
 record, or other paper is introduced in evidence
 as an exhibit, the Administrative Law Judge may
 authorize the withdrawal of the exhibit subject to
@@ -3316,7 +3310,7 @@ recorded or transcribed. Rulings on objections
 are to be a part of the record, but no exception to
 a ruling is necessary to preserve the rights of the
 parties.
-(g) Effective/applicability date.  This section is
+(g) Effective/applicability date. This section is
 applicable on September 26, 2007.
 Treasury Department Circular No. 230
 
@@ -3358,14 +3352,14 @@ for making such findings and conclusions, and
 an order of censure, suspension, disbarment,
 monetary penalty, disqualification, or dismissal of
 the complaint.
-(2) Summary adjudication.  In the event that
+(2) Summary adjudication. In the event that
 a motion for summary adjudication is filed, the
 Administrative Law Judge should rule on the
 motion for summary adjudication within 60
 days after the party in opposition files a written
 response, or if no written response is filed, within
 90 days after the motion for summary adjudication
-is filed. A  decision shall thereafter be rendered if
+is filed. A decision shall thereafter be rendered if
 the pleadings, depositions, admissions, and any
 other admissible evidence show that there is no
 genuine issue of material fact and that a decision
@@ -3375,7 +3369,7 @@ the reasons or basis for making such conclusions,
 and an order of censure, suspension, disbarment,
 monetary penalty, disqualification, or dismissal of
 the complaint.
-(3) Returns and return information.  In the
+(3) Returns and return information. In the
 decision, the Administrative Law Judge should
 use the code assigned to third party taxpayers
 (described in §10.72(d)).
@@ -3405,7 +3399,7 @@ of the Administrative Law Judge will, without
 further proceedings, become the decision of the
 agency 30 days after the date of the Administrative
 Law Judge’s decision.
-(e) Effective/applicability date.  This section is
+(e) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 Treasury Department Circular No. 230
 § 10.76 — Page 39
@@ -3469,7 +3463,7 @@ Secretary of the Treasury, or delegate, will make the
 agency decision. The Secretary of the Treasury, or
 delegate, should make the agency decision within
 180 days after receipt of the appeal
-(b) Standard of review.  The decision of the
+(b) Standard of review. The decision of the
 Administrative Law Judge will not be reversed unless
 the appellant establishes that the decision is clearly
 erroneous in light of the evidence in the record and
@@ -3484,7 +3478,7 @@ the Treasury, or delegate, will provide copies of the
 agency decision to the authorized representative of
 the Internal Revenue Service and the respondent or
 the respondent’s authorized representative.
-(d) Effective/applicability date.  This section is
+(d) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.79 Effect of disbarment, suspension, or censure.
 (a) Disbarment. When the final decision in a case
@@ -3536,7 +3530,7 @@ appropriate period following censure, whether or
 not such consents are specifically requested.
 (e) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
-§ 10.80  Notice of disbarment, suspension, censure,
+§ 10.80 Notice of disbarment, suspension, censure,
 or disqualification.
 (a) In general. On the issuance of a final order
 censuring, suspending, or disbarring a practitioner or
@@ -3572,7 +3566,7 @@ the public interest.
 (b) Effective/applicability date. This section is
 applicable beginning June 12, 2014.
 § 10.82 Expedited suspension.
-(a) When applicable.  Whenever the Commissioner,
+(a) When applicable. Whenever the Commissioner,
 or delegate, determines that a practitioner is
 described in paragraph (b) of this section, the
 expedited procedures described in this section may
@@ -3676,7 +3670,7 @@ Service, unless the respondent agrees to an earlier
 date. An authorized representative may represent
 the respondent at the conference.
 (f) Suspension—
-(1) In general.  The Commissioner, or delegate,
+(1) In general. The Commissioner, or delegate,
 may suspend the respondent from practice before
 the Internal Revenue Service by a written notice of
 expedited suspension immediately following:
@@ -3696,7 +3690,7 @@ this section; or
 personally or through an authorized representative,
 at a conference scheduled by the Internal Revenue
 Service under paragraph (e) of this section.
-(2) Duration of suspension.  A suspension under
+(2) Duration of suspension. A suspension under
 this section will commence on the date that the
 written notice of expedited suspension is served
 on the practitioner, either personally or through
@@ -3795,7 +3789,7 @@ the requirements of this part.
 of the Office of Professional Responsibility may be
 disclosed upon specific request, in accordance with
 the applicable law.
-(c) Effective/applicability date.  This section is
+(c) Effective/applicability date. This section is
 applicable beginning August 2, 2011.
 § 10.91 Saving provision.
 Any proceeding instituted under this part prior to
@@ -3814,8 +3808,7 @@ issue such special orders as he or she deems proper
 in any cases within the purview of this part.
 § 10.93 Effective date.
 Except as otherwise provided in each section and
-Subject to §10.91, Part 10 is applicable on July 26,
-2002.
+Subject to §10.91, Part 10 is applicable on July 26, 2002.
 
 John Dalrymple,
 
