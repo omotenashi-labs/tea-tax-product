@@ -61,7 +61,7 @@ A v0.1 definition of the tax situation object — core fields, types, validation
 
 - Deliberately minimal: broad enough to be correct, narrow enough that a future technical working group has room to contribute
 - Technically rigorous enough that a CTO can evaluate it in an afternoon
-- Informed by domain expertise from TaxAct's Xpert ecosystem — which fields matter, how tier placement works, what edge cases exist, where providers diverge
+- Informed by prior tax SaaS product management expertise — which fields matter, how tier placement works, what edge cases exist, where providers diverge
 - Maps to IRS form/schedule taxonomy (1040 series, Schedules A–F, SE, common supplemental forms)
 
 **Conceptual schema:**
@@ -87,7 +87,7 @@ The schema defines the _shape_ of a tax situation. The knowledge base provides t
 **What the knowledge base encodes:**
 
 - **IRS form/schedule taxonomy.** Which forms exist, what fields they require, how they relate to each other. Schedule C triggers self-employment tax (Schedule SE). Investment income triggers Schedule D and Form 8949. Rental income requires Schedule E. These dependencies are the validation backbone.
-- **Provider tier mapping rules.** Which combination of forms, complexity factors, and income levels maps to which product tier at which provider. A W-2-only filer qualifies for free tiers; a K-1 with foreign tax paid forces premier tier at TurboTax but not at FreeTaxUSA. This is the domain expertise that makes the protocol useful to providers — not just a data container, but an evaluable artifact.
+- **Provider tier mapping rules.** Which combination of forms, complexity factors, and income levels maps to which product tier at which provider. A W-2-only filer qualifies for free tiers; a K-1 with foreign tax paid forces a premier tier at one major provider but not at a budget competitor. This is the domain expertise that makes the protocol useful to providers — not just a data container, but an evaluable artifact.
 - **Validation logic.** Contradictions (claiming single filing status + dependent spouse), missing dependencies (1099-NEC income without estimated tax payment history), implausible values (negative AGI without capital loss documentation), incomplete form chains (Schedule C present but no SE tax calculation).
 - **Tax code rules and thresholds.** AGI limits for Free File eligibility ($89K), credit phase-out ranges, standard deduction amounts by filing status, estimated tax safe harbor rules, EITC qualifying thresholds. These change annually and must be versioned.
 
@@ -106,7 +106,7 @@ A transport-agnostic implementation that demonstrates the schema and knowledge b
 
 **Quality bar:** Tangible enough that a non-technical CEO can see it working and a CTO can see the architecture. Does not need to be production-grade.
 
-**Transport is an implementation detail.** MCP, OpenAI function definitions, REST APIs, or other transports are packaging decisions made based on audience context — not a product requirement.
+**Transport is an implementation detail.** AI agent protocol bindings, function schemas, REST APIs, or other transports are packaging decisions made based on audience context — not a product requirement.
 
 ---
 
@@ -114,11 +114,11 @@ A transport-agnostic implementation that demonstrates the schema and knowledge b
 
 | Week          | Deliverable                                                                                                                                                                       |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1–2           | Tax situation object schema v0.1 — core fields, type definitions, validation rules. Informed by TaxAct Xpert domain knowledge and IRS form/schedule mapping.                      |
+| 1–2           | Tax situation object schema v0.1 — core fields, type definitions, validation rules. Informed by prior tax domain expertise and IRS form/schedule mapping.                         |
 | 3–4           | Tax domain knowledge base — form taxonomy, provider tier mappings, validation rules, tax code thresholds. Structured as both a reference document and future model training data. |
 | 5–6           | Reference implementation — demo showing schema + knowledge base working end-to-end: messy inputs → structured object → validation → tier placement evaluation.                    |
 | 7–8           | Dry runs. Refine the demo. Pressure-test the schema and knowledge base against edge cases. Prepare for CTO-level technical scrutiny.                                              |
-| Post-April 15 | First calls. H&R Block CEO. Taxwell CEO and CTO.                                                                                                                                  |
+| Post-April 15 | First calls with target provider CEOs and CTOs.                                                                                                                                   |
 
 ---
 
@@ -197,7 +197,7 @@ IRS Circular 230 governs who can practice before the IRS and provide personalize
 | Out of Scope                                                                   | Where It Lives                      |
 | ------------------------------------------------------------------------------ | ----------------------------------- |
 | Fine-tuned domain model                                                        | v1                                  |
-| Specific transport bindings (MCP server, OpenAI function schema)               | Implementation detail; post-v0      |
+| Specific transport bindings (agent protocol servers, function schemas)         | Implementation detail; post-v0      |
 | Consumer-facing intake product (chat, voice, document upload UX)               | Phase 5 / Calypso blueprint Phase 2 |
 | Comparison engine (pricing, sentiment, ancillary risk)                         | Phase 5 / Calypso blueprint Phase 4 |
 | Tax Second Opinion feature                                                     | Phase 5 / Calypso blueprint Phase 3 |
@@ -214,12 +214,12 @@ IRS Circular 230 governs who can practice before the IRS and provide personalize
 
 ## 10. Engineering Risk
 
-| Risk                                        | Impact                                 | Mitigation                                                                           |
-| ------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------ |
-| Schema requires more iteration than 2 weeks | Phase 2 outreach window compressed     | Scope v0.1 aggressively minimal. Working group in Phase 3 handles depth.             |
-| Knowledge base scope creep                  | Blocks reference implementation        | Define minimum provider count (top 5) and scenario count upfront. Expand post-v0.    |
-| Reference implementation demo scope         | Three ML pipelines (OCR, voice, Plaid) | Define minimum viable demo input set. One modality may be sufficient for v0.         |
-| Privacy open items unresolved               | Blocks handling of real tax data       | v0 reference implementation may use synthetic data only. Real PII handling deferred. |
+| Risk                                        | Impact                                             | Mitigation                                                                           |
+| ------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Schema requires more iteration than 2 weeks | Phase 2 outreach window compressed                 | Scope v0.1 aggressively minimal. Working group in Phase 3 handles depth.             |
+| Knowledge base scope creep                  | Blocks reference implementation                    | Define minimum provider count (top 5) and scenario count upfront. Expand post-v0.    |
+| Reference implementation demo scope         | Three ML pipelines (OCR, voice, financial account) | Define minimum viable demo input set. One modality may be sufficient for v0.         |
+| Privacy open items unresolved               | Blocks handling of real tax data                   | v0 reference implementation may use synthetic data only. Real PII handling deferred. |
 
 ---
 
