@@ -189,7 +189,7 @@ if _is_legacy_call; then
   # compatibility. test-host-init.yml calls the legacy signature.
   ENV_LABEL="${POSITIONAL[0]}"
   NAMESPACE="calypso-${ENV_LABEL}"
-  REPO="ghcr.io/dot-matrix-labs/calypso-starter-ts"
+  REPO="ghcr.io/omotenashi-labs/tea-tax-product"
 
   echo "==> Calypso host initialisation (legacy mode)"
   echo "    Environment : ${ENV_LABEL}"
@@ -832,7 +832,7 @@ HOST="${POSITIONAL[0]}"
 ENV_LABEL="${POSITIONAL[1]}"
 NAMESPACE="calypso-${ENV_LABEL}"
 SA_NAME="calypso-deployer"
-REPO="ghcr.io/dot-matrix-labs/calypso-starter-ts"
+REPO="ghcr.io/omotenashi-labs/tea-tax-product"
 
 # ── Admin key validation ──────────────────────────────────────────────────────
 
