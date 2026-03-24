@@ -59,7 +59,7 @@ The missing infrastructure is a structured, portable, AI-native representation o
 
 This object is the protocol layer between AI agents and the tax ecosystem. It is what an AI agent produces when a consumer describes their situation, and what a tax provider consumes to determine the right product, tier, and price for that consumer.
 
-The tax industry already has a standard for the *output* - IRS MeF XML defines the format for completed returns. But there is no standard for the *input* - the messy, pre-return reality that precedes filing. Today, every provider has its own proprietary intake format. Data doesn't move between systems. Consumers re-enter information every time they switch. AI agents have no standard way to interact with any provider programmatically. The absence of a shared input format creates the vacuum that bilateral AI deals will fill.
+The tax industry already has a standard for the _output_ - IRS MeF XML defines the format for completed returns. But there is no standard for the _input_ - the messy, pre-return reality that precedes filing. Today, every provider has its own proprietary intake format. Data doesn't move between systems. Consumers re-enter information every time they switch. AI agents have no standard way to interact with any provider programmatically. The absence of a shared input format creates the vacuum that bilateral AI deals will fill.
 
 The tax situation object fills that vacuum as an open standard.
 
@@ -118,7 +118,7 @@ The protocol steward role - maintaining the spec, building reference implementat
 
 With multiple major providers adopted or in-progress, the conversation with Anthropic and OpenAI is no longer a pitch. It is an announcement.
 
-*"The tax industry's major providers have adopted an open standard for how AI agents interact with tax data. Here's the protocol. Here's the MCP server. Here's the OpenAI function schema. Your agents should speak it natively."*
+_"The tax industry's major providers have adopted an open standard for how AI agents interact with tax data. Here's the protocol. Here's the MCP server. Here's the OpenAI function schema. Your agents should speak it natively."_
 
 Both companies want this. Anthropic's partnership pattern is enterprise-infrastructure focused - Accenture (30,000 trained professionals), Snowflake ($200M deal), Salesforce, Deloitte - and in March 2026 they launched the Claude Partner Network with $100M to support partners building vertical intelligence layers on Claude. Docusign already integrated via MCP. A consortium-backed tax protocol exposed via MCP is exactly the kind of vertical partner they're looking for. OpenAI, meanwhile, has already built this playbook for commerce (ACP) and wants to replicate it across every high-value vertical. A consortium-backed standard gives them the tax domain layer without having to build it themselves.
 
@@ -196,7 +196,6 @@ The May conversations should be about participation, not pricing. The revenue co
 | 7-8           | Dry runs. Refine the demo. Pressure-test the schema against edge cases. Prepare for technical scrutiny from the Taxwell CTO.                                           |
 | Post-April 15 | First calls. H&R Block CEO. Taxwell CEO and CTO. The season is over. The window is open.                                                                               |
 
-
 ---
 
 ## Appendix: Founding Team
@@ -221,38 +220,38 @@ The protocol's hardest technical requirements map directly to his expertise:
 **Curtis Campbell - CEO, H&R Block**
 Became CEO January 1, 2026. Previously President of TaxAct (2018-2023), where the founder built the Xpert ecosystem under his leadership. Before TaxAct: VP Product Management & Strategy at Intuit (2014-2017), General Manager at AWS (launched 200+ services), Managing VP at Capital One, 10+ years at Dell. BS from The Citadel, Master of International Business from University of South Carolina. Board Director at Jack Henry & Associates.
 
-*Why he matters:* Knows the founder's work firsthand. Understands Intuit's AI strategy from the inside. Has platform-scale instincts from AWS. Uniquely positioned to feel the threat (former Intuit, now running #2 player) and recognize the structural answer (open standard from someone whose work he's seen).
+_Why he matters:_ Knows the founder's work firsthand. Understands Intuit's AI strategy from the inside. Has platform-scale instincts from AWS. Uniquely positioned to feel the threat (former Intuit, now running #2 player) and recognize the structural answer (open standard from someone whose work he's seen).
 
 **Dermot Halpin - CEO, Taxwell**
 Previously President of Expedia EMEA (2001-2008, grew region to £2.5B). Previously President of Vacation Rentals at TripAdvisor. Previously CEO of Autoquake. MBA from INSEAD, BEng from University College Dublin. Runs a company serving 90,000+ tax professionals and 3M DIY filers.
 
-*Why he matters:* Seven years at Expedia watching it become the front door that disintermediated hotels. Lived the exact playbook this strategy warns about - from the platform side. Will pattern-match immediately on the threat narrative.
+_Why he matters:_ Seven years at Expedia watching it become the front door that disintermediated hotels. Lived the exact playbook this strategy warns about - from the platform side. Will pattern-match immediately on the threat narrative.
 
 **Sugata Mukhopadhyay - Group CTO, Taxwell**
 Previously CTO and SVP of Global Engineering at TripAdvisor (2004-2023, nearly 20 years). Cornell University (1995-2000). 24+ years of technology leadership.
 
-*Why he matters:* The technical validator. Watched Google gradually disintermediate TripAdvisor's discovery layer over two decades. Will evaluate the schema with the rigor of someone who's built and defended large-scale platform architectures. If Sugata says the schema is sound, the rest of the Taxwell C-suite follows.
+_Why he matters:_ The technical validator. Watched Google gradually disintermediate TripAdvisor's discovery layer over two decades. Will evaluate the schema with the rigor of someone who's built and defended large-scale platform architectures. If Sugata says the schema is sound, the rest of the Taxwell C-suite follows.
 
 **Bastien Martini - Chief Product & Marketing Officer, Taxwell**
 Previously at TripAdvisor for 12 years, ultimately leading the B2C entity of Viator. Previously COO at DeepReach (adtech). École Polytechnique (2003), MIT (2008). Career started in Revenue Management at Delta Airlines.
 
-*Why he matters:* Product and marketplace expertise from running Viator (one of the world's largest tours/activities marketplaces). Understands how aggregation and platform dynamics reshape markets from the product side. Will evaluate the protocol through the lens of consumer experience and go-to-market.
+_Why he matters:_ Product and marketplace expertise from running Viator (one of the world's largest tours/activities marketplaces). Understands how aggregation and platform dynamics reshape markets from the product side. Will evaluate the protocol through the lens of consumer experience and go-to-market.
 
 ### Strategic Intelligence
 
 **Van Cline - Head of Product, Intuit SMB**
 Recently accepted this position at Intuit. Previously at TaxAct, where she was the founder's direct manager and mentor. Recruited the founder into the Xpert space.
 
-*Why she matters:* A direct window into Intuit's current AI investment posture - what Intuit does next shapes the urgency calculus for every other conversation. Also knows the founder's capabilities better than almost anyone, having hired and mentored them through the Xpert build.
+_Why she matters:_ A direct window into Intuit's current AI investment posture - what Intuit does next shapes the urgency calculus for every other conversation. Also knows the founder's capabilities better than almost anyone, having hired and mentored them through the Xpert build.
 
 ### Strategic Advisors
 
 **Shaun Stewart - CEO, New Lab / viagogo**
 Previously Global Head of Vacation Rentals at Airbnb (2014-2016). Chief Business Development Officer at Waymo/Google X (2016-2018). General Manager of Jetsetter at Gilt Groupe (acquired by TripAdvisor). Regional Director at Expedia (2002-2010). Cornell hotel management. Currently CEO of New Lab (frontier tech incubator, 150+ startups). Most recently involved with viagogo, the global secondary ticketing marketplace ($4B StubHub acquisition) that operates as the aggregation layer between event ticket sellers and buyers.
 
-*Why he matters:* Has seen platform aggregation from every angle - Expedia, Airbnb, Waymo, and now viagogo. The viagogo experience is most directly relevant: fragmented providers, platform-controlled front door, fee extraction from both sides. Structurally identical to what happens when AI platforms become the front door for tax. Operational knowledge of how providers resist and eventually adopt aggregation standards.
+_Why he matters:_ Has seen platform aggregation from every angle - Expedia, Airbnb, Waymo, and now viagogo. The viagogo experience is most directly relevant: fragmented providers, platform-controlled front door, fee extraction from both sides. Structurally identical to what happens when AI platforms become the front door for tax. Operational knowledge of how providers resist and eventually adopt aggregation standards.
 
 **Kevin Ryan - Founder & CEO, AlleyCorp**
 Previously CEO of DoubleClick (grew from 20-person startup to $3.1B acquisition by Google). Co-founded MongoDB ($26B market cap), Business Insider (sold for $442M to Axel Springer), Gilt Groupe, and Zola. AlleyCorp raised a $250M fund in 2024. Known as the "Godfather of NYC tech." Ernst & Young Entrepreneur of the Year. Hired Shaun Stewart to run Jetsetter within the Gilt Groupe family.
 
-*Why he matters:* Career is a direct pattern-match. DoubleClick became the infrastructure standard for ad serving before Google bought it for $3.1B. MongoDB became the infrastructure standard for document databases. Both times, Ryan built the neutral standard an ecosystem adopted. Also a potential investor through AlleyCorp ($250M fund) - this is precisely the kind of "infrastructure standard that becomes a platform" play that AlleyCorp funds.
+_Why he matters:_ Career is a direct pattern-match. DoubleClick became the infrastructure standard for ad serving before Google bought it for $3.1B. MongoDB became the infrastructure standard for document databases. Both times, Ryan built the neutral standard an ecosystem adopted. Also a potential investor through AlleyCorp ($250M fund) - this is precisely the kind of "infrastructure standard that becomes a platform" play that AlleyCorp funds.
