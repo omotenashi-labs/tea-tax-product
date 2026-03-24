@@ -1,20 +1,5 @@
 import { existsSync, readFileSync } from 'fs';
 
-type Commit = { hash: string; message: string };
-type StudioStatus = {
-  active: boolean;
-  sessionId?: string;
-  branch?: string;
-  commits?: Commit[];
-};
-type StudioChatResponse = { reply: string; commits?: Commit[] };
-type StudioRollbackResponse = { commits?: Commit[] };
-type FixtureResponse<T> = {
-  status?: number;
-  body?: T | { error?: string };
-  delayMs?: number;
-};
-
 type FixtureTask = {
   id: string;
   name: string;
@@ -31,9 +16,6 @@ type FixtureTask = {
 
 type FixtureState = {
   tasks?: FixtureTask[];
-  studioStatus?: StudioStatus | FixtureResponse<StudioStatus>;
-  studioChatResponse?: StudioChatResponse | FixtureResponse<StudioChatResponse>;
-  studioRollbackResponse?: StudioRollbackResponse | FixtureResponse<StudioRollbackResponse>;
 };
 
 type FixtureStore = Record<string, FixtureState>;
@@ -92,18 +74,6 @@ export async function handleFixtureRequest(req: Request, statePath: string): Pro
     });
   }
 
-  if (req.method === 'GET' && url.pathname === '/studio/status') {
-    return fixtureJson(state.studioStatus ?? { active: false });
-  }
-
-  if (req.method === 'POST' && url.pathname === '/studio/chat') {
-    return fixtureJson(state.studioChatResponse ?? { reply: '' });
-  }
-
-  if (req.method === 'POST' && url.pathname === '/studio/rollback') {
-    return fixtureJson(state.studioRollbackResponse ?? { commits: [] });
-  }
-
   return new Response(
     JSON.stringify({ error: `Unhandled fixture route ${req.method} ${url.pathname}` }),
     {
@@ -116,24 +86,6 @@ export async function handleFixtureRequest(req: Request, statePath: string): Pro
 function json(payload: unknown): Response {
   return new Response(JSON.stringify(payload), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
-
-async function fixtureJson<T>(fixture: T | FixtureResponse<T>): Promise<Response> {
-  const response =
-    typeof fixture === 'object' &&
-    fixture !== null &&
-    ('status' in fixture || 'body' in fixture || 'delayMs' in fixture)
-      ? (fixture as FixtureResponse<T>)
-      : ({ status: 200, body: fixture } satisfies FixtureResponse<T>);
-
-  if (response.delayMs) {
-    await Bun.sleep(response.delayMs);
-  }
-
-  return new Response(JSON.stringify(response.body ?? {}), {
-    status: response.status ?? 200,
     headers: { 'Content-Type': 'application/json' },
   });
 }
