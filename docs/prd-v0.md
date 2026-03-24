@@ -1,0 +1,351 @@
+# Tea Tax v0 — Product Requirements Document
+
+**Date:** 2026-03-24
+**Status:** Draft
+**Source of Truth:** `docs/strategy/tax-situation-protocol-strategy.md` (2026-03-23)
+
+---
+
+## 1. Product Vision
+
+Tea Tax is the steward of the **Tax Situation Protocol** — an open, AI-native standard that defines how AI agents represent a taxpayer's financial situation, communicate with tax providers, and route consumers to the right filing option. The protocol fills the gap between the messy, pre-return reality of a taxpayer's life and the structured formats providers need to serve them.
+
+The tax industry has a standard for the _output_ (IRS MeF XML for completed returns) but nothing for the _input_. That vacuum is about to be filled — either by bilateral deals between AI platforms and incumbents (where the largest player wins every bidding war), or by an open standard the industry collectively adopts. Tea Tax defines and stewards the open standard.
+
+> **Inconsistency Note — Prior docs vs. Strategy (overruled):** The product thesis (`docs/vision/tea-tax-thesis.md`) and the Calypso blueprint (`docs/product-concepts/calypso-blueprint/`) position Tea Tax as a consumer-facing "Kayak for taxes" — a free AI-powered intake and comparison engine. The strategy document reframes Tea Tax's **primary v0 identity** as a protocol steward and consortium organizer, with the consumer-facing product emerging later (Phase 5, 2027+) on top of entrenched industry infrastructure. **The strategy document governs.** The consumer product vision remains the long-term destination, but v0 builds the protocol layer that makes it structurally viable.
+
+---
+
+## 2. Problem Statement
+
+### 2.1 The Missing Infrastructure
+
+Every major tax provider has a proprietary intake format. Data doesn't move between systems. AI agents have no standard way to interact with any provider programmatically. As AI becomes the front door for consumer decisions, this absence creates a vacuum that bilateral exclusivity deals will fill — replicating the exact disintermediation pattern that reshaped travel (Expedia/Booking.com), food delivery (DoorDash/Uber Eats), and retail (Amazon).
+
+### 2.2 The Threat to Non-Intuit Providers
+
+Intuit is a $180B company with a $1B+ annual marketing budget. In a world of bilateral AI partnerships — TurboTax pays Anthropic for preferred placement, TurboTax pays OpenAI for default routing — Intuit wins every bidding war. Every other provider (H&R Block, Taxwell/Drake/TaxWise, April Tax, UltraTax) is structurally disadvantaged. The open standard is the only structural answer.
+
+### 2.3 The Precedent Is Already Live
+
+OpenAI launched "Buy it in ChatGPT" powered by the Agentic Commerce Protocol (ACP) — an open standard co-developed with Stripe. By February 2026: 1M+ Shopify merchants integrated, 4% transaction fee per purchase, ~50M shopping-related queries/day. Intuit has launched Intuit Assist spanning 100M customers. The pattern is arriving in tax whether the industry acts or not.
+
+---
+
+## 3. The Tax Situation Object
+
+The core artifact of the protocol: a structured, portable, AI-native representation of a taxpayer's complete financial situation.
+
+### 3.1 What It Contains
+
+- Filing year, filing status, dependents
+- Income streams (W-2, 1099 variants, K-1, rental, etc.) with source, amount, and linked documentation
+- Deductions and credits (standard vs. itemized, education, child, earned income, etc.)
+- Life events (marriage, home purchase, job change, birth, retirement, etc.)
+- State residency and multi-state filing indicators
+- Prior-year context (estimated AGI, filing method, provider)
+- Documentation completeness tracker with confidence scores per field
+- Raw artifacts (documents, photos, recordings) with extracted data
+
+### 3.2 What It Enables
+
+- Any AI agent (Claude, ChatGPT, Gemini, or a consumer's local model) can produce a tax situation object from a conversation, documents, or financial account connections
+- Any tax provider can consume the object and immediately determine the right product, tier, and estimated price
+- Any consumer can carry their structured tax situation to any provider without re-entering data
+- Any credentialed tax professional can receive a pre-structured client instead of a shoebox
+
+### 3.3 Data Model (MVP Persistence)
+
+For internal reference implementation, the object maps to:
+
+| Table         | Purpose                                                                                             |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `users`       | Authenticated accounts                                                                              |
+| `tax_objects` | Filing identity and related data per context (individual, joint, business, dependent, estate/trust) |
+| `tax_returns` | Year- and jurisdiction-scoped returns under a tax object                                            |
+
+MVP access rule: `tax_objects.created_by_user_id = current_user.id` (creator-only). Sharing via `tax_object_memberships` is deferred.
+
+Canonical source: `docs/requirements/users-tax-objects-ownership-access-spec.md`
+
+> **Consistency Note:** The data model defined in the ownership/access spec and the Calypso blueprint align with the strategy document's tax situation object definition. No conflict.
+
+---
+
+## 4. v0 Scope — The Artifact Phase
+
+v0 corresponds to **Phase 1** of the strategy: "Build the Artifact" (now through April 2026). Three deliverables:
+
+### 4.1 The Schema Specification
+
+A v0.1 definition of the tax situation object — core fields, types, validation rules, edge case handling, extensibility model.
+
+**Design constraints:**
+
+- Deliberately minimal: broad enough to be correct, narrow enough that a future technical working group has room to contribute
+- Technically rigorous enough that a CTO can evaluate it in an afternoon
+- Informed by domain expertise from TaxAct's Xpert ecosystem — which fields matter, how tier placement works, what edge cases exist, where providers diverge
+- Maps to IRS form/schedule taxonomy (1040 series, Schedules A–F, SE, common supplemental forms)
+
+**Conceptual schema:**
+
+```
+TaxSituation {
+  filingYear, filingStatus, dependents[]
+  incomeStreams[] { type, source, amount, documentation[] }
+  deductions[] { type, amount, documentation[] }
+  lifeEvents[] { type, date, details }
+  priorYearContext { estimatedAGI, filingMethod, provider }
+  stateResidency { primary, additional[] }
+  documentationCompleteness: float
+  confidenceScores: {}
+  rawArtifacts[] { type, source, extractedData }
+}
+```
+
+> **Inconsistency Note — Schema scope:** The Calypso blueprint (`features/02-tax-situation-object.md`) specifies a full CRUD implementation with progressive enrichment, encryption at rest, and export — scoped to a shipping consumer product. The strategy document scopes v0.1 to a _specification_ with a reference implementation, not a production consumer-grade system. **The strategy document governs.** The blueprint's feature spec is retained as the future consumer-product implementation target.
+
+### 4.2 Working Reference Implementation
+
+An MCP server and OpenAI function definitions that implement the protocol.
+
+**Demo capabilities:**
+
+- Accept messy inputs: a photo of a W-2, a voice description of a life event, a bank account connection
+- Produce a structured tax situation object
+- Demonstrate AI agent consumption of the object
+
+**Quality bar:** Tangible enough that a non-technical CEO can see it working and a CTO can see the architecture. Does not need to be production-grade.
+
+**Protocol interfaces:**
+
+- MCP server (Anthropic ecosystem): Claude and any MCP-compatible agent can natively consume and produce tax situation objects
+- OpenAI function schema: ChatGPT and OpenAI-ecosystem agents can interact with the protocol
+
+> **Inconsistency Note — MCP positioning:** The thesis document frames MCP as a future integration opportunity for the consumer product ("if the object is implemented as an MCP server from day one"). The strategy document makes MCP the _primary delivery mechanism_ for the protocol in v0. **The strategy document governs.** MCP is not an afterthought — it is the protocol's native transport from day one.
+
+### 4.3 The Threat Narrative Deck
+
+A 15-minute presentation that creates urgency for industry adoption.
+
+**Contents:**
+
+- The disintermediation pattern (travel, food delivery, retail)
+- The ACP precedent (4% fee, 1M+ merchants, months to scale)
+- Intuit Assist already live while everyone else watches
+- The hotel industry's fate — a story Taxwell's CEO lived from the inside
+- The open-standard alternative
+- Tailored versions for H&R Block and Taxwell
+
+---
+
+## 5. Execution Timeline (v0)
+
+| Week          | Deliverable                                                                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1–2           | Tax situation object schema v0.1 — core fields, type definitions, validation rules. Informed by TaxAct Xpert domain knowledge and IRS form/schedule mapping. |
+| 3–4           | MCP server reference implementation. OpenAI function schema. Basic demo: document photo + voice input → structured object.                                   |
+| 5–6           | Threat narrative deck. 15 minutes. Tailored versions for H&R Block and Taxwell.                                                                              |
+| 7–8           | Dry runs. Refine the demo. Pressure-test the schema against edge cases. Prepare for CTO-level technical scrutiny.                                            |
+| Post-April 15 | First calls. H&R Block CEO. Taxwell CEO and CTO.                                                                                                             |
+
+---
+
+## 6. Strategic Roadmap (Post-v0)
+
+### Phase 2: The First Two Dominos (May–June 2026)
+
+**Target:** H&R Block (CEO Curtis Campbell — former TaxAct president, knows the founder's work) and Taxwell (CEO Dermot Halpin, CTO Sugata Mukhopadhyay, CPO Bastien Martini — all from travel industry, lived the disintermediation playbook).
+
+**The ask:** Not a contract. A commitment to participate — evaluate the schema, pilot the integration, have a seat at the table. Low barrier to yes, high cost of no.
+
+### Phase 3: Consortium Solidifies (July–September 2026)
+
+Governance structure, technical working group (CTOs from member companies), reference integrations against real provider architectures. Tea Tax occupies the protocol steward role — neutral, not a competitor.
+
+### Phase 4: AI Platform Engagement (Q4 2026)
+
+With multiple providers adopted, approach Anthropic and OpenAI. Not a pitch — an announcement. The consortium's protocol becomes the canonical tax layer in the AI agent ecosystem.
+
+> **Inconsistency Note — Anthropic relationship:** The thesis frames the Anthropic relationship as an AI partnership ("Powered by Claude" co-marketing, preferred API pricing, strategic investment). The strategy reframes it as a platform-level integration where the consortium presents a fait accompli: "The industry adopted this standard. Your agents should speak it natively." **The strategy document governs.** The Anthropic relationship is Phase 4, not Phase 1.
+
+### Phase 5: Consumer Layer Emerges (2027+)
+
+Once the protocol is adopted by providers and spoken by AI agents, the consumer-facing opportunity materializes. The exact shape — aggregator, marketplace, routing layer — will be informed by protocol usage patterns and value flows.
+
+> **Inconsistency Note — Consumer product timing:** The thesis and blueprint assume a consumer product launching for the 2026 filing season ("V1 lives and dies in-season"). The strategy defers the consumer product to 2027+, building it on top of entrenched infrastructure rather than against an entrenched industry. **The strategy document governs.** The 2026 filing season is the _protocol development_ window, not the consumer product launch window.
+
+---
+
+## 7. Revenue Model
+
+**Intentionally unresolved** for v0. The strategic priority is protocol adoption.
+
+Potential models that emerge from usage patterns:
+
+| Model                                                        | Precedent   |
+| ------------------------------------------------------------ | ----------- |
+| Integration tooling and enterprise support                   | Twilio      |
+| Transaction-layer fees as volume flows through the protocol  | Visa/Stripe |
+| Data and intelligence products from aggregate protocol usage | Bloomberg   |
+| Premium services layered on the open standard                | Red Hat     |
+
+> **Inconsistency Note — Revenue model:** The thesis defines revenue as "Kayak model with radical transparency" — affiliate referral fees from providers when consumers click through. The distribution strategy details specific affiliate programs (TurboTax 10–15% rev share via CJ Affiliate). The strategy document says revenue is "intentionally unresolved" and lists four different precedent models, none of which are affiliate/referral. **The strategy document governs.** Affiliate revenue may emerge in the consumer layer (Phase 5), but v0 does not assume or build toward it.
+
+---
+
+## 8. Privacy and Security Architecture
+
+Privacy is a constitutional principle of the platform, retained from the thesis and reinforced by the strategy's consortium trust requirements.
+
+### 8.1 Core Tenets (unchanged from thesis)
+
+- **No admin data access.** No administrator, employee, or internal system can view a user's tax situation. No god mode.
+- **Credentialed access only.** The only window into user data is a credentialed tax professional with explicit, granular, time-bound, auditable, revocable user consent.
+- **Encryption is foundational.** Data encrypted at rest, in transit, and in processing. Zero-knowledge and end-to-end encryption principles applied wherever technically feasible.
+- **Data minimization.** Collect only what is needed. Retain only what the user consents to. Delete aggressively on consent withdrawal.
+- **The portable object is user property.** Export, share, or destroy at will.
+
+### 8.2 Protocol-Specific Security Requirements (from strategy)
+
+- **Zero-knowledge encryption of the tax situation object.** Even the protocol steward cannot access plaintext user data. Consortium members need assurance the steward isn't accumulating a data advantage.
+- **Cryptographic multi-tenancy.** Competing providers sharing the protocol need cryptographic assurance their data is invisible to every other participant and to the steward.
+- **AI model privacy.** Sensitive tax data must not leak into model weights, training pipelines, or third-party API calls during extraction and classification.
+- **Circular 230 compliance enforced architecturally.** Credentialed access, granular consent, auditability, revocability — enforced by the system, not by behavior.
+
+### 8.3 Open Items (retained from blueprint)
+
+- Full zero-knowledge in v0 reference implementation vs. layered approach: TBD
+- Subpoena/law enforcement compliance architecture: TBD
+- Encryption scheme and key management approach: TBD
+
+---
+
+## 9. Regulatory Context
+
+### 9.1 Circular 230
+
+IRS Circular 230 governs who can practice before the IRS and provide personalized tax guidance. Key implications:
+
+- **AI cannot substitute for practitioner competence.** IRS National Tax Forum material (2024) explicitly states this.
+- **Proposed §10.35** would require practitioners to maintain technological competency, including understanding benefits and risks of AI tools.
+- **AI compresses low-leverage tax labor; regulation preserves human accountability** at risk-bearing decision points (written advice, position-taking, representation, sign-off).
+
+Tea Tax's protocol design enforces Circular 230 boundaries architecturally: the system collects and structures information but does not provide tax advice. When advice or strategy is needed, the protocol routes to credentialed professionals.
+
+### 9.2 FTC Enforcement Context
+
+- FTC ordered Intuit (2024) to stop advertising TurboTax as "free" unless genuinely free for all consumers.
+- Separate FTC action against H&R Block for deceptive pricing practices, enforcing changes through 2026.
+- This regulatory activity validates the problem Tea Tax exists to solve and creates consumer awareness.
+
+---
+
+## 10. Founding Team Capabilities
+
+Two roles cover the requirements for a credible open standard:
+
+**Domain expertise (the founder):** Two years leading TaxAct's Xpert ecosystem, 0-to-1 launch of Xpert Full Service. Knows which fields matter, how tier placement works, what edge cases exist, where providers diverge. Direct relationships with H&R Block CEO, Taxwell C-suite, April Tax, UltraTax leadership. Can define the schema correctly on the first try.
+
+**Cryptographic and compliance engineering (Lucas Geiger):** Background in decentralized systems, cryptographic protocols, and decentralized identity. Covers zero-knowledge encryption, compliance architecture, cryptographic multi-tenancy, and AI model privacy — the technical requirements that make the protocol trustworthy to enterprise security teams.
+
+**Both are neutral.** Not a competitor. Not an incumbent. Not an AI company. The only team whose incentive is the standard itself.
+
+---
+
+## 11. Success Criteria for v0
+
+| Criterion                | Measure                                                                                                                                                               |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Schema completeness      | v0.1 covers core 1040-series filing scenarios (W-2 only, freelance/1099, investments, multi-state, rental income) with correct field definitions and validation rules |
+| Reference implementation | MCP server and OpenAI function schema are functional; demo produces a structured object from document + voice inputs                                                  |
+| Technical credibility    | A CTO can evaluate the schema in an afternoon and conclude "this is correct"                                                                                          |
+| Executive credibility    | A non-technical CEO can see the demo working and understand the value proposition                                                                                     |
+| Threat narrative         | 15-minute deck creates urgency; tailored for H&R Block and Taxwell audiences                                                                                          |
+| Timeline                 | All three deliverables ready before post-April 15 outreach window                                                                                                     |
+
+---
+
+## 12. What v0 Is Not
+
+To maintain clarity on scope, the following are explicitly **not in v0**:
+
+| Out of Scope                                                                   | Where It Lives                      |
+| ------------------------------------------------------------------------------ | ----------------------------------- |
+| Consumer-facing intake product (chat, voice, document upload UX)               | Phase 5 / Calypso blueprint Phase 2 |
+| Comparison engine (pricing, sentiment, ancillary risk)                         | Phase 5 / Calypso blueprint Phase 4 |
+| Tax Second Opinion feature                                                     | Phase 5 / Calypso blueprint Phase 3 |
+| Community pricing database                                                     | Phase 5 / Calypso blueprint Phase 5 |
+| Practitioner Layer / CPA marketplace                                           | Phase 5+                            |
+| Done-for-you tax preparation (Superhuman CPA OS)                               | Separate product initiative         |
+| Consumer distribution (SEO, content creators, gig platforms, payroll partners) | Phase 5 / Distribution strategy     |
+| Political amplification (bipartisan pledge, congressional testimony)           | Post-consumer launch                |
+| Affiliate revenue model                                                        | Phase 5                             |
+| Production deployment infrastructure                                           | Post-v0                             |
+
+> **Inconsistency Note — Superhuman CPA OS:** The scaffold design document (`docs/product-concepts/superuman-cpa/`) describes a separate done-for-you tax preparation platform with multi-tenant firm architecture, Circular 230 workflow gates, and per-return billing. This is a fundamentally different product than what v0 defines — it positions Tea Tax as a _tax preparer_, not a protocol steward. The strategy document does not reference Superhuman CPA OS. **The strategy document governs for v0 scope.** The Superhuman CPA OS scaffold may inform the Practitioner Layer in later phases, but it is not part of the protocol strategy.
+
+> **Inconsistency Note — Distribution strategy:** The distribution document (`docs/strategy/tea-tax-distribution-strategy.md`) is entirely consumer-focused: Tax Second Opinion wedge, programmatic SEO, content creator partnerships, gig platform integrations, payroll providers, CPA society alliances, AARP, political amplification. The strategy document's "distribution" is CEO conversations and consortium building. **The strategy document governs for v0.** The consumer distribution strategy is retained for Phase 5.
+
+---
+
+## 13. Assumptions and Risks
+
+### What Must Be True (from strategy)
+
+1. **AI agents become a meaningful front door for tax filing within 2–3 years.** Current trajectory suggests near-certain, but speed matters.
+2. **Incumbents perceive the bilateral-deal threat as real and imminent.** The threat narrative must land.
+3. **The schema can be defined correctly by a small team, fast.** Domain expertise from TaxAct is the accelerant.
+4. **At least two major providers commit to pilot within 3 months of outreach.** Phase 2 is the highest-risk moment.
+5. **The steward role remains trusted as neutral.** Neutrality is an operational constraint, not a positioning choice.
+6. **The consortium itself becomes the credibility anchor.** Until the first two providers commit, authority rests on the founder's domain credibility and relationships.
+
+### Key Risks
+
+| Risk                                                    | Impact                                      | Mitigation                                                                                                                                                               |
+| ------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| First two CEO conversations don't convert               | Strategy collapses — no consortium momentum | Founder's direct relationships with Campbell (H&R Block) and Halpin (Taxwell) reduce but don't eliminate this risk. Fallback: pivot to consumer product path per thesis. |
+| Intuit moves faster than expected on bilateral AI deals | Urgency window shrinks                      | Accelerate Phase 1 delivery. The threat narrative becomes more compelling, not less.                                                                                     |
+| Schema requires more iteration than 2 weeks             | Phase 2 outreach window compressed          | Scope v0.1 aggressively minimal. Working group in Phase 3 handles depth.                                                                                                 |
+| Protocol steward perceived as non-neutral               | Consortium trust collapses                  | Governance design must enforce neutrality structurally. No revenue model that creates competitive conflict.                                                              |
+
+---
+
+## 14. Incorporated Material Index
+
+All prior documents are incorporated by reference. Where they conflict with the strategy document, this PRD notes the inconsistency and applies the strategy document's position.
+
+| Document                        | Path                                                           | Role in PRD                                                                                                                                       |
+| ------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tax Situation Protocol Strategy | `docs/strategy/tax-situation-protocol-strategy.md`             | **Source of truth** for v0 scope, phasing, and strategic framing                                                                                  |
+| Tea Tax Product Thesis          | `docs/vision/tea-tax-thesis.md`                                | Long-term product vision, consumer value proposition, competitive landscape, moat analysis. Retained for Phase 5+ context.                        |
+| Tea Tax Distribution Strategy   | `docs/strategy/tea-tax-distribution-strategy.md`               | Consumer distribution playbook. Retained for Phase 5+ context.                                                                                    |
+| Calypso Blueprint               | `docs/product-concepts/calypso-blueprint/`                     | Consumer product architecture, feature specs, user flows, implementation plan. Retained as Phase 5+ implementation reference.                     |
+| Users/Tax Objects/Access Spec   | `docs/requirements/users-tax-objects-ownership-access-spec.md` | Data model and access rules for the tax situation object. Aligned with strategy; no conflict.                                                     |
+| Current Priorities              | `docs/requirements/current-priorities.md`                      | Near-term organizational focus. Partially superseded by strategy timeline.                                                                        |
+| Superhuman CPA OS Scaffold      | `docs/product-concepts/superuman-cpa/`                         | Done-for-you tax prep platform design. Separate product initiative; may inform future Practitioner Layer.                                         |
+| Circular 230 AI Memo            | `docs/research/irs-circular-230/circular230-ai-memo.md`        | Regulatory research supporting the "AI as empowerment" thesis and architectural compliance approach.                                              |
+| Thesis Review Session           | `docs/vision/tea-tax-thesis-review-session.md`                 | Key decisions from March 22 review: three-vertical architecture, three-vector comparison, V1 metrics. Partially superseded by strategy's phasing. |
+| Deployment Reference            | `docs/requirements/deployment-access-handoff.md`               | Current infrastructure access. Retained for operational context.                                                                                  |
+
+---
+
+## 15. Inconsistency Summary
+
+For quick reference, all inconsistencies between the strategy document (source of truth) and prior documents:
+
+| Topic                         | Prior Docs Say                                                                       | Strategy Says (Governs)                                                 |
+| ----------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| **Product identity**          | Consumer-facing "Kayak for taxes" — free AI intake + comparison engine               | Protocol steward — open standard for AI-tax ecosystem interoperability  |
+| **v0 deliverables**           | Shipping consumer product (Intake Engine + Comparison Engine) for 2026 filing season | Schema spec, MCP reference implementation, threat narrative deck        |
+| **Revenue model**             | Affiliate referral fees (Kayak/Credit Karma model)                                   | Intentionally unresolved; adoption is the priority                      |
+| **Consumer product timing**   | 2026 filing season ("V1 lives and dies in-season")                                   | 2027+ (Phase 5), built on top of entrenched protocol infrastructure     |
+| **Tax situation object role** | Consumer "shopping weapon" and internal data model                                   | Industry-standard protocol layer between AI agents and tax ecosystem    |
+| **MCP/AI integration**        | Future integration opportunity for consumer product                                  | Primary delivery mechanism from day one                                 |
+| **Anthropic relationship**    | AI partnership with co-marketing and investment                                      | Phase 4 platform engagement after consortium adoption                   |
+| **Distribution**              | Consumer channels: SEO, content creators, gig platforms, payroll                     | CEO conversations and consortium building                               |
+| **Superhuman CPA OS**         | Separate done-for-you tax prep service with multi-tenant firm architecture           | Not referenced; separate from protocol strategy                         |
+| **V1 success metrics**        | 60% intake completion, 10-min time to value, 40% CTR                                 | Schema correctness, CTO/CEO credibility, post-season outreach readiness |
+| **Target audience (v0)**      | American taxpayers                                                                   | Industry CEOs, CTOs, and AI platform companies                          |
+
+> **Reconciliation:** These are not contradictions in vision — they are a sequencing reframe. The strategy document does not reject the consumer product; it sequences the protocol layer _first_ so the consumer product launches on entrenched infrastructure rather than against entrenched resistance. All prior consumer-product documentation is retained and will govern the Phase 5 consumer build.
