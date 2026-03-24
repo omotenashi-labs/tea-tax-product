@@ -105,53 +105,71 @@ TaxSituation {
 
 > **Inconsistency Note — Schema scope:** The Calypso blueprint (`features/02-tax-situation-object.md`) specifies a full CRUD implementation with progressive enrichment, encryption at rest, and export — scoped to a shipping consumer product. The strategy document scopes v0.1 to a _specification_ with a reference implementation, not a production consumer-grade system. **The strategy document governs.** The blueprint's feature spec is retained as the future consumer-product implementation target.
 
-### 4.2 Working Reference Implementation
+### 4.2 The Tax Domain Knowledge Base
 
-An MCP server and OpenAI function definitions that implement the protocol.
+The schema defines the _shape_ of a tax situation. The knowledge base provides the _rules_ needed to evaluate whether a given tax situation object is correct, complete, and actionable. Without it, the schema is an inert data format.
+
+**What the knowledge base encodes:**
+
+- **IRS form/schedule taxonomy.** Which forms exist, what fields they require, how they relate to each other. Schedule C triggers self-employment tax (Schedule SE). Investment income triggers Schedule D and Form 8949. Rental income requires Schedule E. These dependencies are the validation backbone.
+- **Provider tier mapping rules.** Which combination of forms, complexity factors, and income levels maps to which product tier at which provider. A W-2-only filer qualifies for free tiers; a K-1 with foreign tax paid forces premier tier at TurboTax but not at FreeTaxUSA. This is the domain expertise that makes the protocol useful to providers — not just a data container, but an evaluable artifact.
+- **Validation logic.** Contradictions (claiming single filing status + dependent spouse), missing dependencies (1099-NEC income without estimated tax payment history), implausible values (negative AGI without capital loss documentation), incomplete form chains (Schedule C present but no SE tax calculation).
+- **Tax code rules and thresholds.** AGI limits for Free File eligibility ($89K), credit phase-out ranges, standard deduction amounts by filing status, estimated tax safe harbor rules, EITC qualifying thresholds. These change annually and must be versioned.
+
+**Why this is a v0 deliverable:**
+
+The knowledge base is the founder's core domain advantage. Anyone can guess at a schema shape. Knowing that box 12 code DD on a W-2 doesn't affect tier placement but a K-1 with foreign tax paid does — that's the alpha that makes the schema right on the first try and the validation trustworthy to a CTO evaluating it.
+
+The knowledge base also serves as the **training corpus** for the fine-tuned domain model in v1 (see Section 6.1).
+
+### 4.3 Working Reference Implementation
+
+A transport-agnostic implementation that demonstrates the schema and knowledge base working together end-to-end.
 
 **Demo capabilities:**
 
 - Accept messy inputs: a photo of a W-2, a voice description of a life event, a bank account connection
 - Produce a structured tax situation object
-- Demonstrate AI agent consumption of the object
+- Validate the object against the knowledge base — flag missing fields, contradictions, and form dependency gaps
+- Demonstrate that a provider could consume the object and determine tier placement
 
 **Quality bar:** Tangible enough that a non-technical CEO can see it working and a CTO can see the architecture. Does not need to be production-grade.
 
-**Protocol interfaces:**
+**Transport is an implementation detail.** The reference implementation should demonstrate the schema and knowledge base — not commit to a specific wire protocol. MCP (Anthropic ecosystem), OpenAI function definitions, REST APIs, or other transports are packaging decisions made based on which demo lands best with the specific audience in the room. The protocol's value is in the schema and domain logic, not in which transport layer delivers it.
 
-- MCP server (Anthropic ecosystem): Claude and any MCP-compatible agent can natively consume and produce tax situation objects
-- OpenAI function schema: ChatGPT and OpenAI-ecosystem agents can interact with the protocol
-
-> **Inconsistency Note — MCP positioning:** The thesis document frames MCP as a future integration opportunity for the consumer product ("if the object is implemented as an MCP server from day one"). The strategy document makes MCP the _primary delivery mechanism_ for the protocol in v0. **The strategy document governs.** MCP is not an afterthought — it is the protocol's native transport from day one.
-
-### 4.3 The Threat Narrative Deck
-
-A 15-minute presentation that creates urgency for industry adoption.
-
-**Contents:**
-
-- The disintermediation pattern (travel, food delivery, retail)
-- The ACP precedent (4% fee, 1M+ merchants, months to scale)
-- Intuit Assist already live while everyone else watches
-- The hotel industry's fate — a story Taxwell's CEO lived from the inside
-- The open-standard alternative
-- Tailored versions for H&R Block and Taxwell
+> **Inconsistency Note — MCP as named deliverable (overruled by PRD review):** The strategy document names "an MCP server and OpenAI function definitions" as the reference implementation. This PRD treats MCP and OpenAI function schemas as transport options, not as v0 requirements. The deliverable is the working demo of schema + knowledge base; the transport packaging is a tactical decision. See Appendix A for rationale.
 
 ---
 
 ## 5. Execution Timeline (v0)
 
-| Week          | Deliverable                                                                                                                                                  |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1–2           | Tax situation object schema v0.1 — core fields, type definitions, validation rules. Informed by TaxAct Xpert domain knowledge and IRS form/schedule mapping. |
-| 3–4           | MCP server reference implementation. OpenAI function schema. Basic demo: document photo + voice input → structured object.                                   |
-| 5–6           | Threat narrative deck. 15 minutes. Tailored versions for H&R Block and Taxwell.                                                                              |
-| 7–8           | Dry runs. Refine the demo. Pressure-test the schema against edge cases. Prepare for CTO-level technical scrutiny.                                            |
-| Post-April 15 | First calls. H&R Block CEO. Taxwell CEO and CTO.                                                                                                             |
+| Week          | Deliverable                                                                                                                                                                       |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1–2           | Tax situation object schema v0.1 — core fields, type definitions, validation rules. Informed by TaxAct Xpert domain knowledge and IRS form/schedule mapping.                      |
+| 3–4           | Tax domain knowledge base — form taxonomy, provider tier mappings, validation rules, tax code thresholds. Structured as both a reference document and future model training data. |
+| 5–6           | Reference implementation — demo showing schema + knowledge base working end-to-end: messy inputs → structured object → validation → tier placement evaluation.                    |
+| 7–8           | Dry runs. Refine the demo. Pressure-test the schema and knowledge base against edge cases. Prepare for CTO-level technical scrutiny.                                              |
+| Post-April 15 | First calls. H&R Block CEO. Taxwell CEO and CTO.                                                                                                                                  |
 
 ---
 
 ## 6. Strategic Roadmap (Post-v0)
+
+### v1: The Fine-Tuned Domain Model
+
+v0 proves the schema and knowledge base are correct. v1 makes them operationally scalable.
+
+The tax domain knowledge base is large and rule-dense — the full IRS form taxonomy, provider tier logic across multiple providers, validation interdependencies, tax code thresholds, credit phase-outs. Feeding this into a frontier model's context window for every evaluation is expensive, unreliable, and ultimately a trust problem: the more context loaded, the more the model hallucinates or drops rules. In tax, a dropped rule means wrong tier placement, a missed credit, or bad validation. That generates errors that are unacceptable for tax preparation — lost confidence in the system leads to failure to distribute and adopt.
+
+**The v1 deliverable is a fine-tuned small language model** trained on the v0 knowledge base that can evaluate, validate, and reason over tax situation objects reliably without context window pressure. The knowledge base is the training data; the small model is the inference engine that has internalized it.
+
+**Why this matters for the protocol strategy:**
+
+- **Reliability at scale.** A fine-tuned model produces deterministic, low-variance evaluations. A frontier model with a stuffed context window produces stochastic ones. Providers and practitioners need the former.
+- **Cost.** Frontier model API calls for every object evaluation across 150M+ potential filers are prohibitive. A small model collapses unit economics.
+- **Trust.** A CTO evaluating the protocol needs confidence that the system won't silently drop a validation rule under context pressure. A fine-tuned model that has internalized the rules is a fundamentally different trust proposition than a general model reasoning over a long prompt.
+- **Privacy.** Sensitive tax data processed by a small model on controlled infrastructure avoids sending PII to third-party frontier model APIs.
+- **Moat.** The model improves as the knowledge base grows and as usage data reveals edge cases. A competitor can't replicate this by plugging into Claude or GPT — the domain-specific model quality is earned through accumulated expertise, not bought off the shelf.
 
 ### Phase 2: The First Two Dominos (May–June 2026)
 
@@ -258,10 +276,10 @@ Two roles cover the requirements for a credible open standard:
 | Criterion                | Measure                                                                                                                                                               |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Schema completeness      | v0.1 covers core 1040-series filing scenarios (W-2 only, freelance/1099, investments, multi-state, rental income) with correct field definitions and validation rules |
-| Reference implementation | MCP server and OpenAI function schema are functional; demo produces a structured object from document + voice inputs                                                  |
-| Technical credibility    | A CTO can evaluate the schema in an afternoon and conclude "this is correct"                                                                                          |
+| Knowledge base coverage  | Form taxonomy, provider tier mappings, validation rules, and tax code thresholds are encoded and structured for both human review and future model training           |
+| Reference implementation | Demo produces a structured object from messy inputs, validates it against the knowledge base, and demonstrates provider tier evaluation                               |
+| Technical credibility    | A CTO can evaluate the schema and knowledge base in an afternoon and conclude "this is correct"                                                                       |
 | Executive credibility    | A non-technical CEO can see the demo working and understand the value proposition                                                                                     |
-| Threat narrative         | 15-minute deck creates urgency; tailored for H&R Block and Taxwell audiences                                                                                          |
 | Timeline                 | All three deliverables ready before post-April 15 outreach window                                                                                                     |
 
 ---
@@ -272,6 +290,8 @@ To maintain clarity on scope, the following are explicitly **not in v0**:
 
 | Out of Scope                                                                   | Where It Lives                      |
 | ------------------------------------------------------------------------------ | ----------------------------------- |
+| Fine-tuned domain model                                                        | v1                                  |
+| Specific transport bindings (MCP server, OpenAI function schema)               | Implementation detail; post-v0      |
 | Consumer-facing intake product (chat, voice, document upload UX)               | Phase 5 / Calypso blueprint Phase 2 |
 | Comparison engine (pricing, sentiment, ancillary risk)                         | Phase 5 / Calypso blueprint Phase 4 |
 | Tax Second Opinion feature                                                     | Phase 5 / Calypso blueprint Phase 3 |
@@ -281,6 +301,7 @@ To maintain clarity on scope, the following are explicitly **not in v0**:
 | Consumer distribution (SEO, content creators, gig platforms, payroll partners) | Phase 5 / Distribution strategy     |
 | Political amplification (bipartisan pledge, congressional testimony)           | Post-consumer launch                |
 | Affiliate revenue model                                                        | Phase 5                             |
+| Threat narrative / pitch deck                                                  | Go-to-market material, not product  |
 | Production deployment infrastructure                                           | Post-v0                             |
 
 > **Inconsistency Note — Superhuman CPA OS:** The scaffold design document (`docs/product-concepts/superuman-cpa/`) describes a separate done-for-you tax preparation platform with multi-tenant firm architecture, Circular 230 workflow gates, and per-return billing. This is a fundamentally different product than what v0 defines — it positions Tea Tax as a _tax preparer_, not a protocol steward. The strategy document does not reference Superhuman CPA OS. **The strategy document governs for v0 scope.** The Superhuman CPA OS scaffold may inform the Practitioner Layer in later phases, but it is not part of the protocol strategy.
@@ -334,18 +355,60 @@ All prior documents are incorporated by reference. Where they conflict with the 
 
 For quick reference, all inconsistencies between the strategy document (source of truth) and prior documents:
 
-| Topic                         | Prior Docs Say                                                                       | Strategy Says (Governs)                                                 |
-| ----------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| **Product identity**          | Consumer-facing "Kayak for taxes" — free AI intake + comparison engine               | Protocol steward — open standard for AI-tax ecosystem interoperability  |
-| **v0 deliverables**           | Shipping consumer product (Intake Engine + Comparison Engine) for 2026 filing season | Schema spec, MCP reference implementation, threat narrative deck        |
-| **Revenue model**             | Affiliate referral fees (Kayak/Credit Karma model)                                   | Intentionally unresolved; adoption is the priority                      |
-| **Consumer product timing**   | 2026 filing season ("V1 lives and dies in-season")                                   | 2027+ (Phase 5), built on top of entrenched protocol infrastructure     |
-| **Tax situation object role** | Consumer "shopping weapon" and internal data model                                   | Industry-standard protocol layer between AI agents and tax ecosystem    |
-| **MCP/AI integration**        | Future integration opportunity for consumer product                                  | Primary delivery mechanism from day one                                 |
-| **Anthropic relationship**    | AI partnership with co-marketing and investment                                      | Phase 4 platform engagement after consortium adoption                   |
-| **Distribution**              | Consumer channels: SEO, content creators, gig platforms, payroll                     | CEO conversations and consortium building                               |
-| **Superhuman CPA OS**         | Separate done-for-you tax prep service with multi-tenant firm architecture           | Not referenced; separate from protocol strategy                         |
-| **V1 success metrics**        | 60% intake completion, 10-min time to value, 40% CTR                                 | Schema correctness, CTO/CEO credibility, post-season outreach readiness |
-| **Target audience (v0)**      | American taxpayers                                                                   | Industry CEOs, CTOs, and AI platform companies                          |
+| Topic                         | Prior Docs Say                                                                       | Strategy Says                                                           | PRD Position                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| **Product identity**          | Consumer-facing "Kayak for taxes" — free AI intake + comparison engine               | Protocol steward — open standard for AI-tax ecosystem interoperability  | Strategy governs                                                                     |
+| **v0 deliverables**           | Shipping consumer product (Intake Engine + Comparison Engine) for 2026 filing season | Schema spec, MCP reference implementation, threat narrative deck        | Schema spec, knowledge base, reference implementation (see Appendix A for revisions) |
+| **Revenue model**             | Affiliate referral fees (Kayak/Credit Karma model)                                   | Intentionally unresolved; adoption is the priority                      | Strategy governs                                                                     |
+| **Consumer product timing**   | 2026 filing season ("V1 lives and dies in-season")                                   | 2027+ (Phase 5), built on top of entrenched protocol infrastructure     | Strategy governs                                                                     |
+| **Tax situation object role** | Consumer "shopping weapon" and internal data model                                   | Industry-standard protocol layer between AI agents and tax ecosystem    | Strategy governs                                                                     |
+| **MCP/AI integration**        | Future integration opportunity for consumer product                                  | Primary delivery mechanism from day one                                 | Transport is an implementation detail, not a v0 deliverable (see Appendix A)         |
+| **Anthropic relationship**    | AI partnership with co-marketing and investment                                      | Phase 4 platform engagement after consortium adoption                   | Strategy governs                                                                     |
+| **Distribution**              | Consumer channels: SEO, content creators, gig platforms, payroll                     | CEO conversations and consortium building                               | Strategy governs                                                                     |
+| **Superhuman CPA OS**         | Separate done-for-you tax prep service with multi-tenant firm architecture           | Not referenced; separate from protocol strategy                         | Strategy governs                                                                     |
+| **V1 success metrics**        | 60% intake completion, 10-min time to value, 40% CTR                                 | Schema correctness, CTO/CEO credibility, post-season outreach readiness | Strategy governs                                                                     |
+| **Target audience (v0)**      | American taxpayers                                                                   | Industry CEOs, CTOs, and AI platform companies                          | Strategy governs                                                                     |
 
 > **Reconciliation:** These are not contradictions in vision — they are a sequencing reframe. The strategy document does not reject the consumer product; it sequences the protocol layer _first_ so the consumer product launches on entrenched infrastructure rather than against entrenched resistance. All prior consumer-product documentation is retained and will govern the Phase 5 consumer build.
+
+---
+
+## Appendix A: LG's Critique and Changes to Strategy Document
+
+This appendix documents where this PRD departs from the strategy document based on review by LG (Lucas Geiger, co-founder), and the rationale for each change.
+
+### Change 1: MCP is an implementation detail, not a deliverable
+
+**Strategy says:** "An MCP server and OpenAI function definitions that implement the protocol."
+
+**Critique:** MCP is a transport layer — a way to package and deliver the protocol. It is not the protocol itself. Naming MCP as a v0 deliverable conflates the _what_ (schema + domain logic) with the _how_ (wire format). The customer need the reference implementation solves is: "show me that this standard works end-to-end." Whether that demo runs over MCP, OpenAI functions, a REST API, or a CLI is a tactical packaging decision driven by audience context — not a product requirement.
+
+**Change:** The reference implementation is defined as transport-agnostic. MCP and OpenAI function schemas are listed as transport options that may be built for specific demos, not as v0 deliverables.
+
+### Change 2: The knowledge base is a missing deliverable
+
+**Strategy says:** The schema specification and reference implementation are the two product deliverables. The knowledge base is implied (the strategy references "domain expertise" and "knowing which fields matter") but never named as a distinct artifact.
+
+**Critique:** The schema defines the _shape_ of a tax situation object. But the schema alone cannot answer: "Is this object correct? What's missing? What contradicts what? What tier does this map to at TurboTax vs. FreeTaxUSA?" Those answers require a structured encoding of the tax domain — IRS form taxonomy, inter-form dependencies, provider tier mapping rules, validation logic, tax code thresholds. Without this knowledge base, the schema is an inert data format that no one can evaluate. With it, the protocol becomes an evaluable, validatable system that a CTO can trust.
+
+The knowledge base is also the founder's core domain advantage — the TaxAct Xpert expertise _is_ this knowledge, not the schema shape. And it is the future training corpus for the v1 fine-tuned model.
+
+**Change:** The tax domain knowledge base is added as a named v0 deliverable (Section 4.2), sitting between the schema spec and the reference implementation.
+
+### Change 3: The threat narrative deck is not a product deliverable
+
+**Strategy says:** The threat narrative deck is one of three Phase 1 deliverables.
+
+**Critique:** The deck is go-to-market material — a pitch artifact for CEO conversations. It is essential for the strategy's success, but it is not part of the product. A PRD should define what gets built, not what gets presented. Including the deck as a product deliverable blurs the line between product scope and sales motion.
+
+**Change:** The threat narrative deck is removed from v0 product scope and noted in "What v0 Is Not" (Section 12) as go-to-market material. It remains important — it just isn't product.
+
+### Change 4: v1 is the fine-tuned domain model
+
+**Strategy does not address this.** The thesis document discusses proprietary local models as a cost, privacy, and moat play, but frames them as a consumer product concern.
+
+**Critique:** The knowledge base is large and rule-dense. Feeding it into a frontier model's context window for every tax situation evaluation is expensive, unreliable, and a trust problem. Context window pressure causes frontier models to drop rules stochastically — in tax, that means wrong tier placement, missed credits, or bad validation. These errors are unacceptable for tax preparation. If the system produces stochastic errors, providers and practitioners lose confidence. Lost confidence in the system leads to failure to distribute and adopt — which kills the consortium strategy.
+
+The answer is a fine-tuned small language model trained on the knowledge base. The model internalizes the domain rules and can evaluate tax situation objects reliably without context window degradation. v0 proves the schema and knowledge base are correct; v1 makes them operationally scalable and trustworthy.
+
+**Change:** v1 is defined as the fine-tuned domain model (Section 6.1), with the v0 knowledge base explicitly serving double duty as both a human-reviewable reference and a model training corpus.
