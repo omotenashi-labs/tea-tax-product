@@ -1,0 +1,23 @@
+name: React Component Tests
+
+on:
+  push:
+    branches: [main, 'UX/**', 'feat/**', 'fix/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+      - name: Install Dependencies
+        run: bun install
+      - name: Install Playwright Chromium
+        run: bunx playwright install --with-deps chromium
+      - name: Run Component Tests
+        run: bun --bun vitest run --config apps/web/vitest.browser.config.ts

@@ -1,0 +1,395 @@
+import { scrubPii } from 'core';
+import type { AppState } from '../index';
+import { signJwt, verifyJwt } from '../auth/jwt';
+import { revokeToken } from 'db/revocation';
+import { generateCsrfToken, csrfCookieHeader, verifyCsrf } from '../auth/csrf';
+import { registerUserSchema, loginUserSchema } from 'core';
+import { validate } from './validation';
+import {
+  getClientIp,
+  globalLimiter,
+  loginIpLimiter,
+  loginUserLimiter,
+  registerIpLimiter,
+  tooManyRequests,
+} from '../security/rate-limiter';
+import { authenticateApiKey } from 'db/api-keys';
+
+// Starter auth note:
+// These routes are intentionally simple so the current app can register and log
+// in during development. They do not satisfy the full blueprint posture yet:
+// passkeys, dual attribution for consequential actions, separate audit writes,
+// and scoped sandbox credentials are all still future implementation work.
+
+// Helper to parse cookies from headers
+export function parseCookies(cookieHeader: string | null): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!cookieHeader) return cookies;
+
+  cookieHeader.split(';').forEach((cookie) => {
+    const parts = cookie.split('=');
+    if (parts.length >= 2) {
+      cookies[parts[0].trim()] = parts.slice(1).join('=').trim();
+    }
+  });
+  return cookies;
+}
+
+// Helper to verify auth from a Request object
+export async function getAuthenticatedUser(
+  req: Request,
+): Promise<{ id: string; username: string } | null> {
+  const cookies = parseCookies(req.headers.get('Cookie'));
+  const token = cookies['calypso_auth'];
+
+  if (!token) return null;
+
+  try {
+    const payload = await verifyJwt<{ id: string; username: string }>(token);
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+// Helper to verify auth from a Request object, also accepting Bearer API keys.
+// Returns { id, username } for session-cookie auth or { id, username: 'api-key' }
+// for a valid API key bearer, where id is the api_key row id.
+export async function getAuthenticatedUserOrApiKey(
+  req: Request,
+): Promise<{ id: string; username: string } | null> {
+  // Try session cookie first
+  const sessionUser = await getAuthenticatedUser(req);
+  if (sessionUser) return sessionUser;
+
+  // Try Bearer token (API key)
+  const authHeader = req.headers.get('Authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const rawKey = authHeader.slice(7).trim();
+    if (rawKey) {
+      try {
+        const keyRow = await authenticateApiKey(rawKey);
+        if (keyRow) {
+          // Represent the API key principal using the key's id; username identifies the key source
+          return { id: keyRow.id, username: `api-key:${keyRow.label}` };
+        }
+      } catch {
+        return null;
+      }
+    }
+  }
+
+  return null;
+}
+
+// Helper to get CORS headers dynamically
+export function getCorsHeaders(req: Request): Record<string, string> {
+  const origin = req.headers.get('Origin') || 'http://localhost:5174';
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Headers': 'Content-Type, X-CSRF-Token',
+  };
+}
+
+export async function handleAuthRequest(
+  req: Request,
+  url: URL,
+  appState: AppState,
+): Promise<Response | null> {
+  const corsHeaders = getCorsHeaders(req);
+  const { sql } = appState;
+
+  // Preflight CORS — no rate limiting needed for OPTIONS
+  if (req.method === 'OPTIONS' && url.pathname.startsWith('/api/auth')) {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  // CSRF check for state-mutating auth routes (register, login, logout)
+  // Login and register are exempt because no authenticated session cookie
+  // exists yet — the CSRF token is issued as part of the response.
+  // Logout mutates server state, so it is checked.
+  const cookies = parseCookies(req.headers.get('Cookie'));
+  if (
+    url.pathname === '/api/auth/logout' ||
+    (req.method !== 'POST' &&
+      req.method !== 'GET' &&
+      req.method !== 'OPTIONS' &&
+      req.method !== 'HEAD' &&
+      url.pathname.startsWith('/api/auth'))
+  ) {
+    const csrfError = verifyCsrf(req, cookies);
+    if (csrfError) return csrfError;
+  }
+
+  // Global per-IP rate limit applied to all auth endpoints
+  if (url.pathname.startsWith('/api/auth')) {
+    const ip = getClientIp(req);
+    const globalResult = globalLimiter.check(ip);
+    if (!globalResult.allowed) {
+      return tooManyRequests(globalResult, corsHeaders);
+    }
+    globalLimiter.consume(ip);
+  }
+
+  // 1. POST /api/auth/register
+  if (req.method === 'POST' && url.pathname === '/api/auth/register') {
+    const ip = getClientIp(req);
+    const ipResult = registerIpLimiter.check(ip);
+    if (!ipResult.allowed) {
+      return tooManyRequests(ipResult, corsHeaders);
+    }
+    registerIpLimiter.consume(ip);
+
+    try {
+      const rawBody = await req.json();
+      const registerResult = validate<{ username: string; password: string }>(
+        registerUserSchema,
+        rawBody,
+      );
+      if (!registerResult.valid) {
+        return new Response(
+          JSON.stringify({
+            error: 'Validation failed',
+            details: registerResult.errors.map((e) => ({
+              instancePath: e.instancePath,
+              message: e.message,
+            })),
+          }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          },
+        );
+      }
+      const { username, password } = registerResult.data;
+
+      // Check if user exists (checking JSONB property 'username' where type is 'user')
+      const existingUser = await sql`
+                SELECT id FROM entities 
+                WHERE type = 'user' AND properties->>'username' = ${username}
+            `;
+
+      if (existingUser.length > 0) {
+        return new Response(JSON.stringify({ error: 'Username already taken' }), {
+          status: 409,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const id = crypto.randomUUID();
+      const hash = await Bun.password.hash(password);
+
+      const properties = {
+        username,
+        password_hash: hash,
+      };
+
+      // Starter implementation: identity material still lives in the generic
+      // entities table. The target posture separates auth controls, audit, and
+      // sensitive-data handling more explicitly.
+      await sql`
+                INSERT INTO entities (id, type, properties, tenant_id) 
+                VALUES (${id}, 'user', ${sql.json(properties)}, null)
+            `;
+
+      const token = await signJwt({ id, username });
+      const csrfToken = generateCsrfToken();
+
+      const res = new Response(JSON.stringify({ user: { id, username } }), {
+        status: 201,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      });
+      // SameSite=Strict prevents the cookie from being sent on any cross-site
+      // request, including top-level navigations. This is the correct posture for
+      // a session-authentication cookie because it eliminates CSRF via cross-site
+      // top-level navigation flows that SameSite=Lax would otherwise allow.
+      //
+      // If OAuth or social-login redirect flows are added in the future, the
+      // redirect-landing endpoint must issue a *new* session cookie after
+      // validating the OAuth state parameter on the server side. The OAuth state
+      // callback itself should use a short-lived, purpose-specific cookie with
+      // SameSite=Lax scoped only to that flow — the primary session cookie must
+      // remain SameSite=Strict.
+      res.headers.append(
+        'Set-Cookie',
+        `calypso_auth=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=604800`,
+      );
+      res.headers.append('Set-Cookie', csrfCookieHeader(csrfToken));
+      return res;
+    } catch (err) {
+      console.error(
+        'REGISTER ERROR:',
+        scrubPii(err instanceof Error ? { message: err.message, stack: err.stack } : err),
+      );
+      return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+        status: 500,
+        headers: corsHeaders,
+      });
+    }
+  }
+
+  // 2. POST /api/auth/login
+  if (req.method === 'POST' && url.pathname === '/api/auth/login') {
+    const ip = getClientIp(req);
+    const ipResult = loginIpLimiter.check(ip);
+    if (!ipResult.allowed) {
+      return tooManyRequests(ipResult, corsHeaders);
+    }
+
+    // Validate and parse body using AJV schema
+    const rawLoginBody = await req.json().catch(() => null);
+    if (!rawLoginBody) {
+      return new Response(JSON.stringify({ error: 'Invalid request body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const loginResult = validate<{ username: string; password: string }>(
+      loginUserSchema,
+      rawLoginBody,
+    );
+    if (!loginResult.valid) {
+      return new Response(
+        JSON.stringify({
+          error: 'Validation failed',
+          details: loginResult.errors.map((e) => ({
+            instancePath: e.instancePath,
+            message: e.message,
+          })),
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      );
+    }
+    const { username, password } = loginResult.data;
+
+    const userResult = loginUserLimiter.check(username);
+    if (!userResult.allowed) {
+      return tooManyRequests(userResult, corsHeaders);
+    }
+
+    loginIpLimiter.consume(ip);
+    loginUserLimiter.consume(username);
+
+    try {
+      // Retrieve User Entity
+      const users = await sql`
+                SELECT id, properties->>'username' as username, properties->>'password_hash' as password_hash 
+                FROM entities 
+                WHERE type = 'user' AND properties->>'username' = ${username}
+            `;
+
+      if (users.length === 0) {
+        return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const user = users[0];
+
+      const isMatch = await Bun.password.verify(password, user.password_hash);
+      if (!isMatch) {
+        return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      const token = await signJwt({ id: user.id, username: user.username });
+      const csrfToken = generateCsrfToken();
+
+      const res = new Response(JSON.stringify({ user: { id: user.id, username: user.username } }), {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+      });
+      // SameSite=Strict — see the register endpoint comment above for the full
+      // rationale and guidance for future OAuth flows.
+      res.headers.append(
+        'Set-Cookie',
+        `calypso_auth=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=604800`,
+      );
+      res.headers.append('Set-Cookie', csrfCookieHeader(csrfToken));
+      return res;
+    } catch (err) {
+      console.error(
+        'LOGIN ERROR:',
+        scrubPii(err instanceof Error ? { message: err.message, stack: err.stack } : err),
+      );
+      return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+        status: 500,
+        headers: corsHeaders,
+      });
+    }
+  }
+
+  // 3. GET /api/auth/me
+  // Validates the session cookie or Bearer API key and returns user profile
+  if (req.method === 'GET' && url.pathname === '/api/auth/me') {
+    const user = await getAuthenticatedUserOrApiKey(req);
+    if (!user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    return new Response(JSON.stringify({ user }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // 4. POST /api/auth/logout
+  if (req.method === 'POST' && url.pathname === '/api/auth/logout') {
+    const cookies = parseCookies(req.headers.get('Cookie'));
+    const token = cookies['calypso_auth'];
+
+    if (token) {
+      try {
+        // Decode without full verify so we can always revoke even if the token
+        // is already near expiry. We only need jti and exp from the payload.
+        const parts = token.split('.');
+        if (parts.length === 3) {
+          const payloadStr = atob(
+            parts[1]
+              .replace(/-/g, '+')
+              .replace(/_/g, '/')
+              .padEnd(parts[1].length + ((4 - (parts[1].length % 4)) % 4), '='),
+          );
+          const payload = JSON.parse(payloadStr) as { jti?: string; exp?: number };
+          if (payload.jti && payload.exp) {
+            const expiresAt = new Date(payload.exp * 1000);
+            await revokeToken(payload.jti, expiresAt);
+          }
+        }
+      } catch {
+        // Best-effort: revocation failure should not block logout response.
+      }
+    }
+
+    const res = new Response(JSON.stringify({ success: true }), {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json',
+      },
+    });
+    res.headers.append('Set-Cookie', 'calypso_auth=; HttpOnly; Path=/; Max-Age=0');
+    res.headers.append(
+      'Set-Cookie',
+      '__Host-csrf-token=; SameSite=Strict; Secure; Path=/; Max-Age=0',
+    );
+    return res;
+  }
+
+  return null;
+}

@@ -1,0 +1,24 @@
+{
+  "name": "db",
+  "private": true,
+  "main": "index.ts",
+  "types": "index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./pg-container": "./pg-container.ts",
+    "./revocation": "./revocation.ts",
+    "./trace": "./trace.ts",
+    "./task-queue": "./task-queue.ts",
+    "./task-queue-worker": "./task-queue-worker.ts",
+    "./api-keys": "./api-keys.ts",
+    "./worker-credentials": "./worker-credentials.ts",
+    "./worker-channel": "./worker-channel.ts",
+    "./governance": "./governance.ts"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "postgres": "^3.4.8"
+  }
+}
