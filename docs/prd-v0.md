@@ -11,6 +11,8 @@
 
 Tea Tax is the steward of the **Tax Situation Protocol** — an open, AI-native standard that defines how AI agents represent a taxpayer's financial situation, communicate with tax providers, and route consumers to the right filing option. The protocol fills the gap between the messy, pre-return reality of a taxpayer's life and the structured formats providers need to serve them. The tax industry has a standard for the _output_ (IRS MeF XML for completed returns) but nothing for the _input_.
 
+**Operating principle:** This PRD defines the protocol and reference tooling — not the organizational structure around it. Consortium governance, membership models, and organizational design are out of scope. The protocol's adoption and retention depend entirely on its utility: if the schema is correct, the knowledge base is trustworthy, and the tooling works, participants stay. No governance mechanism substitutes for a protocol that solves real problems.
+
 ---
 
 ## 2. The Tax Situation Object
@@ -196,6 +198,7 @@ IRS Circular 230 governs who can practice before the IRS and provide personalize
 
 | Out of Scope                                                                   | Where It Lives                      |
 | ------------------------------------------------------------------------------ | ----------------------------------- |
+| Consortium governance, membership, and organizational structure                | Organizational design; not product  |
 | Fine-tuned domain model                                                        | v1                                  |
 | Specific transport bindings (agent protocol servers, function schemas)         | Implementation detail; post-v0      |
 | Consumer-facing intake product (chat, voice, document upload UX)               | Phase 5 / Calypso blueprint Phase 2 |
