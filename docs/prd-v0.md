@@ -108,6 +108,8 @@ A transport-agnostic implementation that demonstrates the schema and knowledge b
 
 **Quality bar:** Tangible enough that a non-technical CEO can see it working and a CTO can see the architecture. Does not need to be production-grade.
 
+**Responsive PWA with camera capture:** The reference implementation is a responsive PWA that works across desktop, tablet, and mobile. The user flow is identical on all form factors: upload (or photograph) a W-2 → review extracted data → complete the tax situation → view validation and tier results. On devices with cameras (mobile, tablet, some laptops), the upload step detects camera availability and offers a "Take Photo" option alongside the standard file picker. This is the "sizzle" for CEO conversations — a CEO pulls out their phone, photographs their own W-2, and watches the protocol work in real time. The existing codebase includes production-ready PWA infrastructure (service worker, install prompts, camera capture with progressive enhancement via `use-platform.ts`, platform detection) that makes this feasible within v0 scope.
+
 **Transport is an implementation detail.** AI agent protocol bindings, function schemas, REST APIs, or other transports are packaging decisions made based on audience context — not a product requirement.
 
 ---
@@ -188,8 +190,9 @@ IRS Circular 230 governs who can practice before the IRS and provide personalize
 | Schema completeness      | v0.1 covers core 1040-series filing scenarios (W-2 only, freelance/1099, investments, multi-state, rental income) with correct field definitions and validation rules |
 | Knowledge base coverage  | Form taxonomy, provider tier mappings, validation rules, and tax code thresholds are encoded and structured for both human review and future model training           |
 | Reference implementation | Demo produces a structured object from messy inputs, validates it against the knowledge base, and demonstrates provider tier evaluation                               |
+| Camera capture           | On devices with cameras, the upload step offers "Take Photo" alongside file upload — a CEO photographs their W-2 from their phone and sees the full flow              |
 | Technical credibility    | A CTO can evaluate the schema and knowledge base in an afternoon and conclude "this is correct"                                                                       |
-| Executive credibility    | A non-technical CEO can see the demo working and understand the value proposition                                                                                     |
+| Executive credibility    | A non-technical CEO can see the demo working and understand the value proposition — on desktop, tablet, or their own phone                                            |
 | Timeline                 | All three deliverables ready before post-April 15 outreach window                                                                                                     |
 
 ---
@@ -201,7 +204,7 @@ IRS Circular 230 governs who can practice before the IRS and provide personalize
 | Consortium governance, membership, and organizational structure                | Organizational design; not product  |
 | Fine-tuned domain model                                                        | v1                                  |
 | Specific transport bindings (agent protocol servers, function schemas)         | Implementation detail; post-v0      |
-| Consumer-facing intake product (chat, voice, document upload UX)               | Phase 5 / Calypso blueprint Phase 2 |
+| Full consumer-facing intake product (chat, voice, financial account connections) | Phase 5 / Calypso blueprint Phase 2 |
 | Comparison engine (pricing, sentiment, ancillary risk)                         | Phase 5 / Calypso blueprint Phase 4 |
 | Tax Second Opinion feature                                                     | Phase 5 / Calypso blueprint Phase 3 |
 | Community pricing database                                                     | Phase 5 / Calypso blueprint Phase 5 |
@@ -221,7 +224,7 @@ IRS Circular 230 governs who can practice before the IRS and provide personalize
 | ------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | Schema requires more iteration than 2 weeks | Phase 2 outreach window compressed                 | Scope v0.1 aggressively minimal. Working group in Phase 3 handles depth.             |
 | Knowledge base scope creep                  | Blocks reference implementation                    | Define minimum provider count (top 5) and scenario count upfront. Expand post-v0.    |
-| Reference implementation demo scope         | Three ML pipelines (OCR, voice, financial account) | Define minimum viable demo input set. One modality may be sufficient for v0.         |
+| Reference implementation demo scope         | Desktop + mobile PWA demo surfaces                 | Single modality (W-2 OCR). Mobile PWA leverages existing camera/PWA infrastructure.  |
 | Privacy open items unresolved               | Blocks handling of real tax data                   | v0 reference implementation may use synthetic data only. Real PII handling deferred. |
 
 ---

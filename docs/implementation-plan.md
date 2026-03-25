@@ -875,9 +875,11 @@ This is the culminating visual — the "show me that this standard works" moment
 - Vertical rhythm: `space-y-8` between major sections. Breathing room, not cramped.
 
 **Responsive behavior:**
-- v0 targets desktop viewport (1280px+). CEO demos happen on laptops and projectors.
-- Minimum: 1024px. Below that, no guarantees.
-- Mobile is out of scope (PRD §9).
+The user flow is identical on all form factors — one flow, not separate desktop and mobile experiences. The layout adapts responsively:
+- **Desktop** (1280px+): Dark sidebar visible, two-column form layouts, tier comparison table. CEO demos on laptops and projectors.
+- **Tablet** (768px–1279px): Sidebar collapses to icon-only or hidden. Single-column content. Tier table horizontal-scrolls or switches to stacked cards. Camera detection offers "Take Photo" option on upload step.
+- **Mobile** (375px–767px): No sidebar. Full-width content. Stacked provider cards instead of table. Larger touch targets (`py-3` inputs). Camera detection offers "Take Photo" option on upload step.
+- Camera availability is detected via `use-platform.ts` (existing infrastructure). When a camera is detected (mobile, tablet, camera-equipped laptops), the upload step shows a "Take Photo" button alongside drag-and-drop / file picker. Uses existing `<input type="file" capture="environment">` + `getUserMedia` progressive enhancement from `camera-demo.tsx`.
 
 #### 6.4.7 Iconography
 
@@ -932,6 +934,39 @@ Error states:
 - **Not a rebrand of the existing starter app.** The starter app (task board, PWA demo) keeps its current styling. The tax demo page introduces the new identity within its content area. Migrating the existing app to the new identity is a separate task, not in v0 scope.
 - **Not a design system.** v0 does not need a component library, Storybook, or design tokens package. It needs a demo that looks credible. The Tailwind config and the patterns above are sufficient.
 - **Not dark mode.** The dark sidebar anchors the layout, but the content area is light. A full dark mode is not needed for CEO demos and would double the styling work.
+
+### 6.4.11 Responsive Adaptations
+
+The flow is identical across breakpoints. Only layout density and navigation change.
+
+**Sidebar:**
+- Desktop (1280px+): full dark sidebar `w-56` with text labels.
+- Tablet (768px–1279px): sidebar collapsed to icon-only `w-16` or hidden behind hamburger.
+- Mobile (<768px): no sidebar. Top bar: `bg-brand-800 text-white px-4 py-3` with "Tea Tax" wordmark + schema version badge.
+
+**Upload zone — camera detection:**
+When `use-platform.ts` detects camera availability (`getUserMedia` or `inputCapture`), the upload zone shows two options:
+- Primary: "Take Photo" button — `bg-accent-500 text-white rounded-lg py-3 px-6 font-semibold`. Triggers `<input type="file" accept="image/*" capture="environment">`.
+- Secondary: "Upload File" or drag-and-drop zone (same dashed-border treatment as §6.4.5).
+- On desktop without camera: drag-and-drop zone only (no "Take Photo" button).
+- Camera detection is progressive enhancement — the flow works without a camera.
+
+**Extracted data review card:**
+- Desktop: CSS Grid two-column layout.
+- Tablet/Mobile (<1024px): single-column stack. Inputs get `py-3` instead of `py-2` for touch targets. "Confirm & Continue" button: `w-full py-3`.
+
+**Situation completion form:**
+- Desktop: two-column form grid where sensible (e.g., first name / last name).
+- Tablet/Mobile: single-column stack. Same sections, same fields, same add/remove controls.
+
+**Provider tier results:**
+- Desktop: comparison table (§6.4.5).
+- Tablet (768px–1023px): table with horizontal scroll.
+- Mobile (<768px): stacked provider cards. One card per provider showing: provider name, tier badge, federal price, state price, qualifying factors. Each card: `bg-white shadow-card rounded-lg p-4 space-y-2`.
+
+**Step indicator:**
+- Desktop: segmented horizontal bar (§6.4.5).
+- Mobile (<768px): three dots with labels below. `flex justify-between px-4 py-2`.
 
 ### 6.5 W-2 Extraction
 
@@ -1056,7 +1091,8 @@ Each fixture includes: a complete TaxSituation object, the expected ValidationRe
 | 16 | Build demo UI: situation completion form | 1, 4, 5 | User can fill all TaxSituation fields, save to tax return entity |
 | 17 | Build demo UI: validation and tier results display | 13, 14 | User sees validation results (errors, warnings, completeness) and provider tier table |
 | 18 | Create synthetic demo fixtures for all 5 scenarios | 1, 7, 8, 9, 10 | Complete fixtures with TaxSituation, expected validation, and expected tier placements |
-| 19 | End-to-end dry run and polish | 12–18 | Full demo flow runs for all 5 scenarios; visually polished; no errors; CEO-presentable |
+| 19 | End-to-end dry run and polish | 12–18, 20 | Full demo flow runs for all 5 scenarios at desktop, tablet, and mobile breakpoints; camera capture works on camera-equipped devices; visually polished; CEO-presentable |
+| 20 | Update PWA manifest, icons, and install flow for tax demo branding | visual identity | Manifest reflects Tea Tax branding; icons updated; install prompts work on iOS and Android |
 
 ---
 
@@ -1093,8 +1129,8 @@ Each fixture includes: a complete TaxSituation object, the expected ValidationRe
 |-------|------|--------|----------|
 | Unit | Types, knowledge base rules, form taxonomy, tier mapping, thresholds, validation engine | Vitest (Bun) | `packages/core/knowledge-base/__tests__/` |
 | Integration (API) | Tax object CRUD, tax return CRUD, validation EP, tier evaluation EP, extraction EP | Vitest (Bun) + real PG container | `apps/server/tests/integration/` |
-| Component | Demo UI steps: upload component, form component, results component | Vitest + Playwright Chromium | `apps/web/tests/component/` |
-| E2E | Full demo flow: upload → extract → complete → validate → tier evaluate | Vitest + Playwright Chromium | `tests/e2e/` |
+| Component | Demo UI steps: upload component, form component, results component, mobile capture, mobile results | Vitest + Playwright Chromium | `apps/web/tests/component/` |
+| E2E | Full demo flow: upload → extract → complete → validate → tier evaluate (desktop + mobile viewport) | Vitest + Playwright Chromium | `tests/e2e/` |
 
 ### Fixture strategy
 
@@ -1139,11 +1175,17 @@ Issue 3 (Entity Reg.)┤                                        ├──→ Iss
                                                               │
 Issue 18 (Fixtures) ←────────────────────────────────────────┘
 
-Issue 15 (Upload UI) ──┐
-Issue 16 (Form UI) ────┤──→ Issue 17 (Results UI) ──→ Issue 19 (Dry Run)
-Issue 13 (Validate EP) ┤
-Issue 14 (Tier Eval EP)┘
+Issue 15 (Upload UI + Camera) ──┐
+Issue 16 (Form UI) ────────────┤──→ Issue 17 (Results UI + Responsive) ──→ Issue 19 (Dry Run)
+Issue 13 (Validate EP) ────────┤
+Issue 14 (Tier Eval EP) ───────┘
+
+Visual Identity ──→ Issue 20 (PWA Branding)  ──→ Issue 19 (Dry Run)
 ```
+
+Note: Upload UI (Issue 15) includes camera detection and "Take Photo" button on camera-equipped devices.
+Results UI (Issue 17) includes responsive tier display (table on desktop, stacked cards on mobile).
+All demo UI issues (15–17) produce responsive layouts across desktop, tablet, and mobile.
 
 ### Execution Phases
 
@@ -1158,6 +1200,7 @@ Issue 14 (Tier Eval EP)┘
 - Issue 8: Provider tier mapping rules
 - Issue 9: Validation rules (5 categories)
 - Issue 10: Tax code thresholds (2025)
+- Visual identity setup (no deps)
 
 **Phase C — API Layer + Engine (after Phase B):**
 - Issue 5: Tax returns CRUD API (needs 4)
@@ -1171,12 +1214,13 @@ Issue 14 (Tier Eval EP)┘
 - Issue 14: Tier evaluation endpoint (needs 5, 8)
 
 **Phase E — Demo UI (after Phase D):**
-- Issue 15: Upload and extract UI (needs 12)
-- Issue 16: Situation completion form (needs 5)
-- Issue 17: Validation and tier results display (needs 13, 14)
+- Issue 15: Upload and extract UI with camera detection (needs 12). Responsive: desktop drag-and-drop + mobile/tablet "Take Photo" button.
+- Issue 16: Situation completion form (needs 5). Responsive: two-column grid on desktop, single-column on tablet/mobile.
+- Issue 17: Validation and tier results display (needs 13, 14). Responsive: comparison table on desktop, stacked cards on mobile.
+- Issue 20: PWA manifest/icon branding (needs visual identity)
 
 **Phase F — Polish (after Phase E):**
-- Issue 19: End-to-end dry run and polish (needs 15–18)
+- Issue 19: End-to-end dry run and polish (needs 15–18, 20). Tests at desktop, tablet, and mobile breakpoints. Camera flow tested on mobile viewport.
 
 ---
 
@@ -1190,7 +1234,7 @@ Issue 14 (Tier Eval EP)┘
 | Field-level encryption of `situation_data` | v0 uses synthetic data only. Infrastructure marked ready (sensitive field in registry). | When real PII arrives |
 | Sharing / `tax_object_memberships` | Access spec defers to v2. | v2+ |
 | Transport bindings (MCP, OpenAI functions, REST spec) | PRD §9 + LG Review Change 1: transport is implementation detail. | Post-v0 packaging decisions |
-| Consumer-facing UX polish | PRD §9: consumer intake is Phase 5. Demo UI is for CTO/CEO presentation only. | Phase 5 / Calypso blueprint Phase 2 |
+| Full consumer intake product (chat, voice, financial accounts) | PRD §9: full consumer product is Phase 5. v0 demo includes desktop and mobile PWA for CEO presentation. | Phase 5 / Calypso blueprint Phase 2 |
 | Fine-tuned domain model | PRD §5: v1 deliverable. v0 knowledge base is future training corpus. | v1 |
 | Consortium governance | PRD §1: organizational design out of scope. | Non-product |
 | Threat narrative deck | LG Review Change 3: go-to-market material, not product. | GTM workstream |
@@ -1217,7 +1261,7 @@ Issue 14 (Tier Eval EP)┘
 |---------------|-------------|
 | Schema completeness | TypeScript types + JSON Schema cover all 5 filing scenarios. Unit tests validate each. Enums have concrete values. Versioning strategy documented. Error model implemented. |
 | Knowledge base coverage | Form taxonomy (12+ forms), tier mappings (5 providers × 3–4 tiers), validation rules (5 categories, 15+ rules), 2025 thresholds — all implemented, tested, and exported as JSON. |
-| Reference implementation | Demo: W-2 image → extraction → user review → situation completion → validation → tier evaluation. E2E test passes for all 5 scenario fixtures. |
+| Reference implementation | Demo: W-2 image → extraction → user review → situation completion → validation → tier evaluation. Same flow works at desktop, tablet, and mobile breakpoints. E2E test passes for all 5 scenario fixtures. On camera-equipped devices, "Take Photo" option available alongside file upload. |
 | Technical credibility | CTO can: (a) read the JSON Schema, (b) run the validator against sample objects, (c) trace form dependency chains in the taxonomy, (d) see the versioning strategy, (e) understand the error/uncertainty model. All within one afternoon. |
-| Executive credibility | CEO can: (a) watch a W-2 photo become structured data, (b) see validation flag missing information, (c) see tier placement across 5 real providers. Three-step demo, no technical prerequisites, visually polished. |
-| Timeline | 19 issues across 6 execution phases within 8-week window. |
+| Executive credibility | CEO can: (a) photograph a W-2 from their phone or upload on desktop, (b) watch it become structured data, (c) see validation flag missing information, (d) see tier placement across 5 real providers. Same flow, any device, visually polished. |
+| Timeline | 20 issues across 6 execution phases within 8-week window. |
