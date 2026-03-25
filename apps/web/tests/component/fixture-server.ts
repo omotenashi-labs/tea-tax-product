@@ -187,7 +187,7 @@ async function fixtureJson<T>(fixture: T | FixtureResponse<T>): Promise<Response
       : ({ status: 200, body: fixture } satisfies FixtureResponse<T>);
 
   if (response.delayMs) {
-    await Bun.sleep(response.delayMs);
+    await new Promise<void>((resolve) => setTimeout(resolve, response.delayMs));
   }
 
   return new Response(JSON.stringify(response.body ?? {}), {
