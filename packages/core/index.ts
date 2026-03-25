@@ -1,4 +1,5 @@
 export * from './types';
+export * from './tax-situation';
 export * from './data-policies';
 export * from './audit';
 export * from './trace';
