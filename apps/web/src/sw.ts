@@ -37,7 +37,7 @@
 /// <reference lib="webworker" />
 declare const self: ServiceWorkerGlobalScope;
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `tea-tax-shell-${CACHE_VERSION}`;
 
 /**
