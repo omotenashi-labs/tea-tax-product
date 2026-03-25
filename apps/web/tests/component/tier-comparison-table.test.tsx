@@ -147,10 +147,10 @@ describe('TierComparisonTable', () => {
     const screen = render(<TierComparisonTable result={mockTierResult} />);
 
     // Provider names appear in both mobile cards and desktop table rows.
-    // Use .first() to avoid strict mode violations when both are in the DOM.
-    await expect.element(screen.getByText('TurboTax').first()).toBeInTheDocument();
-    await expect.element(screen.getByText('FreeTaxUSA').first()).toBeInTheDocument();
-    await expect.element(screen.getByText('Cash App Taxes').first()).toBeInTheDocument();
+    // Use .all()[0] to avoid strict mode violations when both are in the DOM.
+    await expect.element(screen.getByText('TurboTax').all()[0]).toBeInTheDocument();
+    await expect.element(screen.getByText('FreeTaxUSA').all()[0]).toBeInTheDocument();
+    await expect.element(screen.getByText('Cash App Taxes').all()[0]).toBeInTheDocument();
   });
 
   test('does not render any recommendation badge', async () => {
