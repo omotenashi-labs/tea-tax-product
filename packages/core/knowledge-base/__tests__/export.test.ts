@@ -68,9 +68,9 @@ describe('buildKnowledgeBaseExport', () => {
       expect(Array.isArray(provider.tiers)).toBe(true);
       for (const tier of provider.tiers) {
         // Ensure no `evaluate` function leaked through
-        expect((tier as Record<string, unknown>).evaluate).toBeUndefined();
+        expect((tier as unknown as Record<string, unknown>).evaluate).toBeUndefined();
         for (const cond of [...tier.qualifyingConditions, ...tier.disqualifyingConditions]) {
-          expect((cond as Record<string, unknown>).evaluate).toBeUndefined();
+          expect((cond as unknown as Record<string, unknown>).evaluate).toBeUndefined();
           expect(typeof cond.description).toBe('string');
         }
       }
@@ -86,7 +86,7 @@ describe('buildKnowledgeBaseExport', () => {
   test('validationRules have no function references — check replaced with conditionDescription', () => {
     const { validationRules } = buildKnowledgeBaseExport();
     for (const rule of validationRules) {
-      expect((rule as Record<string, unknown>).check).toBeUndefined();
+      expect((rule as unknown as Record<string, unknown>).check).toBeUndefined();
       expect(typeof rule.conditionDescription).toBe('string');
       expect(rule.conditionDescription.length).toBeGreaterThan(0);
       expect(typeof rule.id).toBe('string');
