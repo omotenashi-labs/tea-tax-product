@@ -36,11 +36,15 @@ describe('TaxSituationForm', () => {
   test('renders all five section headings', async () => {
     const screen = renderForm();
 
-    await expect.element(screen.getByText('Filing Basics')).toBeInTheDocument();
-    await expect.element(screen.getByText('Income')).toBeInTheDocument();
-    await expect.element(screen.getByText('Deductions')).toBeInTheDocument();
-    await expect.element(screen.getByText('Life Events')).toBeInTheDocument();
-    await expect.element(screen.getByText('State Residency')).toBeInTheDocument();
+    await expect
+      .element(screen.getByRole('heading', { name: 'Filing Basics' }))
+      .toBeInTheDocument();
+    await expect.element(screen.getByRole('heading', { name: 'Income' })).toBeInTheDocument();
+    await expect.element(screen.getByRole('heading', { name: 'Deductions' })).toBeInTheDocument();
+    await expect.element(screen.getByRole('heading', { name: 'Life Events' })).toBeInTheDocument();
+    await expect
+      .element(screen.getByRole('heading', { name: 'State Residency' }))
+      .toBeInTheDocument();
   });
 
   test('renders filing status radio buttons', async () => {
@@ -251,10 +255,14 @@ describe('TaxSituationForm', () => {
     expect(form).toBeTruthy();
 
     // All section headings present at mobile width
-    await expect.element(screen.getByText('Filing Basics')).toBeInTheDocument();
-    await expect.element(screen.getByText('Income')).toBeInTheDocument();
-    await expect.element(screen.getByText('Deductions')).toBeInTheDocument();
-    await expect.element(screen.getByText('Life Events')).toBeInTheDocument();
-    await expect.element(screen.getByText('State Residency')).toBeInTheDocument();
+    await expect
+      .element(screen.getByRole('heading', { name: 'Filing Basics' }))
+      .toBeInTheDocument();
+    await expect.element(screen.getByRole('heading', { name: 'Income' })).toBeInTheDocument();
+    await expect.element(screen.getByRole('heading', { name: 'Deductions' })).toBeInTheDocument();
+    await expect.element(screen.getByRole('heading', { name: 'Life Events' })).toBeInTheDocument();
+    await expect
+      .element(screen.getByRole('heading', { name: 'State Residency' }))
+      .toBeInTheDocument();
   });
 });
