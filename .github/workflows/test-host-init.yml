@@ -71,7 +71,7 @@ jobs:
       - name: Install k3s
         run: |
           curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644 --disable traefik" sh -
-          for i in $(seq 1 30); do sudo k3s ctr version > /dev/null 2>&1 && break; sleep 2; done
+          for i in $(seq 1 60); do sudo k3s kubectl get nodes > /dev/null 2>&1 && break; sleep 2; done
 
       - name: Import branch image into k3s containerd
         run: docker save ghcr.io/${{ github.repository }}:branch-test | sudo k3s ctr images import -
@@ -126,7 +126,7 @@ jobs:
       - name: Install k3s
         run: |
           curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644 --disable traefik" sh -
-          for i in $(seq 1 30); do sudo k3s ctr version > /dev/null 2>&1 && break; sleep 2; done
+          for i in $(seq 1 60); do sudo k3s kubectl get nodes > /dev/null 2>&1 && break; sleep 2; done
 
       - name: Import branch image into k3s containerd
         run: docker save ghcr.io/${{ github.repository }}:branch-test | sudo k3s ctr images import -

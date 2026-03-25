@@ -198,14 +198,14 @@ if _is_legacy_call; then
 
   # ── 1. k3s installation ─────────────────────────────────────────────────────
   echo "==> [1/8] Checking k3s installation"
-  if command -v k3s &>/dev/null && k3s kubectl get nodes &>/dev/null 2>&1; then
+  if command -v k3s &>/dev/null && timeout 15 k3s kubectl get nodes &>/dev/null 2>&1; then
     echo "    k3s already installed and running — skipping."
   else
     echo "    Installing k3s..."
     curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644 --disable traefik" sh -
     echo "    Waiting for k3s to be ready..."
-    for i in $(seq 1 30); do
-      if k3s kubectl get nodes &>/dev/null 2>&1; then
+    for i in $(seq 1 60); do
+      if timeout 10 k3s kubectl get nodes &>/dev/null 2>&1; then
         echo "    k3s ready after ${i} attempts."
         break
       fi
@@ -441,6 +441,9 @@ if _is_legacy_call; then
     --from-literal=ANALYTICS_W_PASSWORD="${ANALYTICS_W_PASSWORD}"
     --from-literal=AGENT_CODING_PASSWORD="${AGENT_CODING_PASSWORD}"
     --from-literal=AGENT_ANALYSIS_PASSWORD="${AGENT_ANALYSIS_PASSWORD}"
+    --from-literal=APP_DB="tea_tax_app"
+    --from-literal=AUDIT_DB="tea_tax_audit"
+    --from-literal=ANALYTICS_DB="tea_tax_analytics"
   )
   [[ -n "${REMOTE_PG_CA_CERT:-}" ]] && DB_INIT_SECRET_ARGS+=(--from-literal=DB_CA_CERT="${REMOTE_PG_CA_CERT}")
   kubectl delete secret calypso-db-init-secret --namespace="${NAMESPACE}" --ignore-not-found
@@ -613,6 +616,21 @@ spec:
                 secretKeyRef:
                   name: calypso-db-init-secret
                   key: AGENT_ANALYSIS_PASSWORD
+            - name: APP_DB
+              valueFrom:
+                secretKeyRef:
+                  name: calypso-db-init-secret
+                  key: APP_DB
+            - name: AUDIT_DB
+              valueFrom:
+                secretKeyRef:
+                  name: calypso-db-init-secret
+                  key: AUDIT_DB
+            - name: ANALYTICS_DB
+              valueFrom:
+                secretKeyRef:
+                  name: calypso-db-init-secret
+                  key: ANALYTICS_DB
           resources:
             requests:
               cpu: '50m'
@@ -1472,7 +1490,10 @@ kubectl create secret generic calypso-db-init-secret \
   --from-literal=AUDIT_W_PASSWORD="${AUDIT_W_PASSWORD}" \
   --from-literal=ANALYTICS_W_PASSWORD="${ANALYTICS_W_PASSWORD}" \
   --from-literal=AGENT_CODING_PASSWORD="${AGENT_CODING_PASSWORD}" \
-  --from-literal=AGENT_ANALYSIS_PASSWORD="${AGENT_ANALYSIS_PASSWORD}"
+  --from-literal=AGENT_ANALYSIS_PASSWORD="${AGENT_ANALYSIS_PASSWORD}" \
+  --from-literal=APP_DB="tea_tax_app" \
+  --from-literal=AUDIT_DB="tea_tax_audit" \
+  --from-literal=ANALYTICS_DB="tea_tax_analytics"
 
 echo "    Secrets applied."
 REMOTESCRIPT
