@@ -7,7 +7,7 @@
 --
 -- The agent_coding role gets:
 --   - LOGIN with a known dev password
---   - CONNECT on calypso_app
+--   - CONNECT on tea_tax_app
 --   - USAGE on public schema
 --   - SELECT on task_queue_view_coding only (no INSERT/UPDATE/DELETE)
 --
@@ -49,5 +49,5 @@ END
 $$;
 
 -- Grant CONNECT on the app database to both agent roles
-GRANT CONNECT ON DATABASE calypso_app TO agent_coding;
-GRANT CONNECT ON DATABASE calypso_app TO agent_analysis;
+GRANT CONNECT ON DATABASE tea_tax_app TO agent_coding;
+GRANT CONNECT ON DATABASE tea_tax_app TO agent_analysis;

@@ -1,10 +1,22 @@
 import { test, expect, describe } from 'vitest';
 import { validate, getCompiledValidator } from '../../src/api/validation';
-import { createTaskSchema, registerUserSchema, patchTaskSchema } from 'core';
+import { registerUserSchema, loginUserSchema } from 'core';
+
+/** Minimal inline schema used to test validation behaviour without relying on
+ *  domain-specific schemas that may be removed in future scrubs. */
+const nameRequiredSchema = {
+  type: 'object',
+  properties: {
+    name: { type: 'string', minLength: 1 },
+    priority: { type: 'string', enum: ['low', 'medium', 'high'] },
+  },
+  required: ['name'],
+  additionalProperties: false,
+} as const;
 
 describe('validate()', () => {
   test('returns valid:true with typed data when input matches schema', () => {
-    const result = validate<{ name: string }>(createTaskSchema, { name: 'My task' });
+    const result = validate<{ name: string }>(nameRequiredSchema, { name: 'My task' });
     expect(result.valid).toBe(true);
     if (result.valid) {
       expect(result.data.name).toBe('My task');
@@ -12,7 +24,7 @@ describe('validate()', () => {
   });
 
   test('returns valid:false with errors when required field is missing', () => {
-    const result = validate(createTaskSchema, { priority: 'low' });
+    const result = validate(nameRequiredSchema, { priority: 'low' });
     expect(result.valid).toBe(false);
     if (!result.valid) {
       expect(result.errors.length).toBeGreaterThan(0);
@@ -22,7 +34,7 @@ describe('validate()', () => {
   });
 
   test('returns valid:false with errors for invalid enum value', () => {
-    const result = validate(createTaskSchema, { name: 'Task', priority: 'urgent' });
+    const result = validate(nameRequiredSchema, { name: 'Task', priority: 'urgent' });
     expect(result.valid).toBe(false);
     if (!result.valid) {
       expect(result.errors.length).toBeGreaterThan(0);
@@ -32,7 +44,7 @@ describe('validate()', () => {
   });
 
   test('collects all errors (allErrors: true) when multiple fields are invalid', () => {
-    const result = validate(createTaskSchema, {
+    const result = validate(nameRequiredSchema, {
       name: '',
       priority: 'invalid',
     });
@@ -44,12 +56,12 @@ describe('validate()', () => {
   });
 
   test('allows optional fields to be absent', () => {
-    const result = validate<{ name: string }>(createTaskSchema, { name: 'Minimal task' });
+    const result = validate<{ name: string }>(nameRequiredSchema, { name: 'Minimal task' });
     expect(result.valid).toBe(true);
   });
 
   test('returns valid:false for additional properties when additionalProperties:false', () => {
-    const result = validate(createTaskSchema, { name: 'Task', unknownField: 'oops' });
+    const result = validate(nameRequiredSchema, { name: 'Task', unknownField: 'oops' });
     expect(result.valid).toBe(false);
   });
 
@@ -81,22 +93,24 @@ describe('validate()', () => {
     }
   });
 
-  test('patchTaskSchema: valid partial patch passes', () => {
-    const result = validate(patchTaskSchema, { status: 'done' });
+  test('loginUserSchema: valid input passes', () => {
+    const result = validate(loginUserSchema, { username: 'alice', password: 'pw' });
     expect(result.valid).toBe(true);
   });
 
-  test('patchTaskSchema: invalid status enum fails', () => {
-    const result = validate(patchTaskSchema, { status: 'completed' });
+  test('loginUserSchema: missing password fails', () => {
+    const result = validate(loginUserSchema, { username: 'alice' });
     expect(result.valid).toBe(false);
     if (!result.valid) {
-      const paths = result.errors.map((e) => e.instancePath);
-      expect(paths.some((p) => p === '/status')).toBe(true);
+      const messages = result.errors.map((e) => e.message);
+      expect(messages.some((m) => m?.includes("must have required property 'password'"))).toBe(
+        true,
+      );
     }
   });
 
   test('error objects include instancePath and message', () => {
-    const result = validate(createTaskSchema, {});
+    const result = validate(nameRequiredSchema, {});
     expect(result.valid).toBe(false);
     if (!result.valid) {
       const err = result.errors[0];
@@ -108,8 +122,8 @@ describe('validate()', () => {
 
 describe('getCompiledValidator() — module-level caching', () => {
   test('returns the same compiled function reference on successive calls (same schema object)', () => {
-    const fn1 = getCompiledValidator(createTaskSchema);
-    const fn2 = getCompiledValidator(createTaskSchema);
+    const fn1 = getCompiledValidator(nameRequiredSchema);
+    const fn2 = getCompiledValidator(nameRequiredSchema);
     expect(fn1).toBe(fn2);
   });
 
@@ -119,14 +133,14 @@ describe('getCompiledValidator() — module-level caching', () => {
     expect(fn1).toBe(fn2);
   });
 
-  test('returns the same reference for patchTaskSchema across two calls', () => {
-    const fn1 = getCompiledValidator(patchTaskSchema);
-    const fn2 = getCompiledValidator(patchTaskSchema);
+  test('returns the same reference for loginUserSchema across two calls', () => {
+    const fn1 = getCompiledValidator(loginUserSchema);
+    const fn2 = getCompiledValidator(loginUserSchema);
     expect(fn1).toBe(fn2);
   });
 
   test('valid payload is still accepted after refactor', () => {
-    const result = validate<{ name: string }>(createTaskSchema, { name: 'Cached task' });
+    const result = validate<{ name: string }>(nameRequiredSchema, { name: 'Cached task' });
     expect(result.valid).toBe(true);
     if (result.valid) {
       expect(result.data.name).toBe('Cached task');
@@ -134,7 +148,7 @@ describe('getCompiledValidator() — module-level caching', () => {
   });
 
   test('invalid payload is still rejected with the same structured error after refactor', () => {
-    const result = validate(createTaskSchema, { priority: 'bad' });
+    const result = validate(nameRequiredSchema, { priority: 'bad' });
     expect(result.valid).toBe(false);
     if (!result.valid) {
       expect(result.errors.length).toBeGreaterThan(0);
@@ -147,12 +161,12 @@ describe('getCompiledValidator() — module-level caching', () => {
 
   test('performance smoke: 1000 cached validate() calls complete within 100ms', () => {
     // Warm up the cache (first call compiles the schema)
-    validate(createTaskSchema, { name: 'warmup' });
+    validate(nameRequiredSchema, { name: 'warmup' });
 
     const ITERATIONS = 1000;
     const start = performance.now();
     for (let i = 0; i < ITERATIONS; i++) {
-      validate(createTaskSchema, { name: `task-${i}` });
+      validate(nameRequiredSchema, { name: `task-${i}` });
     }
     const elapsed = performance.now() - start;
 

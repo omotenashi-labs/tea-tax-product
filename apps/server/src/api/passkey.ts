@@ -32,7 +32,7 @@ import { signJwt } from '../auth/jwt';
 // In development (localhost) the rpID is 'localhost'.
 // For production, override via RP_ID / RP_NAME / ORIGIN env vars.
 const RP_ID = process.env.RP_ID ?? 'localhost';
-const RP_NAME = process.env.RP_NAME ?? 'Calypso';
+const RP_NAME = process.env.RP_NAME ?? 'Tea Tax';
 const ORIGIN = process.env.ORIGIN ?? `http://localhost:5174`;
 
 export async function handlePasskeyRequest(
@@ -302,7 +302,7 @@ export async function handlePasskeyRequest(
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json',
-          'Set-Cookie': `calypso_auth=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=604800`,
+          'Set-Cookie': `tea_tax_auth=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=604800`,
         },
       });
     } catch (err) {

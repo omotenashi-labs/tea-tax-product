@@ -101,15 +101,15 @@ echo "    migrate OK"
 echo "==> Verify tables"
 docker run --rm --network=host postgres:16-alpine \
   psql "${DATABASE_URL}" -c "\dt" | grep -E "entity_types|entities"
-echo "    calypso_app tables OK"
+echo "    tea_tax_app tables OK"
 
 docker run --rm --network=host postgres:16-alpine \
   psql "${AUDIT_DATABASE_URL}" -c "\dt" | grep "audit_log"
-echo "    calypso_audit tables OK"
+echo "    tea_tax_audit tables OK"
 
 docker run --rm --network=host postgres:16-alpine \
   psql "${ANALYTICS_DATABASE_URL}" -c "\dt" | grep -E "analytics_events|audit_replica"
-echo "    calypso_analytics tables OK"
+echo "    tea_tax_analytics tables OK"
 
 # ── 7. Verify audit_w INSERT grant ───────────────────────────────────────────
 

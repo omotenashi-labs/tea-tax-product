@@ -1,6 +1,14 @@
 import { sql } from 'db';
-import type { ConsequentialWriteRequest, PrincipalActorRef, TaskProperties } from 'core';
+import type { ConsequentialWriteRequest, PrincipalActorRef } from 'core';
 import { emitAuditEvent } from './audit-service';
+
+/**
+ * Generic entity properties payload for a task entity.
+ * TaskProperties was removed as a named export during the Foundation scrub;
+ * task CRUD is out of scope for the demo. This type alias keeps the write
+ * service compilable without coupling it to a domain type that no longer exists.
+ */
+type TaskProperties = Record<string, unknown>;
 
 export interface TaskWritePayload {
   taskId: string;
@@ -53,8 +61,8 @@ export async function applyTaskPatchThroughBoundary(
     action: request.transactionType,
     entity_type: 'task',
     entity_id: request.payload.taskId,
-    before: request.payload.current as unknown as Record<string, unknown>,
-    after: request.payload.next as unknown as Record<string, unknown>,
+    before: request.payload.current as Record<string, unknown>,
+    after: request.payload.next as Record<string, unknown>,
     ts: new Date().toISOString(),
   });
 

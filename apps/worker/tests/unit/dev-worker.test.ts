@@ -122,8 +122,8 @@ describe('dev-postgres-init agent roles SQL', () => {
     expect(sqlText).toContain('agent_analysis');
   });
 
-  test('SQL grants CONNECT on calypso_app to agent_coding', () => {
-    expect(sqlText).toContain('GRANT CONNECT ON DATABASE calypso_app TO agent_coding');
+  test('SQL grants CONNECT on tea_tax_app to agent_coding', () => {
+    expect(sqlText).toContain('GRANT CONNECT ON DATABASE tea_tax_app TO agent_coding');
   });
 
   test('SQL script is idempotent (uses IF NOT EXISTS guards)', () => {

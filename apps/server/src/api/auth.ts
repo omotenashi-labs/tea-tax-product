@@ -40,7 +40,7 @@ export async function getAuthenticatedUser(
   req: Request,
 ): Promise<{ id: string; username: string } | null> {
   const cookies = parseCookies(req.headers.get('Cookie'));
-  const token = cookies['calypso_auth'];
+  const token = cookies['tea_tax_auth'];
 
   if (!token) return null;
 
@@ -216,7 +216,7 @@ export async function handleAuthRequest(
       // remain SameSite=Strict.
       res.headers.append(
         'Set-Cookie',
-        `calypso_auth=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=604800`,
+        `tea_tax_auth=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=604800`,
       );
       res.headers.append('Set-Cookie', csrfCookieHeader(csrfToken));
       return res;
@@ -316,7 +316,7 @@ export async function handleAuthRequest(
       // rationale and guidance for future OAuth flows.
       res.headers.append(
         'Set-Cookie',
-        `calypso_auth=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=604800`,
+        `tea_tax_auth=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=604800`,
       );
       res.headers.append('Set-Cookie', csrfCookieHeader(csrfToken));
       return res;
@@ -351,7 +351,7 @@ export async function handleAuthRequest(
   // 4. POST /api/auth/logout
   if (req.method === 'POST' && url.pathname === '/api/auth/logout') {
     const cookies = parseCookies(req.headers.get('Cookie'));
-    const token = cookies['calypso_auth'];
+    const token = cookies['tea_tax_auth'];
 
     if (token) {
       try {
@@ -383,7 +383,7 @@ export async function handleAuthRequest(
         'Content-Type': 'application/json',
       },
     });
-    res.headers.append('Set-Cookie', 'calypso_auth=; HttpOnly; Path=/; Max-Age=0');
+    res.headers.append('Set-Cookie', 'tea_tax_auth=; HttpOnly; Path=/; Max-Age=0');
     res.headers.append(
       'Set-Cookie',
       '__Host-csrf-token=; SameSite=Strict; Secure; Path=/; Max-Age=0',

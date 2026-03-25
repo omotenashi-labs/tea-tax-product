@@ -8,36 +8,36 @@ import { resolveDatabaseUrls, resolveSchemaSqlPath, splitSqlStatements } from '.
 describe('resolveDatabaseUrls', () => {
   it('uses localhost defaults when only DATABASE_URL is unset', () => {
     expect(resolveDatabaseUrls({} as NodeJS.ProcessEnv)).toEqual({
-      app: 'postgres://app_rw:app_rw_password@localhost:5432/calypso_app',
-      audit: 'postgres://audit_w:audit_w_password@localhost:5432/calypso_audit',
-      analytics: 'postgres://analytics_w:analytics_w_password@localhost:5432/calypso_analytics',
+      app: 'postgres://app_rw:app_rw_password@localhost:5432/tea_tax_app',
+      audit: 'postgres://audit_w:audit_w_password@localhost:5432/tea_tax_audit',
+      analytics: 'postgres://analytics_w:analytics_w_password@localhost:5432/tea_tax_analytics',
     });
   });
 
   it('respects explicit pool environment overrides', () => {
     expect(
       resolveDatabaseUrls({
-        DATABASE_URL: 'postgres://app@example/calypso_app',
-        AUDIT_DATABASE_URL: 'postgres://audit@example/calypso_audit',
-        ANALYTICS_DATABASE_URL: 'postgres://analytics@example/calypso_analytics',
+        DATABASE_URL: 'postgres://app@example/tea_tax_app',
+        AUDIT_DATABASE_URL: 'postgres://audit@example/tea_tax_audit',
+        ANALYTICS_DATABASE_URL: 'postgres://analytics@example/tea_tax_analytics',
       } as NodeJS.ProcessEnv),
     ).toEqual({
-      app: 'postgres://app@example/calypso_app',
-      audit: 'postgres://audit@example/calypso_audit',
-      analytics: 'postgres://analytics@example/calypso_analytics',
+      app: 'postgres://app@example/tea_tax_app',
+      audit: 'postgres://audit@example/tea_tax_audit',
+      analytics: 'postgres://analytics@example/tea_tax_analytics',
     });
   });
 
   it('falls back independently when audit or analytics URLs are missing', () => {
     expect(
       resolveDatabaseUrls({
-        DATABASE_URL: 'postgres://app@example/calypso_app',
-        AUDIT_DATABASE_URL: 'postgres://audit@example/calypso_audit',
+        DATABASE_URL: 'postgres://app@example/tea_tax_app',
+        AUDIT_DATABASE_URL: 'postgres://audit@example/tea_tax_audit',
       } as NodeJS.ProcessEnv),
     ).toEqual({
-      app: 'postgres://app@example/calypso_app',
-      audit: 'postgres://audit@example/calypso_audit',
-      analytics: 'postgres://analytics_w:analytics_w_password@localhost:5432/calypso_analytics',
+      app: 'postgres://app@example/tea_tax_app',
+      audit: 'postgres://audit@example/tea_tax_audit',
+      analytics: 'postgres://analytics_w:analytics_w_password@localhost:5432/tea_tax_analytics',
     });
   });
 });
@@ -79,7 +79,7 @@ describe('resolveSchemaSqlPath', () => {
   });
 
   it('falls back to packaged schema.sql when running from a bundled dist directory', () => {
-    const root = mkdtempSync(join(tmpdir(), 'calypso-schema-path-'));
+    const root = mkdtempSync(join(tmpdir(), 'tea-tax-schema-path-'));
     const distDir = join(root, 'dist');
     const packagedDir = join(root, 'packages', 'db');
     mkdirSync(distDir, { recursive: true });

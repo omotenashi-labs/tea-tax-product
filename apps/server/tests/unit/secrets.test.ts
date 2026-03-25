@@ -49,7 +49,7 @@ describe('VaultSecretsProvider', () => {
   const VAULT_ADDR = 'http://vault-test:8200';
   const TOKEN = 'test-token';
   const MOUNT = 'secret';
-  const PATH = 'calypso';
+  const PATH = 'tea-tax';
 
   function makeProvider(ttlMs = 300_000) {
     return new VaultSecretsProvider({

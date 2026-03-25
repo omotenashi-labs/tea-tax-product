@@ -9,7 +9,7 @@ import { log, rotateLogs, templateMessage, configureLogger, resetDeduplication }
 // ---------------------------------------------------------------------------
 
 function makeTmpDir(): string {
-  return mkdtempSync(join(tmpdir(), 'calypso-logger-test-'));
+  return mkdtempSync(join(tmpdir(), 'tea-tax-logger-test-'));
 }
 
 function readLines(filePath: string): string[] {

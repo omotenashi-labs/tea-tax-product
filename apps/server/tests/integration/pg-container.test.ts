@@ -12,7 +12,7 @@ afterAll(async () => {
 });
 
 test('container starts and returns a valid DATABASE_URL', () => {
-  expect(pg.url).toMatch(/^postgres:\/\/calypso:calypso@localhost:\d+\/calypso$/);
+  expect(pg.url).toMatch(/^postgres:\/\/tea_tax:tea_tax@localhost:\d+\/tea_tax$/);
 });
 
 test('container is reachable and accepts queries', async () => {
@@ -22,9 +22,9 @@ test('container is reachable and accepts queries', async () => {
     pg.containerId,
     'psql',
     '-U',
-    'calypso',
+    'tea_tax',
     '-d',
-    'calypso',
+    'tea_tax',
     '-c',
     'SELECT 1 AS ok',
   ]);

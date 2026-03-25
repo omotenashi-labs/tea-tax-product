@@ -12,9 +12,9 @@
 import postgres from 'postgres';
 import { cleanupStaleContainers, addProcess, removeProcess } from './cleanup';
 
-const PG_USER = 'calypso';
-const PG_PASSWORD = 'calypso';
-const PG_DB = 'calypso';
+const PG_USER = 'tea_tax';
+const PG_PASSWORD = 'tea_tax';
+const PG_DB = 'tea_tax';
 const PG_IMAGE = 'postgres:16';
 const READY_TIMEOUT_MS = 30_000;
 const PORT_POLL_INTERVAL_MS = 250;

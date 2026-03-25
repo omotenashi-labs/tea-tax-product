@@ -354,7 +354,7 @@ if _is_legacy_call; then
   fi
 
   if [[ "${DB_MODE}" == "local" ]]; then
-    PG_HOST="postgres"; PG_PORT="5432"; PG_ADMIN_DB="calypso_app"
+    PG_HOST="postgres"; PG_PORT="5432"; PG_ADMIN_DB="tea_tax_app"
     PG_ADMIN_USER="postgres"; PG_ADMIN_PASSWORD="${POSTGRES_SUPERUSER_PASSWORD:-}"; PG_SSL=""
   else
     PG_HOST="${REMOTE_PG_HOST}"; PG_PORT="${REMOTE_PG_PORT}"; PG_ADMIN_DB="${REMOTE_PG_ADMIN_DB}"
@@ -363,9 +363,9 @@ if _is_legacy_call; then
   fi
 
   if [[ "${DB_MODE}" == "local" ]]; then
-    DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@postgres:5432/calypso_app"
-    AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@postgres:5432/calypso_audit"
-    ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@postgres:5432/calypso_analytics"
+    DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@postgres:5432/tea_tax_app"
+    AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@postgres:5432/tea_tax_audit"
+    ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@postgres:5432/tea_tax_analytics"
     ADMIN_DATABASE_URL="postgres://${PG_ADMIN_USER}:${PG_ADMIN_PASSWORD}@postgres:5432/${PG_ADMIN_DB}"
   else
     SSL_SUFFIX=""
@@ -374,9 +374,9 @@ if _is_legacy_call; then
     elif [[ "${PG_SSL}" == "disable" ]]; then
       SSL_SUFFIX="?sslmode=disable"
     fi
-    DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@${PG_HOST}:${PG_PORT}/calypso_app${SSL_SUFFIX}"
-    AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@${PG_HOST}:${PG_PORT}/calypso_audit${SSL_SUFFIX}"
-    ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@${PG_HOST}:${PG_PORT}/calypso_analytics${SSL_SUFFIX}"
+    DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@${PG_HOST}:${PG_PORT}/tea_tax_app${SSL_SUFFIX}"
+    AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@${PG_HOST}:${PG_PORT}/tea_tax_audit${SSL_SUFFIX}"
+    ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@${PG_HOST}:${PG_PORT}/tea_tax_analytics${SSL_SUFFIX}"
     ADMIN_DATABASE_URL="postgres://${PG_ADMIN_USER}:${PG_ADMIN_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_ADMIN_DB}${SSL_SUFFIX}"
   fi
 
@@ -428,7 +428,7 @@ if _is_legacy_call; then
   if [[ "${DB_MODE}" == "local" ]]; then
     DB_SECRET_ARGS+=(--from-literal=POSTGRES_USER="postgres")
     DB_SECRET_ARGS+=(--from-literal=POSTGRES_PASSWORD="${POSTGRES_SUPERUSER_PASSWORD}")
-    DB_SECRET_ARGS+=(--from-literal=POSTGRES_DB="calypso_app")
+    DB_SECRET_ARGS+=(--from-literal=POSTGRES_DB="tea_tax_app")
   fi
   kubectl delete secret calypso-db-secrets --namespace="${NAMESPACE}" --ignore-not-found
   kubectl create secret generic calypso-db-secrets "${DB_SECRET_ARGS[@]}"
@@ -514,14 +514,14 @@ spec:
               mountPath: /var/lib/postgresql/data
           livenessProbe:
             exec:
-              command: [pg_isready, -U, postgres, -d, calypso_app]
+              command: [pg_isready, -U, postgres, -d, tea_tax_app]
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
           readinessProbe:
             exec:
-              command: [pg_isready, -U, postgres, -d, calypso_app]
+              command: [pg_isready, -U, postgres, -d, tea_tax_app]
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 5
@@ -1418,10 +1418,10 @@ fi
 
 # Build database URLs
 if [[ "${DB_MODE}" == "local" ]]; then
-  DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@postgres:5432/calypso_app"
-  AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@postgres:5432/calypso_audit"
-  ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@postgres:5432/calypso_analytics"
-  ADMIN_DATABASE_URL="postgres://postgres:${POSTGRES_SUPERUSER_PASSWORD:-}@postgres:5432/calypso_app"
+  DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@postgres:5432/tea_tax_app"
+  AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@postgres:5432/tea_tax_audit"
+  ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@postgres:5432/tea_tax_analytics"
+  ADMIN_DATABASE_URL="postgres://postgres:${POSTGRES_SUPERUSER_PASSWORD:-}@postgres:5432/tea_tax_app"
 else
   REMOTE_PG_PORT="${REMOTE_PG_PORT:-5432}"
   REMOTE_PG_ADMIN_DB="${REMOTE_PG_ADMIN_DB:-postgres}"
@@ -1433,9 +1433,9 @@ else
   elif [[ "${REMOTE_PG_SSL}" == "disable" ]]; then
     SSL_SUFFIX="?sslmode=disable"
   fi
-  DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/calypso_app${SSL_SUFFIX}"
-  AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/calypso_audit${SSL_SUFFIX}"
-  ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/calypso_analytics${SSL_SUFFIX}"
+  DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/tea_tax_app${SSL_SUFFIX}"
+  AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/tea_tax_audit${SSL_SUFFIX}"
+  ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/tea_tax_analytics${SSL_SUFFIX}"
   ADMIN_DATABASE_URL="postgres://${REMOTE_PG_ADMIN_USER}:${REMOTE_PG_ADMIN_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/${REMOTE_PG_ADMIN_DB}${SSL_SUFFIX}"
 fi
 
@@ -1509,7 +1509,7 @@ kubectl patch secret calypso-db-secrets --namespace="${NAMESPACE}" \
   -p='[
     {"op":"add","path":"/data/POSTGRES_USER","value":"'"$(printf '%s' "postgres" | base64 | tr -d '\n')"'"},
     {"op":"add","path":"/data/POSTGRES_PASSWORD","value":"'"$(printf '%s' "${POSTGRES_SUPERUSER_PASSWORD:-}" | base64 | tr -d '\n')"'"},
-    {"op":"add","path":"/data/POSTGRES_DB","value":"'"$(printf '%s' "calypso_app" | base64 | tr -d '\n')"'"}
+    {"op":"add","path":"/data/POSTGRES_DB","value":"'"$(printf '%s' "tea_tax_app" | base64 | tr -d '\n')"'"}
   ]'
 REMOTESCRIPT
 
@@ -1578,14 +1578,14 @@ spec:
               mountPath: /var/lib/postgresql/data
           livenessProbe:
             exec:
-              command: [pg_isready, -U, postgres, -d, calypso_app]
+              command: [pg_isready, -U, postgres, -d, tea_tax_app]
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
           readinessProbe:
             exec:
-              command: [pg_isready, -U, postgres, -d, calypso_app]
+              command: [pg_isready, -U, postgres, -d, tea_tax_app]
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 5

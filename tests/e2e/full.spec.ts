@@ -30,14 +30,14 @@ test('app loads and shows login screen', async () => {
 
   await page.goto(env.baseUrl, { waitUntil: 'networkidle' });
 
-  await playwrightExpect(page.getByRole('heading', { name: 'Calypso' })).toBeVisible();
+  await playwrightExpect(page.getByRole('heading', { name: 'Tea Tax' })).toBeVisible();
   await playwrightExpect(page.getByPlaceholder('••••••••')).toBeVisible();
   vitestExpect(consoleErrors.filter((e) => !isExpectedError(e))).toHaveLength(0);
 
   await page.close();
 });
 
-test('register and login renders the Calypso layout shell', async () => {
+test('register and login renders the Tea Tax layout shell', async () => {
   const consoleErrors: string[] = [];
   const page = await browser.newPage();
   page.on('console', (msg) => {
@@ -52,7 +52,7 @@ test('register and login renders the Calypso layout shell', async () => {
   await page.getByPlaceholder('••••••••').fill('smokepass123');
   await page.getByRole('button', { name: 'Create Account' }).click();
 
-  await playwrightExpect(page.getByRole('heading', { name: 'Main Project' })).toBeVisible({
+  await playwrightExpect(page.getByRole('heading', { name: 'Tea Tax' })).toBeVisible({
     timeout: 15_000,
   });
   vitestExpect(consoleErrors.filter((e) => !isExpectedError(e))).toHaveLength(0);

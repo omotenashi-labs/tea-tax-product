@@ -4,9 +4,9 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 
 const DEFAULT_DATABASE_NAMES = {
-  app: 'calypso_app',
-  audit: 'calypso_audit',
-  analytics: 'calypso_analytics',
+  app: 'tea_tax_app',
+  audit: 'tea_tax_audit',
+  analytics: 'tea_tax_analytics',
 } as const;
 
 const ROLE_NAMES = {

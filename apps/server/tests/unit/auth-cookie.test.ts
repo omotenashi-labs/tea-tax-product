@@ -96,7 +96,7 @@ describe('auth cookie SameSite attribute', () => {
 
     const setCookieHeaders = res!.headers.getSetCookie();
 
-    const authCookie = setCookieHeaders.find((h) => h.startsWith('calypso_auth='));
+    const authCookie = setCookieHeaders.find((h) => h.startsWith('tea_tax_auth='));
     expect(authCookie).toBeDefined();
     expect(authCookie).toContain('SameSite=Strict');
     expect(authCookie).not.toContain('SameSite=Lax');
@@ -128,7 +128,7 @@ describe('auth cookie SameSite attribute', () => {
 
     const setCookieHeaders = res!.headers.getSetCookie();
 
-    const authCookie = setCookieHeaders.find((h) => h.startsWith('calypso_auth='));
+    const authCookie = setCookieHeaders.find((h) => h.startsWith('tea_tax_auth='));
     expect(authCookie).toBeDefined();
     expect(authCookie).toContain('SameSite=Strict');
     expect(authCookie).not.toContain('SameSite=Lax');
@@ -136,7 +136,7 @@ describe('auth cookie SameSite attribute', () => {
 });
 
 describe('auth cookie other attributes', () => {
-  test('calypso_auth cookie is HttpOnly', async () => {
+  test('tea_tax_auth cookie is HttpOnly', async () => {
     const passwordHash = await Bun.password.hash('password');
     const appState = makeAppState({
       sqlResult: [{ id: 'user-id', username: 'testuser', password_hash: passwordHash }],
@@ -152,11 +152,11 @@ describe('auth cookie other attributes', () => {
     const res = await handleAuthRequest(req, url, appState);
     const setCookieHeaders = res!.headers.getSetCookie();
 
-    const authCookie = setCookieHeaders.find((h) => h.startsWith('calypso_auth='));
+    const authCookie = setCookieHeaders.find((h) => h.startsWith('tea_tax_auth='));
     expect(authCookie).toContain('HttpOnly');
   });
 
-  test('calypso_auth cookie has Path=/', async () => {
+  test('tea_tax_auth cookie has Path=/', async () => {
     const passwordHash = await Bun.password.hash('password');
     const appState = makeAppState({
       sqlResult: [{ id: 'user-id', username: 'testuser', password_hash: passwordHash }],
@@ -172,7 +172,7 @@ describe('auth cookie other attributes', () => {
     const res = await handleAuthRequest(req, url, appState);
     const setCookieHeaders = res!.headers.getSetCookie();
 
-    const authCookie = setCookieHeaders.find((h) => h.startsWith('calypso_auth='));
+    const authCookie = setCookieHeaders.find((h) => h.startsWith('tea_tax_auth='));
     expect(authCookie).toContain('Path=/');
   });
 });

@@ -19,8 +19,8 @@ export interface Relation {
   created_at: string;
 }
 
-// Calypso Specific semantic properties mapped from the Entity JSONB
-// Policy note: this starter app stores password hashes inside the generic user
+// Tea Tax semantic properties mapped from the Entity JSONB
+// Policy note: this app stores password hashes inside the generic user
 // entity payload. The target blueprint posture replaces this with passkey-first
 // auth, dedicated auth/audit controls, and stricter separation between identity
 // material and general business entities.
@@ -28,39 +28,6 @@ export interface UserProperties {
   username: string;
   password_hash: string;
 }
-
-export type TaskStatus = 'todo' | 'in_progress' | 'done';
-export type TaskPriority = 'low' | 'medium' | 'high';
-
-export interface Task {
-  id: string;
-  name: string;
-  description: string;
-  owner: string;
-  priority: TaskPriority;
-  status: TaskStatus;
-  estimateStart: string | null;
-  estimatedDeliver: string | null;
-  dependsOn: string[];
-  tags: string[];
-  createdAt: string;
-}
-
-export interface TaskProperties {
-  name: string;
-  description: string;
-  owner: string;
-  priority: TaskPriority;
-  status: TaskStatus;
-  estimateStart: string | null;
-  estimatedDeliver: string | null;
-  dependsOn: string[];
-  tags: string[];
-}
-
-// Policy note: a starter-level task update is still modeled as a mutable entity
-// rewrite. Consequential future workflows should move to a journaled write
-// boundary so state changes can be replayed, compensated, and attributed.
 
 export interface GithubLinkProperties {
   issueNumber: number;
@@ -72,41 +39,6 @@ export interface GithubLinkProperties {
 // ---------------------------------------------------------------------------
 // JSON Schemas for server-side validation and integration test fixtures
 // ---------------------------------------------------------------------------
-
-/** JSON Schema for creating a new task (POST /api/tasks body). */
-export const createTaskSchema = {
-  type: 'object',
-  properties: {
-    name: { type: 'string', minLength: 1 },
-    description: { type: 'string' },
-    owner: { type: 'string' },
-    priority: { type: 'string', enum: ['low', 'medium', 'high'] },
-    status: { type: 'string', enum: ['todo', 'in_progress', 'done'] },
-    estimateStart: { type: ['string', 'null'] },
-    estimatedDeliver: { type: ['string', 'null'] },
-    dependsOn: { type: 'array', items: { type: 'string' } },
-    tags: { type: 'array', items: { type: 'string' } },
-  },
-  required: ['name'],
-  additionalProperties: false,
-} as const;
-
-/** JSON Schema for patching an existing task (PATCH /api/tasks/:id body). */
-export const patchTaskSchema = {
-  type: 'object',
-  properties: {
-    name: { type: 'string', minLength: 1 },
-    description: { type: 'string' },
-    owner: { type: 'string' },
-    priority: { type: 'string', enum: ['low', 'medium', 'high'] },
-    status: { type: 'string', enum: ['todo', 'in_progress', 'done'] },
-    estimateStart: { type: ['string', 'null'] },
-    estimatedDeliver: { type: ['string', 'null'] },
-    dependsOn: { type: 'array', items: { type: 'string' } },
-    tags: { type: 'array', items: { type: 'string' } },
-  },
-  additionalProperties: false,
-} as const;
 
 /** JSON Schema for user registration (POST /api/auth/register body). */
 export const registerUserSchema = {
