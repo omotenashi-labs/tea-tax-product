@@ -1,5 +1,5 @@
 import { test, expect, beforeAll, afterAll } from 'vitest';
-import { startPostgres, type PgContainer } from '../helpers/pg-container';
+import { startPostgres, type PgContainer } from '../../helpers/pg-container';
 
 let pg: PgContainer;
 
