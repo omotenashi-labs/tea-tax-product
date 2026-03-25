@@ -4,8 +4,8 @@ import { PasskeyLoginButton } from './PasskeyButton';
 
 /** Demo personas pre-seeded for frictionless demo access. */
 const DEMO_USERS = [
-  { label: 'Demo as Admin', username: 'demo_admin', password: 'demo_admin123' },
-  { label: 'Demo as Tax Filer', username: 'demo_filer', password: 'demo_filer123' },
+  { label: 'Demo as Superadmin', username: 'demo_superadmin', password: 'demo_superadmin123' },
+  { label: 'Demo as Filer', username: 'demo_filer', password: 'demo_filer123' },
 ];
 
 export const Login: React.FC = () => {

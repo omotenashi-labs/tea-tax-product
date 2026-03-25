@@ -3,7 +3,7 @@
  * Idempotent demo persona seeding.
  *
  * On startup this module ensures two fixed demo accounts exist so that the
- * "Demo as Admin" and "Demo as Tax Filer" buttons on the login page work
+ * "Demo as Superadmin" and "Demo as Filer" buttons on the login page work
  * without manual setup.
  *
  * Credentials are intentionally fixed and public — these accounts are for
@@ -24,7 +24,7 @@ interface DemoPersona {
 }
 
 const DEMO_PERSONAS: DemoPersona[] = [
-  { username: 'demo_admin', password: 'demo_admin123', role: 'admin' },
+  { username: 'demo_superadmin', password: 'demo_superadmin123', role: 'superadmin' },
   { username: 'demo_filer', password: 'demo_filer123', role: 'tax_filer' },
 ];
 
