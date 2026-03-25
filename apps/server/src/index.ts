@@ -20,6 +20,7 @@ import { handleAdminRequest } from './api/admin';
 import { handleUsersRequest } from './api/users';
 import { handleTaxObjectsRequest } from './api/tax-objects';
 import { handleTaxReturnsRequest } from './api/tax-returns';
+import { handleTierEvaluateRequest } from './api/tier-evaluate';
 import { handleExtractW2Request } from './api/extract-w2';
 import { seedSuperuser } from './seed/superuser';
 import { getJwks } from './auth/jwt';
@@ -192,6 +193,12 @@ export default {
     }
 
     if (url.pathname.startsWith('/api/tax-objects')) {
+      // Tier-evaluate route is the deepest nested path — check it first.
+      if (url.pathname.includes('/tier-evaluate')) {
+        const tierEvalRes = await handleTierEvaluateRequest(req, url, appState);
+        if (tierEvalRes) return withTrace(tierEvalRes);
+      }
+
       // Tax-returns routes are nested under /api/tax-objects/:id/returns.
       // Check them before the parent tax-objects handler to avoid early exit.
       if (url.pathname.includes('/returns')) {
