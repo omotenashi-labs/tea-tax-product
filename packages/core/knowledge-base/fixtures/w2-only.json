@@ -1,0 +1,112 @@
+{
+  "taxSituation": {
+    "id": "fixture-w2-001",
+    "version": "0.1.0",
+    "filingYear": 2025,
+    "filingStatus": "single",
+    "dependents": [],
+    "incomeStreams": [
+      {
+        "type": "w2",
+        "source": "Acme Technology Inc.",
+        "amount": 72000,
+        "employerEIN": "47-1234567",
+        "documentation": [
+          {
+            "artifactId": "art-w2-001",
+            "description": "W-2 from Acme Technology Inc. — 2025"
+          }
+        ],
+        "w2Data": {
+          "wages": 72000,
+          "federalTaxWithheld": 11520,
+          "socialSecurityWages": 72000,
+          "socialSecurityTaxWithheld": 4464,
+          "medicareWages": 72000,
+          "medicareTaxWithheld": 1044,
+          "stateName": "CA",
+          "stateWages": 72000,
+          "stateTaxWithheld": 3600
+        }
+      }
+    ],
+    "deductions": [
+      {
+        "type": "standard",
+        "amount": 15000,
+        "documentation": []
+      }
+    ],
+    "credits": [],
+    "lifeEvents": [],
+    "priorYearContext": {
+      "estimatedAGI": 68000,
+      "filingMethod": "self_prepared",
+      "provider": "TurboTax"
+    },
+    "stateResidency": {
+      "primary": "CA",
+      "additional": []
+    },
+    "documentationCompleteness": 1.0,
+    "confidenceScores": {
+      "overall": 0.97,
+      "perField": {
+        "incomeStreams[0].w2Data.wages": 0.99,
+        "incomeStreams[0].w2Data.federalTaxWithheld": 0.99
+      }
+    },
+    "rawArtifacts": [
+      {
+        "id": "art-w2-001",
+        "type": "document",
+        "source": "upload",
+        "extractedData": {
+          "formType": "W-2",
+          "taxYear": 2025,
+          "employer": "Acme Technology Inc."
+        }
+      }
+    ],
+    "metadata": {
+      "createdAt": "2026-01-15T10:00:00.000Z",
+      "updatedAt": "2026-01-15T10:00:00.000Z",
+      "objectType": "individual",
+      "schemaVersion": "0.1.0"
+    }
+  },
+  "expectedValidationResult": {
+    "valid": true,
+    "errors": [],
+    "warnings": [],
+    "completeness": 1.0,
+    "formsRequired": ["1040", "state-return", "w-2"]
+  },
+  "expectedTierPlacements": {
+    "turbotax": {
+      "matchedTier": "Free",
+      "federalPrice": 0,
+      "statePrice": 0
+    },
+    "hrblock": {
+      "matchedTier": "Free Online",
+      "federalPrice": 0,
+      "statePrice": 0
+    },
+    "taxact": {
+      "matchedTier": "Free",
+      "federalPrice": 0,
+      "statePrice": 39.99
+    },
+    "freetaxusa": {
+      "matchedTier": "Free",
+      "federalPrice": 0,
+      "statePrice": 14.99
+    },
+    "cashapp": {
+      "matchedTier": "Free",
+      "federalPrice": 0,
+      "statePrice": 0
+    }
+  }
+}
