@@ -53,7 +53,6 @@ interface TaxObjectProperties {
   display_name?: string;
   created_by_user_id: string;
   status: 'active' | 'archived';
-  [key: string]: unknown;
 }
 
 interface TaxObjectRow {
@@ -137,7 +136,7 @@ export async function handleTaxObjectsRequest(
 
     await sql`
       INSERT INTO entities (id, type, properties)
-      VALUES (${id}, 'tax_object', ${sql.json(properties)})
+      VALUES (${id}, 'tax_object', ${sql.json(properties as never)})
     `;
 
     // Create the "owns" relation from user to tax_object.
@@ -255,7 +254,7 @@ export async function handleTaxObjectsRequest(
 
     await sql`
       UPDATE entities
-      SET properties = ${sql.json(updatedProperties)},
+      SET properties = ${sql.json(updatedProperties as never)},
           updated_at = NOW(),
           version = version + 1
       WHERE id = ${targetId}
