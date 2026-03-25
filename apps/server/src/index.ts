@@ -18,6 +18,7 @@ import { startStaleClaimRecovery } from './policies/stale-claim-recovery-service
 import { websocketHandler } from './websocket';
 import { handleAdminRequest } from './api/admin';
 import { handleUsersRequest } from './api/users';
+import { handleTaxObjectsRequest } from './api/tax-objects';
 import { seedSuperuser } from './seed/superuser';
 import { getJwks } from './auth/jwt';
 
@@ -186,6 +187,11 @@ export default {
     if (url.pathname.startsWith('/api/users')) {
       const usersRes = await handleUsersRequest(req, url, appState);
       if (usersRes) return withTrace(usersRes);
+    }
+
+    if (url.pathname.startsWith('/api/tax-objects')) {
+      const taxObjectsRes = await handleTaxObjectsRequest(req, url, appState);
+      if (taxObjectsRes) return withTrace(taxObjectsRes);
     }
 
     // Serve static assets — path is relative to this file, not process cwd
