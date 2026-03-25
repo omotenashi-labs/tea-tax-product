@@ -7,4 +7,5 @@ export * from './trace';
 export * from './logger';
 export * from './encryption';
 export * from './scrub-pii';
+export * from './knowledge-base/form-taxonomy';
 export const coreHelper = () => true;
