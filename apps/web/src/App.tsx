@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Login } from './components/Login';
-import { Settings, User } from 'lucide-react';
+import { Settings, User, Receipt } from 'lucide-react';
+import { DemoFlow } from './components/demo/demo-flow';
 
 function App() {
   const { user, logout, loading } = useAuth();
 
   // Core Layout State
-  const [activeView, setActiveView] = useState<'home' | 'settings'>('home');
+  const [activeView, setActiveView] = useState<'home' | 'demo' | 'settings'>('home');
 
   if (loading) {
     return (
@@ -31,6 +32,13 @@ function App() {
           </div>
 
           <div className="flex flex-col gap-4 mt-4 w-full px-2">
+            <button
+              onClick={() => setActiveView('demo')}
+              className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'demo' ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
+              title="Tax Demo"
+            >
+              <Receipt size={20} strokeWidth={2.5} />
+            </button>
             <button
               onClick={() => setActiveView('settings')}
               className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'settings' ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
@@ -69,6 +77,7 @@ function App() {
                 Welcome to Tea Tax. Tax declaration features coming soon.
               </div>
             )}
+            {activeView === 'demo' && <DemoFlow onExit={() => setActiveView('home')} />}
             {activeView === 'settings' && (
               <div className="p-8 text-zinc-400 text-sm">Settings coming soon.</div>
             )}
