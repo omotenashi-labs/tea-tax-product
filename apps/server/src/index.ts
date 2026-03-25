@@ -20,6 +20,7 @@ import { handleAdminRequest } from './api/admin';
 import { handleUsersRequest } from './api/users';
 import { handleTaxObjectsRequest } from './api/tax-objects';
 import { handleTaxReturnsRequest } from './api/tax-returns';
+import { handleExtractW2Request } from './api/extract-w2';
 import { seedSuperuser } from './seed/superuser';
 import { getJwks } from './auth/jwt';
 
@@ -200,6 +201,11 @@ export default {
 
       const taxObjectsRes = await handleTaxObjectsRequest(req, url, appState);
       if (taxObjectsRes) return withTrace(taxObjectsRes);
+    }
+
+    if (url.pathname.startsWith('/api/extract/w2')) {
+      const extractRes = await handleExtractW2Request(req, url, appState);
+      if (extractRes) return withTrace(extractRes);
     }
 
     // Serve static assets — path is relative to this file, not process cwd
