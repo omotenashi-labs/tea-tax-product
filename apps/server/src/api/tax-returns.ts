@@ -31,6 +31,14 @@
  *   Returns 404 for unknown/non-owned entities and 400 for invalid bodies.
  *   Requires CSRF verification.
  *
+ * POST /api/tax-objects/:id/returns/:returnId/validate
+ *   Reads situation_data from the specified tax return, runs the validation
+ *   engine, and returns a ValidationResult (errors, warnings, completeness,
+ *   formsRequired). Read-only: does not modify stored data.
+ *   Returns 422 if the tax return has no situation_data.
+ *   Returns 404 if the entity does not exist or is not owned by the user.
+ *   Returns 401 if unauthenticated.
+ *
  * All endpoints require an authenticated session (returns 401 otherwise).
  * POST and PATCH require a valid CSRF token (returns 403 otherwise).
  * Bodies are validated via AJV against schemas from packages/core.
@@ -44,7 +52,12 @@ import { verifyCsrf } from '../auth/csrf';
 import { makeJson } from '../lib/response';
 import { validate } from './validation';
 import { broadcast } from '../websocket';
-import { createTaxReturnSchema, patchTaxReturnSchema } from 'core';
+import {
+  createTaxReturnSchema,
+  patchTaxReturnSchema,
+  validate as runValidationEngine,
+  type TaxSituation,
+} from 'core';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -107,6 +120,8 @@ interface PatchTaxReturnBody {
 
 // Matches /api/tax-objects/:id/returns
 const LIST_CREATE_PATTERN = /^\/api\/tax-objects\/([^/]+)\/returns$/;
+// Matches /api/tax-objects/:id/returns/:returnId/validate
+const VALIDATE_PATTERN = /^\/api\/tax-objects\/([^/]+)\/returns\/([^/]+)\/validate$/;
 // Matches /api/tax-objects/:id/returns/:returnId
 const SINGLE_PATTERN = /^\/api\/tax-objects\/([^/]+)\/returns\/([^/]+)$/;
 
@@ -122,9 +137,10 @@ export async function handleTaxReturnsRequest(
   if (!url.pathname.includes('/returns')) return null;
 
   const listCreateMatch = url.pathname.match(LIST_CREATE_PATTERN);
-  const singleMatch = url.pathname.match(SINGLE_PATTERN);
+  const validateMatch = url.pathname.match(VALIDATE_PATTERN);
+  const singleMatch = !validateMatch ? url.pathname.match(SINGLE_PATTERN) : null;
 
-  if (!listCreateMatch && !singleMatch) return null;
+  if (!listCreateMatch && !validateMatch && !singleMatch) return null;
 
   const corsHeaders = getCorsHeaders(req);
   const { sql } = appState;
@@ -135,7 +151,7 @@ export async function handleTaxReturnsRequest(
   if (!user) return json({ error: 'Unauthorized' }, 401);
 
   // Resolve the parent tax_object ID from the URL.
-  const taxObjectId = (listCreateMatch ?? singleMatch)![1];
+  const taxObjectId = (listCreateMatch ?? validateMatch ?? singleMatch)![1];
 
   // -------------------------------------------------------------------------
   // Ownership check helper — verifies the tax_object exists and is owned by
@@ -358,6 +374,47 @@ export async function handleTaxReturnsRequest(
     broadcast('tax_return.updated', updated);
 
     return json(updated);
+  }
+
+  // -------------------------------------------------------------------------
+  // POST /api/tax-objects/:id/returns/:returnId/validate — validate a tax return
+  //
+  // Reads situation_data from the stored tax_return entity, runs the
+  // validation engine, and returns the ValidationResult. Read-only.
+  // -------------------------------------------------------------------------
+  if (req.method === 'POST' && validateMatch) {
+    // Verify parent ownership.
+    const taxObject = await getOwnedTaxObject();
+    if (!taxObject) return json({ error: 'Not found' }, 404);
+
+    const returnId = validateMatch[2];
+
+    // Fetch the tax return scoped to this tax_object.
+    const rows = await sql<TaxReturnRow[]>`
+      SELECT id, type, properties, created_at, updated_at
+      FROM entities
+      WHERE id = ${returnId}
+        AND type = 'tax_return'
+        AND properties->>'tax_object_id' = ${taxObjectId}
+    `;
+
+    if (rows.length === 0) return json({ error: 'Not found' }, 404);
+
+    const entity = rows[0];
+    const situationData = entity.properties.situation_data;
+
+    // situation_data must be present to run validation.
+    if (situationData === undefined || situationData === null) {
+      return json(
+        { error: 'Unprocessable Entity', details: 'No situation_data found on this tax return.' },
+        422,
+      );
+    }
+
+    // Run the validation engine. This is a pure function — no DB writes.
+    const result = runValidationEngine(situationData as TaxSituation);
+
+    return json(result);
   }
 
   return null;
