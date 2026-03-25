@@ -46,3 +46,6 @@ coverage/
 # Kubernetes secrets (never commit real credentials)
 k8s/secrets.yaml
 .gemini/
+
+# Vitest browser component test runtime state
+apps/web/tests/component/.runtime/
