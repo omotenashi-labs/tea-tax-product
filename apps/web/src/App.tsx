@@ -12,14 +12,16 @@ function App() {
   const isSuperadmin = user?.role === 'superadmin';
 
   // Core Layout State
-  const [activeView, setActiveView] = useState<
-    'home' | 'demo' | 'tax-situation' | 'settings' | 'admin'
-  >('home');
+  // Role-aware default: superadmin can be directed to 'admin' in the future (#81).
+  const defaultView = isSuperadmin ? 'tax-situation' : 'tax-situation';
+  const [activeView, setActiveView] = useState<'demo' | 'tax-situation' | 'settings' | 'admin'>(
+    defaultView as 'demo' | 'tax-situation' | 'settings' | 'admin',
+  );
 
   // Redirect non-superadmin users away from the admin view if they somehow land there
   useEffect(() => {
     if (activeView === 'admin' && !isSuperadmin) {
-      setActiveView('home');
+      setActiveView('tax-situation');
     }
   }, [activeView, isSuperadmin]);
 
@@ -103,14 +105,7 @@ function App() {
 
           {/* Content */}
           <div className="flex-1 overflow-hidden overflow-y-auto">
-            {activeView === 'home' && (
-              <div className="p-8 space-y-4">
-                <p className="text-zinc-500 text-sm">
-                  Welcome to Tea Tax. Use the sidebar to navigate to your tax situation form.
-                </p>
-              </div>
-            )}
-            {activeView === 'demo' && <DemoFlow onExit={() => setActiveView('home')} />}
+            {activeView === 'demo' && <DemoFlow onExit={() => setActiveView('tax-situation')} />}
             {activeView === 'tax-situation' && (
               <TaxSituationForm taxObjectId="demo-tax-object-id" returnId="demo-return-id" />
             )}
