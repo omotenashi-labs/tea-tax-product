@@ -9,12 +9,12 @@
  */
 import { test, expect, beforeAll, afterAll } from 'vitest';
 import type { Subprocess } from 'bun';
-import { startPostgres, type PgContainer } from '../helpers/pg-container';
+import { startPostgres, type PgContainer } from '../../helpers/pg-container';
 
 const PORT = 31424;
 const BASE = `http://localhost:${PORT}`;
 const SERVER_READY_TIMEOUT_MS = 20_000;
-const REPO_ROOT = new URL('../../../../', import.meta.url).pathname;
+const REPO_ROOT = new URL('../../../../../', import.meta.url).pathname;
 const SERVER_ENTRY = 'apps/server/src/index.ts';
 
 let pg: PgContainer;

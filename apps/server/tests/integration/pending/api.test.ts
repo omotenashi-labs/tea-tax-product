@@ -1,6 +1,6 @@
 import { test, expect, beforeAll, afterAll } from 'vitest';
 import type { Subprocess } from 'bun';
-import { startPostgres, type PgContainer } from '../helpers/pg-container';
+import { startPostgres, type PgContainer } from '../../helpers/pg-container';
 
 // Each test run gets its own isolated postgres container + server process.
 // No external infrastructure required — just Docker.
@@ -9,7 +9,7 @@ const PORT = 31416; // separate from dev server (31415) to allow parallel use
 const BASE = `http://localhost:${PORT}`;
 const SERVER_READY_TIMEOUT_MS = 20_000;
 // Path relative to repo root — Bun needs to run from there to resolve workspace packages.
-const REPO_ROOT = new URL('../../../../', import.meta.url).pathname;
+const REPO_ROOT = new URL('../../../../../', import.meta.url).pathname;
 const SERVER_ENTRY = 'apps/server/src/index.ts';
 
 let pg: PgContainer;
