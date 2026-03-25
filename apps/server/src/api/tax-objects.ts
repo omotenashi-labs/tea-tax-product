@@ -53,6 +53,7 @@ interface TaxObjectProperties {
   display_name?: string;
   created_by_user_id: string;
   status: 'active' | 'archived';
+  [key: string]: unknown;
 }
 
 interface TaxObjectRow {
