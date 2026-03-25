@@ -1,18 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Login } from './components/Login';
-import { Settings, User, Receipt, FileText } from 'lucide-react';
+import { Settings, User, Receipt, FileText, ShieldAlert } from 'lucide-react';
 import { DemoFlow } from './components/demo/demo-flow';
 import { TaxSituationForm } from './components/TaxSituationForm';
 import { RegisterPasskeyButton } from './components/PasskeyButton';
+import { AdminPanel } from './components/AdminPanel';
 
 function App() {
   const { user, logout, loading } = useAuth();
+  const isSuperadmin = user?.role === 'superadmin';
 
   // Core Layout State
-  const [activeView, setActiveView] = useState<'home' | 'demo' | 'tax-situation' | 'settings'>(
-    'home',
-  );
+  const [activeView, setActiveView] = useState<
+    'home' | 'demo' | 'tax-situation' | 'settings' | 'admin'
+  >('home');
+
+  // Redirect non-superadmin users away from the admin view if they somehow land there
+  useEffect(() => {
+    if (activeView === 'admin' && !isSuperadmin) {
+      setActiveView('home');
+    }
+  }, [activeView, isSuperadmin]);
 
   if (loading) {
     return (
@@ -57,6 +66,16 @@ function App() {
             >
               <Settings size={20} strokeWidth={2.5} />
             </button>
+            {isSuperadmin && (
+              <button
+                onClick={() => setActiveView('admin')}
+                className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'admin' ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
+                title="Admin"
+                data-testid="admin-nav-item"
+              >
+                <ShieldAlert size={20} strokeWidth={2.5} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -100,6 +119,10 @@ function App() {
                 <h2 className="text-sm font-semibold text-zinc-700">Security</h2>
                 <RegisterPasskeyButton userId={user.id} />
               </div>
+            )}
+            {activeView === 'admin' && isSuperadmin && <AdminPanel />}
+            {activeView === 'admin' && !isSuperadmin && (
+              <div className="p-8 text-red-500 text-sm">Access denied.</div>
             )}
           </div>
         </div>

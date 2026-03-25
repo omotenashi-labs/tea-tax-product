@@ -38,14 +38,14 @@ export function parseCookies(cookieHeader: string | null): Record<string, string
 // Helper to verify auth from a Request object
 export async function getAuthenticatedUser(
   req: Request,
-): Promise<{ id: string; username: string } | null> {
+): Promise<{ id: string; username: string; role?: string } | null> {
   const cookies = parseCookies(req.headers.get('Cookie'));
   const token = cookies['tea_tax_auth'];
 
   if (!token) return null;
 
   try {
-    const payload = await verifyJwt<{ id: string; username: string }>(token);
+    const payload = await verifyJwt<{ id: string; username: string; role?: string }>(token);
     return payload;
   } catch {
     return null;
@@ -57,7 +57,7 @@ export async function getAuthenticatedUser(
 // for a valid API key bearer, where id is the api_key row id.
 export async function getAuthenticatedUserOrApiKey(
   req: Request,
-): Promise<{ id: string; username: string } | null> {
+): Promise<{ id: string; username: string; role?: string } | null> {
   // Try session cookie first
   const sessionUser = await getAuthenticatedUser(req);
   if (sessionUser) return sessionUser;
@@ -193,10 +193,11 @@ export async function handleAuthRequest(
                 VALUES (${id}, 'user', ${sql.json(properties)}, null)
             `;
 
-      const token = await signJwt({ id, username });
+      const role = 'tax_filer'; // new registrations always start as tax_filer
+      const token = await signJwt({ id, username, role });
       const csrfToken = generateCsrfToken();
 
-      const res = new Response(JSON.stringify({ user: { id, username } }), {
+      const res = new Response(JSON.stringify({ user: { id, username, role } }), {
         status: 201,
         headers: {
           ...corsHeaders,
@@ -280,8 +281,8 @@ export async function handleAuthRequest(
     try {
       // Retrieve User Entity
       const users = await sql`
-                SELECT id, properties->>'username' as username, properties->>'password_hash' as password_hash 
-                FROM entities 
+                SELECT id, properties->>'username' as username, properties->>'password_hash' as password_hash, properties->>'role' as role, properties->>'active' as active
+                FROM entities
                 WHERE type = 'user' AND properties->>'username' = ${username}
             `;
 
@@ -294,6 +295,14 @@ export async function handleAuthRequest(
 
       const user = users[0];
 
+      // Reject login for deactivated users
+      if (user.active === 'false') {
+        return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       const isMatch = await Bun.password.verify(password, user.password_hash);
       if (!isMatch) {
         return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
@@ -302,16 +311,20 @@ export async function handleAuthRequest(
         });
       }
 
-      const token = await signJwt({ id: user.id, username: user.username });
+      const role: string = user.role ?? 'tax_filer';
+      const token = await signJwt({ id: user.id, username: user.username, role });
       const csrfToken = generateCsrfToken();
 
-      const res = new Response(JSON.stringify({ user: { id: user.id, username: user.username } }), {
-        status: 200,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
+      const res = new Response(
+        JSON.stringify({ user: { id: user.id, username: user.username, role } }),
+        {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
       // SameSite=Strict — see the register endpoint comment above for the full
       // rationale and guidance for future OAuth flows.
       res.headers.append(
