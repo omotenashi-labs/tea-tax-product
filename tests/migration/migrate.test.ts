@@ -1,3 +1,4 @@
+import { spawnSync } from 'child_process';
 import { afterAll, beforeAll, expect, test } from 'vitest';
 import { migrate } from '../../packages/db';
 import { startPostgres, type PgContainer } from '../../packages/db/pg-container';
@@ -40,8 +41,7 @@ function listPublicTables(containerId: string): string[] {
     "WHERE table_schema = 'public'",
     'ORDER BY table_name',
   ].join(' ');
-  const proc = Bun.spawnSync([
-    'docker',
+  const proc = spawnSync('docker', [
     'exec',
     containerId,
     'psql',
@@ -54,10 +54,10 @@ function listPublicTables(containerId: string): string[] {
     query,
   ]);
 
-  expect(proc.exitCode).toBe(0);
+  expect(proc.status).toBe(0);
 
-  return new TextDecoder()
-    .decode(proc.stdout)
+  return proc.stdout
+    .toString()
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line.length > 0);

@@ -10,6 +10,7 @@
  */
 
 import postgres from 'postgres';
+import { spawnSync } from 'child_process';
 import { cleanupStaleContainers, addProcess, removeProcess } from './cleanup';
 
 const PG_USER = 'tea_tax';
@@ -27,8 +28,7 @@ export interface PgContainer {
 
 export async function startPostgres(): Promise<PgContainer> {
   cleanupStaleContainers();
-  const runResult = Bun.spawnSync([
-    'docker',
+  const runResult = spawnSync('docker', [
     'run',
     '-d',
     '--rm',
@@ -43,13 +43,11 @@ export async function startPostgres(): Promise<PgContainer> {
     PG_IMAGE,
   ]);
 
-  if (runResult.exitCode !== 0) {
-    throw new Error(
-      `Failed to start postgres container: ${new TextDecoder().decode(runResult.stderr)}`,
-    );
+  if (runResult.status !== 0) {
+    throw new Error(`Failed to start postgres container: ${runResult.stderr?.toString() ?? ''}`);
   }
 
-  const containerId = new TextDecoder().decode(runResult.stdout).trim();
+  const containerId = runResult.stdout.toString().trim();
   addProcess(containerId, 'postgres');
 
   let port: number;
@@ -58,7 +56,7 @@ export async function startPostgres(): Promise<PgContainer> {
     await waitForPostgres(port);
   } catch (err) {
     removeProcess(containerId);
-    Bun.spawnSync(['docker', 'stop', containerId]);
+    spawnSync('docker', ['stop', containerId]);
     throw err;
   }
 
@@ -69,7 +67,7 @@ export async function startPostgres(): Promise<PgContainer> {
     containerId,
     stop: async () => {
       removeProcess(containerId);
-      Bun.spawnSync(['docker', 'stop', containerId]);
+      spawnSync('docker', ['stop', containerId]);
     },
   };
 }
@@ -77,12 +75,12 @@ export async function startPostgres(): Promise<PgContainer> {
 async function getContainerPortWithRetry(containerId: string): Promise<number> {
   const deadline = Date.now() + READY_TIMEOUT_MS;
   while (Date.now() < deadline) {
-    const result = Bun.spawnSync(['docker', 'port', containerId, '5432']);
-    const output = new TextDecoder().decode(result.stdout).trim();
+    const result = spawnSync('docker', ['port', containerId, '5432']);
+    const output = result.stdout?.toString().trim() ?? '';
     try {
       return parseDockerPortOutput(output);
     } catch {
-      await Bun.sleep(PORT_POLL_INTERVAL_MS);
+      await new Promise((resolve) => setTimeout(resolve, PORT_POLL_INTERVAL_MS));
     }
   }
   throw new Error(`Timed out waiting for docker to publish port for container ${containerId}`);
@@ -99,7 +97,7 @@ async function waitForPostgres(port: number): Promise<void> {
       await testSql.end();
       return;
     } catch {
-      await Bun.sleep(300);
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
   }
   throw new Error(`Postgres container did not become ready within ${READY_TIMEOUT_MS}ms`);

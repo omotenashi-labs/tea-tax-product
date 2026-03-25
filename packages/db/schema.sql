@@ -45,6 +45,60 @@ INSERT INTO entity_types (type, schema) VALUES
   ('message',     '{}')
 ON CONFLICT (type) DO NOTHING;
 
+-- Tax domain entity types
+-- tax_object: represents a filing identity (individual, business, dependent, etc.)
+INSERT INTO entity_types (type, schema) VALUES
+  ('tax_object', '{
+    "type": "object",
+    "properties": {
+      "object_type": {
+        "type": "string",
+        "enum": ["individual", "joint_household", "business", "dependent", "estate_or_trust"]
+      },
+      "display_name": {"type": "string"},
+      "status": {"type": "string", "enum": ["active", "archived"]},
+      "created_by_user_id": {"type": "string"}
+    },
+    "required": ["object_type", "display_name", "created_by_user_id"]
+  }')
+ON CONFLICT (type) DO NOTHING;
+
+-- tax_return: a year- and jurisdiction-specific filing under a tax_object.
+-- situation_data is marked sensitive (contains PII / financial data).
+INSERT INTO entity_types (type, schema, sensitive) VALUES
+  ('tax_return', '{
+    "type": "object",
+    "properties": {
+      "tax_object_id": {"type": "string"},
+      "tax_year": {"type": "integer"},
+      "jurisdiction": {"type": "string"},
+      "return_type": {"type": "string"},
+      "status": {"type": "string", "enum": ["draft", "in_review", "filed", "amended"]},
+      "situation_data": {"type": "object"}
+    },
+    "required": ["tax_object_id", "tax_year", "jurisdiction", "return_type"]
+  }', ARRAY['situation_data'])
+ON CONFLICT (type) DO NOTHING;
+
+-- Partial unique index: prevents duplicate tax_return filings for the same
+-- (tax_object_id, tax_year, jurisdiction, return_type) combination.
+-- Stored as JSONB properties on the entities table.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_entities_tax_return_unique
+    ON entities (
+        (properties->>'tax_object_id'),
+        (properties->>'tax_year'),
+        (properties->>'jurisdiction'),
+        (properties->>'return_type')
+    )
+    WHERE type = 'tax_return';
+
+-- Relation types for graph traversal: owns and belongs_to
+-- These allow user->tax_object and tax_object->tax_return traversal.
+-- Relation types are stored as free-text in the relations.type column;
+-- we seed canonical type names here as entity_types entries so they are
+-- visible to the governance / schema tooling if needed.
+-- (No separate relation_types table exists in v0; type is plain text.)
+
 CREATE TABLE IF NOT EXISTS revoked_tokens (
   jti TEXT PRIMARY KEY,
   revoked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -11,6 +11,7 @@
 
 import { join } from 'path';
 import { existsSync, unlinkSync, readFileSync, writeFileSync, readdirSync } from 'fs';
+import { spawnSync } from 'child_process';
 
 const SENTINEL_FILE = '.tea-tax-db';
 
@@ -93,14 +94,14 @@ export function cleanupStaleContainers(): void {
             for (const proc of sentinel.processes) {
               try {
                 console.log(`[cleanup] Stopping stale container: ${proc.containerId}`);
-                Bun.spawnSync(['docker', 'stop', proc.containerId]);
+                spawnSync('docker', ['stop', proc.containerId]);
               } catch {
                 // Container may already be gone
               }
             }
           } else if (content) {
             console.log(`[cleanup] Stopping stale container: ${content}`);
-            Bun.spawnSync(['docker', 'stop', content]);
+            spawnSync('docker', ['stop', content]);
           }
           unlinkSync(join(repoRoot, file));
         } catch {
@@ -117,7 +118,7 @@ export function cleanupStaleContainers(): void {
   for (const process of sentinel.processes) {
     try {
       console.log(`[cleanup] Stopping stale container: ${process.containerId}`);
-      Bun.spawnSync(['docker', 'stop', process.containerId]);
+      spawnSync('docker', ['stop', process.containerId]);
     } catch {
       // Container may already be gone
     }
