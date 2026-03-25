@@ -8,78 +8,89 @@
  * browser environment via Vitest Browser Mode.
  */
 
+import React from 'react';
 import { render } from 'vitest-browser-react';
 import { describe, test, expect } from 'vitest';
 import { DemoCard } from '../../src/components/pwa/demo-card';
 
 describe('DemoCard', () => {
-  test('renders title and description when feature is available and granted', async () => {
+  test('renders heading and description when feature is available and granted', async () => {
     const screen = render(
       <DemoCard
-        title="Camera"
-        description="Capture photos"
+        title="CaptureCard"
+        description="Take a photo with the device camera"
         icon={<span data-testid="icon">📷</span>}
         featureAvailable={true}
         permissionState="granted"
       >
-        <button>Open camera</button>
+        <button>Shoot</button>
       </DemoCard>,
     );
 
-    await expect.element(screen.getByText('Camera')).toBeInTheDocument();
-    await expect.element(screen.getByText('Capture photos')).toBeInTheDocument();
-    await expect.element(screen.getByText('Open camera')).toBeInTheDocument();
+    await expect.element(screen.getByRole('heading', { name: 'CaptureCard' })).toBeInTheDocument();
+    await expect
+      .element(screen.getByText('Take a photo with the device camera'))
+      .toBeInTheDocument();
+    await expect.element(screen.getByRole('button', { name: 'Shoot' })).toBeInTheDocument();
   });
 
-  test('renders unavailable state when featureAvailable is false', async () => {
+  test('renders unavailable state when featureAvailable is false and hides children', async () => {
     const screen = render(
       <DemoCard
-        title="Microphone"
+        title="MicrophoneCard"
         description="Record audio"
         icon={<span>🎙</span>}
         featureAvailable={false}
         platformNotes="Not supported in this browser"
       >
-        <button>Record</button>
+        <button>StartRecording</button>
       </DemoCard>,
     );
 
     await expect.element(screen.getByText('Not available')).toBeInTheDocument();
-    // Children should not be rendered when feature is unavailable
-    expect(screen.getByText('Record').query()).toBeNull();
+    // Children must not be rendered when the feature is unavailable
+    await expect
+      .element(screen.getByRole('button', { name: 'StartRecording' }))
+      .not.toBeInTheDocument();
   });
 
   test('renders permission denied message when access is denied', async () => {
     const screen = render(
       <DemoCard
-        title="Camera"
-        description="Capture photos"
-        icon={<span>📷</span>}
+        title="DeniedCard"
+        description="Permission test"
+        icon={<span>🔒</span>}
         featureAvailable={true}
         permissionState="denied"
       >
-        <button>Open camera</button>
+        <button>ActionDenied</button>
       </DemoCard>,
     );
 
     await expect.element(screen.getByText(/Permission denied/)).toBeInTheDocument();
-    expect(screen.getByText('Open camera').query()).toBeNull();
+    await expect
+      .element(screen.getByRole('button', { name: 'ActionDenied' }))
+      .not.toBeInTheDocument();
   });
 
   test('renders grant permission button when permissionState is prompt', async () => {
     const screen = render(
       <DemoCard
-        title="Camera"
-        description="Capture photos"
-        icon={<span>📷</span>}
+        title="PromptCard"
+        description="Needs permission"
+        icon={<span>❓</span>}
         featureAvailable={true}
         permissionState="prompt"
       >
-        <button>Open camera</button>
+        <button>ActionPrompt</button>
       </DemoCard>,
     );
 
-    await expect.element(screen.getByText('Grant permission')).toBeInTheDocument();
-    expect(screen.getByText('Open camera').query()).toBeNull();
+    await expect
+      .element(screen.getByRole('button', { name: 'Grant permission' }))
+      .toBeInTheDocument();
+    await expect
+      .element(screen.getByRole('button', { name: 'ActionPrompt' }))
+      .not.toBeInTheDocument();
   });
 });
