@@ -441,6 +441,9 @@ if _is_legacy_call; then
     --from-literal=ANALYTICS_W_PASSWORD="${ANALYTICS_W_PASSWORD}"
     --from-literal=AGENT_CODING_PASSWORD="${AGENT_CODING_PASSWORD}"
     --from-literal=AGENT_ANALYSIS_PASSWORD="${AGENT_ANALYSIS_PASSWORD}"
+    --from-literal=APP_DB="tea_tax_app"
+    --from-literal=AUDIT_DB="tea_tax_audit"
+    --from-literal=ANALYTICS_DB="tea_tax_analytics"
   )
   [[ -n "${REMOTE_PG_CA_CERT:-}" ]] && DB_INIT_SECRET_ARGS+=(--from-literal=DB_CA_CERT="${REMOTE_PG_CA_CERT}")
   kubectl delete secret calypso-db-init-secret --namespace="${NAMESPACE}" --ignore-not-found
@@ -613,6 +616,21 @@ spec:
                 secretKeyRef:
                   name: calypso-db-init-secret
                   key: AGENT_ANALYSIS_PASSWORD
+            - name: APP_DB
+              valueFrom:
+                secretKeyRef:
+                  name: calypso-db-init-secret
+                  key: APP_DB
+            - name: AUDIT_DB
+              valueFrom:
+                secretKeyRef:
+                  name: calypso-db-init-secret
+                  key: AUDIT_DB
+            - name: ANALYTICS_DB
+              valueFrom:
+                secretKeyRef:
+                  name: calypso-db-init-secret
+                  key: ANALYTICS_DB
           resources:
             requests:
               cpu: '50m'
@@ -1472,7 +1490,10 @@ kubectl create secret generic calypso-db-init-secret \
   --from-literal=AUDIT_W_PASSWORD="${AUDIT_W_PASSWORD}" \
   --from-literal=ANALYTICS_W_PASSWORD="${ANALYTICS_W_PASSWORD}" \
   --from-literal=AGENT_CODING_PASSWORD="${AGENT_CODING_PASSWORD}" \
-  --from-literal=AGENT_ANALYSIS_PASSWORD="${AGENT_ANALYSIS_PASSWORD}"
+  --from-literal=AGENT_ANALYSIS_PASSWORD="${AGENT_ANALYSIS_PASSWORD}" \
+  --from-literal=APP_DB="tea_tax_app" \
+  --from-literal=AUDIT_DB="tea_tax_audit" \
+  --from-literal=ANALYTICS_DB="tea_tax_analytics"
 
 echo "    Secrets applied."
 REMOTESCRIPT
