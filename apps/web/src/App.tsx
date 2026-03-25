@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Login } from './components/Login';
-import { Settings, User, Receipt } from 'lucide-react';
+import { Settings, User, Receipt, FileText } from 'lucide-react';
 import { DemoFlow } from './components/demo/demo-flow';
+import { TaxSituationForm } from './components/TaxSituationForm';
 
 function App() {
   const { user, logout, loading } = useAuth();
 
   // Core Layout State
-  const [activeView, setActiveView] = useState<'home' | 'demo' | 'settings'>('home');
+  const [activeView, setActiveView] = useState<'home' | 'demo' | 'tax-situation' | 'settings'>(
+    'home',
+  );
 
   if (loading) {
     return (
@@ -40,8 +43,16 @@ function App() {
               <Receipt size={20} strokeWidth={2.5} />
             </button>
             <button
+              onClick={() => setActiveView('tax-situation')}
+              className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'tax-situation' ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
+              title="Tax Situation"
+            >
+              <FileText size={20} strokeWidth={2.5} />
+            </button>
+            <button
               onClick={() => setActiveView('settings')}
               className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'settings' ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
+              title="Settings"
             >
               <Settings size={20} strokeWidth={2.5} />
             </button>
@@ -73,11 +84,16 @@ function App() {
           {/* Content */}
           <div className="flex-1 overflow-hidden overflow-y-auto">
             {activeView === 'home' && (
-              <div className="p-8 text-zinc-400 text-sm">
-                Welcome to Tea Tax. Tax declaration features coming soon.
+              <div className="p-8 space-y-4">
+                <p className="text-zinc-500 text-sm">
+                  Welcome to Tea Tax. Use the sidebar to navigate to your tax situation form.
+                </p>
               </div>
             )}
             {activeView === 'demo' && <DemoFlow onExit={() => setActiveView('home')} />}
+            {activeView === 'tax-situation' && (
+              <TaxSituationForm taxObjectId="demo-tax-object-id" returnId="demo-return-id" />
+            )}
             {activeView === 'settings' && (
               <div className="p-8 text-zinc-400 text-sm">Settings coming soon.</div>
             )}
