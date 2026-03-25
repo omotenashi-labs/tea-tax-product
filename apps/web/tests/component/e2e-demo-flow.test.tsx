@@ -38,7 +38,7 @@
  *   - apps/web/src/components/TierComparisonTable.tsx
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { render } from 'vitest-browser-react';
 import { page } from '@vitest/browser/context';
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -46,12 +46,7 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { DemoFlow } from '../../src/components/demo/demo-flow';
 import { ValidationResultsPanel } from '../../src/components/ValidationResultsPanel';
 import { TierComparisonTable } from '../../src/components/TierComparisonTable';
-import type {
-  ValidationResult,
-  TierEvaluationResult,
-  W2ExtractedData,
-  ConfidenceScores,
-} from 'core';
+import type { ValidationResult, TierEvaluationResult, W2ExtractedData } from 'core';
 
 // ---------------------------------------------------------------------------
 // Scenario fixture types
@@ -555,45 +550,6 @@ const ALL_SCENARIOS: ScenarioFixture[] = [
   MULTI_STATE_FIXTURE,
   RENTAL_FIXTURE,
 ];
-
-// ---------------------------------------------------------------------------
-// Full demo page wrapper — renders DemoFlow + results panels together
-// ---------------------------------------------------------------------------
-
-/**
- * Renders the complete three-step demo + results screen in a single tree.
- * This mirrors the CEO demo page structure:
- *   Step 1–3: DemoFlow (upload → review → complete)
- *   Results:  ValidationResultsPanel + TierComparisonTable with fixture data
- */
-function FullDemoPage({
-  fixture,
-  onFlowComplete,
-}: {
-  fixture: ScenarioFixture;
-  onFlowComplete?: () => void;
-}) {
-  const [completed, setCompleted] = useState(false);
-
-  return (
-    <div data-testid="full-demo-page" style={{ width: '100%', minHeight: '600px' }}>
-      {!completed && (
-        <DemoFlow
-          onExit={() => {
-            setCompleted(true);
-            onFlowComplete?.();
-          }}
-        />
-      )}
-      {completed && (
-        <div data-testid="results-screen">
-          <ValidationResultsPanel result={fixture.expectedValidation} />
-          <TierComparisonTable result={fixture.expectedTiers} />
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Helper: mock fetch for a given extraction fixture
