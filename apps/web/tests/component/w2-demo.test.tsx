@@ -21,7 +21,8 @@
  */
 
 import React from 'react';
-import { render, page } from 'vitest-browser-react';
+import { render } from 'vitest-browser-react';
+import { page } from '@vitest/browser/context';
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { W2UploadZone } from '../../src/components/demo/w2-upload-zone';
 import { W2ReviewCard } from '../../src/components/demo/w2-review-card';
@@ -88,9 +89,9 @@ describe('W2UploadZone — file upload triggers extraction', () => {
       }),
     );
 
-    render(<W2UploadZone onExtractionComplete={onExtractionComplete} />);
+    const screen = render(<W2UploadZone onExtractionComplete={onExtractionComplete} />);
 
-    const fileInput = page.getByTestId('w2-file-input');
+    const fileInput = screen.getByTestId('w2-file-input');
     await expect.element(fileInput).toBeInTheDocument();
 
     // Simulate file selection
@@ -125,7 +126,7 @@ describe('W2ReviewCard — extracted data and confidence dots', () => {
     const onConfirm = vi.fn();
     const onReupload = vi.fn();
 
-    render(
+    const screen = render(
       <W2ReviewCard
         extractedData={SAMPLE_W2}
         confidence={HIGH_CONFIDENCE}
@@ -135,35 +136,37 @@ describe('W2ReviewCard — extracted data and confidence dots', () => {
     );
 
     // Card heading
-    await expect.element(page.getByText('Extracted W-2 Data')).toBeInTheDocument();
+    await expect.element(screen.getByText('Extracted W-2 Data')).toBeInTheDocument();
 
     // Overall confidence badge (High — overall=0.95)
-    await expect.element(page.getByTestId('confidence-badge')).toBeInTheDocument();
-    await expect.element(page.getByTestId('confidence-badge')).toHaveTextContent('High confidence');
+    await expect.element(screen.getByTestId('confidence-badge')).toBeInTheDocument();
+    await expect
+      .element(screen.getByTestId('confidence-badge'))
+      .toHaveTextContent('High confidence');
 
     // Key field rows
-    await expect.element(page.getByTestId('field-row-employerName')).toBeInTheDocument();
-    await expect.element(page.getByTestId('field-row-wages')).toBeInTheDocument();
-    await expect.element(page.getByTestId('field-row-federalTaxWithheld')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('field-row-employerName')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('field-row-wages')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('field-row-federalTaxWithheld')).toBeInTheDocument();
 
     // Confidence dots are rendered as aria-labeled spans
-    const wagesRow = page.getByTestId('field-row-wages');
+    const wagesRow = screen.getByTestId('field-row-wages');
     await expect.element(wagesRow.getByLabelText(/Confidence: 97%/)).toBeInTheDocument();
 
     // Low-confidence field (stateWages = 0.65 → red dot)
-    const stateWagesRow = page.getByTestId('field-row-stateWages');
+    const stateWagesRow = screen.getByTestId('field-row-stateWages');
     await expect.element(stateWagesRow.getByLabelText(/Confidence: 65%/)).toBeInTheDocument();
 
     // CTA buttons are present
-    await expect.element(page.getByTestId('confirm-button')).toBeInTheDocument();
-    await expect.element(page.getByTestId('reupload-button')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('confirm-button')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('reupload-button')).toBeInTheDocument();
   });
 
   test('"Confirm & Continue" calls onConfirm with edited data', async () => {
     const onConfirm = vi.fn();
     const onReupload = vi.fn();
 
-    render(
+    const screen = render(
       <W2ReviewCard
         extractedData={SAMPLE_W2}
         confidence={HIGH_CONFIDENCE}
@@ -172,7 +175,7 @@ describe('W2ReviewCard — extracted data and confidence dots', () => {
       />,
     );
 
-    await page.getByTestId('confirm-button').click();
+    await screen.getByTestId('confirm-button').click();
     expect(onConfirm).toHaveBeenCalledTimes(1);
     const confirmed = onConfirm.mock.calls[0][0] as W2ExtractedData;
     expect(confirmed.employerName).toBe('Acme Corp');
@@ -204,9 +207,9 @@ describe('W2UploadZone — camera detection', () => {
       }),
     }));
 
-    render(<W2UploadZone onExtractionComplete={vi.fn()} />);
+    const screen = render(<W2UploadZone onExtractionComplete={vi.fn()} />);
 
-    await expect.element(page.getByTestId('take-photo-button')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('take-photo-button')).toBeInTheDocument();
   });
 
   test('upload zone works without camera (progressive enhancement)', async () => {
@@ -228,12 +231,12 @@ describe('W2UploadZone — camera detection', () => {
       }),
     }));
 
-    render(<W2UploadZone onExtractionComplete={vi.fn()} />);
+    const screen = render(<W2UploadZone onExtractionComplete={vi.fn()} />);
 
     // File input still present
-    await expect.element(page.getByTestId('w2-file-input')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('w2-file-input')).toBeInTheDocument();
     // Drop zone present
-    await expect.element(page.getByTestId('w2-upload-zone')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('w2-upload-zone')).toBeInTheDocument();
   });
 });
 
@@ -246,7 +249,7 @@ describe('W2ReviewCard — responsive layout', () => {
     // Set viewport to 375px wide
     await page.viewport(375, 667);
 
-    render(
+    const screen = render(
       <W2ReviewCard
         extractedData={SAMPLE_W2}
         confidence={HIGH_CONFIDENCE}
@@ -256,12 +259,12 @@ describe('W2ReviewCard — responsive layout', () => {
     );
 
     // All fields still render at mobile width
-    await expect.element(page.getByTestId('w2-review-card')).toBeInTheDocument();
-    await expect.element(page.getByTestId('field-row-wages')).toBeInTheDocument();
-    await expect.element(page.getByTestId('field-row-employerName')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('w2-review-card')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('field-row-wages')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('field-row-employerName')).toBeInTheDocument();
 
     // "Confirm & Continue" button is full-width on mobile (w-full class present on mobile)
-    await expect.element(page.getByTestId('confirm-button')).toBeInTheDocument();
+    await expect.element(screen.getByTestId('confirm-button')).toBeInTheDocument();
 
     // Reset viewport
     await page.viewport(1280, 800);
