@@ -139,9 +139,8 @@ describe('ValidationResultsPanel', () => {
   test('renders required forms as pills', async () => {
     const screen = render(<ValidationResultsPanel result={mockValidResult} />);
 
-    const pills = screen.getByTestId('required-form-pill');
-    // Multiple pills exist — check the first one is present
-    await expect.element(pills).toBeInTheDocument();
+    // Multiple pills exist (one per required form) — use .first() to avoid strict mode violation
+    await expect.element(screen.getByTestId('required-form-pill').first()).toBeInTheDocument();
   });
 
   test('renders all three required forms', async () => {

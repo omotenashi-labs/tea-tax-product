@@ -146,11 +146,11 @@ describe('TierComparisonTable', () => {
   test('renders provider names', async () => {
     const screen = render(<TierComparisonTable result={mockTierResult} />);
 
-    // Provider names appear at least once (in table rows or cards)
-    const turbotaxEls = screen.getByText('TurboTax');
-    await expect.element(turbotaxEls).toBeInTheDocument();
-    await expect.element(screen.getByText('FreeTaxUSA')).toBeInTheDocument();
-    await expect.element(screen.getByText('Cash App Taxes')).toBeInTheDocument();
+    // Provider names appear in both mobile cards and desktop table rows.
+    // Use .first() to avoid strict mode violations when both are in the DOM.
+    await expect.element(screen.getByText('TurboTax').first()).toBeInTheDocument();
+    await expect.element(screen.getByText('FreeTaxUSA').first()).toBeInTheDocument();
+    await expect.element(screen.getByText('Cash App Taxes').first()).toBeInTheDocument();
   });
 
   test('does not render any recommendation badge', async () => {
