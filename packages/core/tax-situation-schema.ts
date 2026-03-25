@@ -149,8 +149,6 @@ const PRIOR_YEAR_FILING_METHOD_ENUM = [
   'unknown',
 ] as const;
 
-const VALIDATION_SEVERITY_ENUM = ['error', 'warning', 'info'] as const;
-
 // ---------------------------------------------------------------------------
 // Shared sub-schemas (reused across top-level schemas)
 // ---------------------------------------------------------------------------

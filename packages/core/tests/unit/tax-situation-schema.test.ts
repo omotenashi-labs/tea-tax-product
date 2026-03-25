@@ -10,7 +10,7 @@
  */
 
 import Ajv from 'ajv';
-import { describe, expect, test, beforeAll } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import {
   taxSituationSchema,
   createTaxObjectSchema,
@@ -33,6 +33,13 @@ function validate(schema: object, data: unknown) {
   const fn = ajv.compile(schema);
   const valid = fn(data);
   return { valid, errors: fn.errors ?? [] };
+}
+
+/** Return a shallow copy of obj with the given key removed. */
+function omit<T extends object, K extends keyof T>(obj: T, key: K): Omit<T, K> {
+  const copy = { ...obj };
+  delete copy[key];
+  return copy;
 }
 
 // ---------------------------------------------------------------------------
@@ -295,8 +302,7 @@ describe('taxSituationSchema', () => {
 
   describe('rejects objects with missing required fields', () => {
     test('missing id', () => {
-      const { id: _id, ...noId } = scenario1W2Only;
-      const result = validate(taxSituationSchema, noId);
+      const result = validate(taxSituationSchema, omit(scenario1W2Only, 'id'));
       expect(result.valid).toBe(false);
       expect(
         result.errors.some(
@@ -306,20 +312,17 @@ describe('taxSituationSchema', () => {
     });
 
     test('missing filingStatus', () => {
-      const { filingStatus: _fs, ...noFs } = scenario1W2Only;
-      const result = validate(taxSituationSchema, noFs);
+      const result = validate(taxSituationSchema, omit(scenario1W2Only, 'filingStatus'));
       expect(result.valid).toBe(false);
     });
 
     test('missing incomeStreams', () => {
-      const { incomeStreams: _is, ...noIs } = scenario1W2Only;
-      const result = validate(taxSituationSchema, noIs);
+      const result = validate(taxSituationSchema, omit(scenario1W2Only, 'incomeStreams'));
       expect(result.valid).toBe(false);
     });
 
     test('missing stateResidency', () => {
-      const { stateResidency: _sr, ...noSr } = scenario1W2Only;
-      const result = validate(taxSituationSchema, noSr);
+      const result = validate(taxSituationSchema, omit(scenario1W2Only, 'stateResidency'));
       expect(result.valid).toBe(false);
     });
   });
@@ -508,14 +511,12 @@ describe('createTaxReturnSchema', () => {
   });
 
   test('rejects missing taxObjectId', () => {
-    const { taxObjectId: _t, ...body } = minimalBody;
-    const result = validate(createTaxReturnSchema, body);
+    const result = validate(createTaxReturnSchema, omit(minimalBody, 'taxObjectId'));
     expect(result.valid).toBe(false);
   });
 
   test('rejects missing filingYear', () => {
-    const { filingYear: _y, ...body } = minimalBody;
-    const result = validate(createTaxReturnSchema, body);
+    const result = validate(createTaxReturnSchema, omit(minimalBody, 'filingYear'));
     expect(result.valid).toBe(false);
   });
 
