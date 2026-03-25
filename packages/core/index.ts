@@ -1,6 +1,7 @@
 export * from './types';
 export * from './tax-situation';
 export * from './tax-situation-schema';
+export * from './knowledge-base/thresholds';
 export * from './data-policies';
 export * from './audit';
 export * from './trace';
