@@ -64,12 +64,17 @@ describe('migration idempotency', () => {
 describe('tax_return uniqueness constraint', () => {
   test('inserting two tax_return entities with identical (tax_object_id, tax_year, jurisdiction, return_type) violates the unique constraint', async () => {
     const taxObjectId = 'test-tax-obj-unique-' + Date.now();
+    const taxObjectProps = {
+      object_type: 'individual',
+      display_name: 'Test Object',
+      created_by_user_id: 'user-1',
+    };
     await sql`
       INSERT INTO entities (id, type, properties)
       VALUES (
         ${taxObjectId},
         'tax_object',
-        ${{ object_type: 'individual', display_name: 'Test Object', created_by_user_id: 'user-1' }}
+        ${sql.json(taxObjectProps)}
       )
     `;
 
