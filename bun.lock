@@ -72,6 +72,9 @@
     },
     "packages/core": {
       "name": "core",
+      "dependencies": {
+        "ajv": "^8.18.0",
+      },
       "devDependencies": {
         "@types/node": "^20.0.0",
       },
