@@ -92,7 +92,7 @@ export async function handlePasskeyRequest(
         (row) => ({ id: row.credential_id }),
       );
 
-      const { rpId, origin: expectedOrigin } = getRpConfig(req);
+      const { rpId } = getRpConfig(req);
       const options = await generateRegistrationOptions({
         rpName: RP_NAME,
         rpID: rpId,
