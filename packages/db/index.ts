@@ -7,9 +7,9 @@ import { buildSslOptions } from './ssl';
 export { buildSslOptions } from './ssl';
 
 const DEFAULT_DATABASE_URLS = {
-  app: 'postgres://app_rw:app_rw_password@localhost:5432/calypso_app',
-  audit: 'postgres://audit_w:audit_w_password@localhost:5432/calypso_audit',
-  analytics: 'postgres://analytics_w:analytics_w_password@localhost:5432/calypso_analytics',
+  app: 'postgres://app_rw:app_rw_password@localhost:5432/tea_tax_app',
+  audit: 'postgres://audit_w:audit_w_password@localhost:5432/tea_tax_audit',
+  analytics: 'postgres://analytics_w:analytics_w_password@localhost:5432/tea_tax_analytics',
 } as const;
 
 export interface DatabaseUrls {
@@ -19,7 +19,7 @@ export interface DatabaseUrls {
 }
 
 // Starter implementation note:
-// This package currently exposes a single connection pool bound to calypso_app.
+// This package currently exposes a single connection pool bound to tea_tax_app.
 // The target blueprint posture splits transactional, analytics, and audit paths
 // across separate roles / databases so business journals, analytics, and audit
 // writes cannot be conflated at runtime.

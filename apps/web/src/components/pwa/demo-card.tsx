@@ -1,10 +1,10 @@
 /**
  * @file demo-card.tsx
  *
- * Reusable shell component for PWA feature demo cards. All four interactive
- * demo cards (storage, camera, microphone, notifications) use this shell so
- * that permission handling, availability messaging, and visual chrome are
- * consistent across the demo page.
+ * Reusable shell component for PWA feature demo cards.  The camera capture
+ * card (reused by the tax demo upload step) uses this shell so that
+ * permission handling, availability messaging, and visual chrome are
+ * consistent.
  *
  * Rendering logic
  * ---------------
@@ -24,7 +24,7 @@
  *
  * 4. permissionState === 'granted' || permissionState == null
  *    → Feature is available and either granted or requires no permission.
- *      Render `children` (the demo-specific interactive area).
+ *      Render `children` (the feature-specific interactive area).
  *
  * Canonical docs
  * ---------------
@@ -62,16 +62,16 @@ export interface DemoCardProps {
    */
   onRequestPermission?: () => void;
   /**
-   * The demo-specific interactive content.  Rendered only when the feature
+   * The feature-specific interactive content.  Rendered only when the feature
    * is available and permission is granted (or not required).
    */
   children: React.ReactNode;
 }
 
 /**
- * Reusable PWA demo card that manages feature availability and permission
- * state display.  Downstream cards (storage, camera, mic, notifications)
- * pass the feature-specific interactive area via `children`.
+ * Reusable PWA feature card that manages feature availability and permission
+ * state display.  The camera capture card passes its interactive area via
+ * `children`.
  */
 export function DemoCard({
   title,
@@ -133,7 +133,7 @@ export function DemoCard({
         </div>
       )}
 
-      {/* Demo content — only when available and access is granted or not needed */}
+      {/* Feature content — only when available and access is granted or not needed */}
       {featureAvailable && (permissionState === 'granted' || permissionState == null) && (
         <div className="flex flex-col gap-3">{children}</div>
       )}

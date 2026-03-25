@@ -2,6 +2,12 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { PasskeyLoginButton } from './PasskeyButton';
 
+/** Demo users pre-seeded for frictionless demo access. */
+const DEMO_USERS = [
+  { label: 'Demo as Alice', username: 'alice', password: 'alice123' },
+  { label: 'Demo as Bob', username: 'bob', password: 'bob123' },
+];
+
 export const Login: React.FC = () => {
   const { setUser } = useAuth();
   const [isRegister, setIsRegister] = useState(false);
@@ -44,10 +50,36 @@ export const Login: React.FC = () => {
     }
   };
 
+  /** Auto-fill and submit credentials for a demo user. */
+  const handleDemoLogin = async (demoUsername: string, demoPassword: string) => {
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username: demoUsername, password: demoPassword }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Demo login failed.');
+      }
+
+      setUser(data.user);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Demo login failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col justify-center items-center font-sans">
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-zinc-200 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-zinc-900 mb-2 text-center">Calypso</h1>
+        <h1 className="text-3xl font-bold text-zinc-900 mb-2 text-center">Tea Tax</h1>
         <p className="text-zinc-500 text-center mb-8">
           {isRegister ? 'Create an account' : 'Sign in to your account'}
         </p>
@@ -101,6 +133,26 @@ export const Login: React.FC = () => {
               onSuccess={(user) => setUser(user)}
               onError={(msg) => setError(msg)}
             />
+
+            {/* Quick-select demo user buttons for frictionless demo access */}
+            <div className="mt-4 flex flex-col gap-2">
+              <p className="text-xs text-zinc-400 text-center font-medium uppercase tracking-wider">
+                Demo access
+              </p>
+              <div className="flex gap-2">
+                {DEMO_USERS.map(({ label, username: demoUser, password: demoPass }) => (
+                  <button
+                    key={demoUser}
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleDemoLogin(demoUser, demoPass)}
+                    className="flex-1 px-3 py-2 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-600 hover:bg-zinc-50 hover:border-zinc-300 transition-colors disabled:opacity-50"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </>
         )}
 

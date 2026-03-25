@@ -48,7 +48,7 @@ test('register sets a session cookie', async () => {
   });
   expect(res.status).toBe(201);
   const setCookie = res.headers.get('set-cookie') ?? '';
-  expect(setCookie).toContain('calypso_auth=');
+  expect(setCookie).toContain('tea_tax_auth=');
 });
 
 test('logout revokes the token so subsequent requests return 401', async () => {
@@ -60,8 +60,8 @@ test('logout revokes the token so subsequent requests return 401', async () => {
   });
   expect(loginRes.status).toBe(200);
   const setCookie = loginRes.headers.get('set-cookie') ?? '';
-  const cookie = setCookie.split(';')[0]; // e.g. "calypso_auth=<token>"
-  expect(cookie).toContain('calypso_auth=');
+  const cookie = setCookie.split(';')[0]; // e.g. "tea_tax_auth=<token>"
+  expect(cookie).toContain('tea_tax_auth=');
 
   // 2. Verify the token is valid before logout
   const meBeforeRes = await fetch(`${BASE}/api/auth/me`, {

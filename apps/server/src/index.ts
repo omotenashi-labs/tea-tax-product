@@ -1,6 +1,6 @@
 /**
  * @file overview
- * This is the main entrypoint for the Calypso Bun server.
+ * This is the main entrypoint for the Tea Tax Bun server.
  * It is responsible for handling all incoming HTTP requests, routing them
  * to the appropriate integration or business logic modules, and serving
  * the compiled frontend React application from `apps/web/dist`.
@@ -11,7 +11,6 @@ import { cleanupExpiredRevocations, startRevocationCleanup } from 'db/revocation
 import { scrubPii } from 'core';
 import { handleAuthRequest, getAuthenticatedUser } from './api/auth';
 import { handlePasskeyRequest } from './api/passkey';
-import { handleTasksRequest } from './api/tasks';
 import { handleTaskQueueResultRequest, handleTasksQueueRequest } from './api/task-queue';
 import { handleAuditRequest } from './api/audit';
 import { extractTraceId, traceLog, log } from 'core';
@@ -164,13 +163,9 @@ export default {
     }
 
     if (url.pathname.startsWith('/api/tasks')) {
-      // Delegated-token result submission route must be checked before the
-      // cookie-auth tasks route so workers can submit without a user session.
+      // Delegated-token result submission route — workers submit results here without a user session.
       const resultRes = await handleTaskQueueResultRequest(req, url, appState);
       if (resultRes) return withTrace(resultRes);
-
-      const tasksRes = await handleTasksRequest(req, url, appState);
-      if (tasksRes) return withTrace(tasksRes);
     }
 
     if (url.pathname.startsWith('/api/tasks-queue')) {

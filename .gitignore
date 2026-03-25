@@ -41,7 +41,7 @@ coverage/
 .studio
 
 # Studio cleanup sentinel
-.calypso-db
+.tea-tax-db
 
 # Kubernetes secrets (never commit real credentials)
 k8s/secrets.yaml

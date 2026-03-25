@@ -1,7 +1,7 @@
 {
-  "name": "Calypso",
-  "short_name": "Calypso",
-  "description": "Calypso – modern full-stack starter with PWA support",
+  "name": "Tea Tax",
+  "short_name": "Tea Tax",
+  "description": "Tea Tax – digital tax declaration for tea imports with PWA support",
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#3b82f6",

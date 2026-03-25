@@ -12,7 +12,7 @@
 
 import { describe, test, expect } from 'vitest';
 
-const DISMISSED_KEY = 'calypso:pwa-install-dismissed';
+const DISMISSED_KEY = 'tea-tax:pwa-install-dismissed';
 
 /** Mirrors the eligibility decision from InstallPrompt */
 function resolveEligibility(opts: {
@@ -104,7 +104,7 @@ describe('InstallPrompt eligibility logic', () => {
 
   test('dismissed key name is stable (used in localStorage)', () => {
     // Verifies the constant is exported-compatible for localStorage usage
-    expect(DISMISSED_KEY).toBe('calypso:pwa-install-dismissed');
+    expect(DISMISSED_KEY).toBe('tea-tax:pwa-install-dismissed');
   });
 });
 

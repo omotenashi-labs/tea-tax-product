@@ -107,10 +107,10 @@ else
 fi
 
 if [[ "${DB_MODE}" == "local" ]]; then
-  DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@postgres:5432/calypso_app"
-  AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@postgres:5432/calypso_audit"
-  ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@postgres:5432/calypso_analytics"
-  ADMIN_DATABASE_URL="postgres://postgres:${POSTGRES_SUPERUSER_PASSWORD:-}@postgres:5432/calypso_app"
+  DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@postgres:5432/tea_tax_app"
+  AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@postgres:5432/tea_tax_audit"
+  ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@postgres:5432/tea_tax_analytics"
+  ADMIN_DATABASE_URL="postgres://postgres:${POSTGRES_SUPERUSER_PASSWORD:-}@postgres:5432/tea_tax_app"
 else
   REMOTE_PG_PORT="${REMOTE_PG_PORT:-5432}"
   REMOTE_PG_ADMIN_DB="${REMOTE_PG_ADMIN_DB:-postgres}"
@@ -122,9 +122,9 @@ else
   elif [[ "${REMOTE_PG_SSL}" == "disable" ]]; then
     SSL_SUFFIX="?sslmode=disable"
   fi
-  DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/calypso_app${SSL_SUFFIX}"
-  AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/calypso_audit${SSL_SUFFIX}"
-  ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/calypso_analytics${SSL_SUFFIX}"
+  DATABASE_URL="postgres://app_rw:${APP_RW_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/tea_tax_app${SSL_SUFFIX}"
+  AUDIT_DATABASE_URL="postgres://audit_w:${AUDIT_W_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/tea_tax_audit${SSL_SUFFIX}"
+  ANALYTICS_DATABASE_URL="postgres://analytics_w:${ANALYTICS_W_PASSWORD}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/tea_tax_analytics${SSL_SUFFIX}"
   ADMIN_DATABASE_URL="postgres://${REMOTE_PG_ADMIN_USER}:${REMOTE_PG_ADMIN_PASSWORD:-}@${REMOTE_PG_HOST}:${REMOTE_PG_PORT}/${REMOTE_PG_ADMIN_DB}${SSL_SUFFIX}"
 fi
 
@@ -186,7 +186,7 @@ DB_SECRET_ARGS=(
 if [[ "${DB_MODE}" == "local" ]]; then
   DB_SECRET_ARGS+=(--from-literal=POSTGRES_USER="postgres")
   DB_SECRET_ARGS+=(--from-literal=POSTGRES_PASSWORD="${POSTGRES_SUPERUSER_PASSWORD}")
-  DB_SECRET_ARGS+=(--from-literal=POSTGRES_DB="calypso_app")
+  DB_SECRET_ARGS+=(--from-literal=POSTGRES_DB="tea_tax_app")
 fi
 kubectl delete secret calypso-db-secrets --namespace="${NAMESPACE}" --ignore-not-found
 kubectl create secret generic calypso-db-secrets "${DB_SECRET_ARGS[@]}"
@@ -270,14 +270,14 @@ spec:
               mountPath: /var/lib/postgresql/data
           livenessProbe:
             exec:
-              command: [pg_isready, -U, postgres, -d, calypso_app]
+              command: [pg_isready, -U, postgres, -d, tea_tax_app]
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
             failureThreshold: 6
           readinessProbe:
             exec:
-              command: [pg_isready, -U, postgres, -d, calypso_app]
+              command: [pg_isready, -U, postgres, -d, tea_tax_app]
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 5

@@ -78,7 +78,7 @@ describe('handleUsersRequest()', () => {
 
     const appState = makeAppState([], [{ count: '0' }]);
 
-    const req = makeRequest('DELETE', '/api/users/nonexistent-id', 'calypso_auth=fake-token');
+    const req = makeRequest('DELETE', '/api/users/nonexistent-id', 'tea_tax_auth=fake-token');
     const url = new URL(req.url);
     const result = await handleUsersRequest(req, url, appState);
     expect(result?.status).toBe(404);
@@ -110,7 +110,7 @@ describe('handleUsersRequest()', () => {
       analyticsSql: sql,
     } satisfies import('../../src/index').AppState;
 
-    const req = makeRequest('DELETE', '/api/users/super-id', 'calypso_auth=fake-token');
+    const req = makeRequest('DELETE', '/api/users/super-id', 'tea_tax_auth=fake-token');
     const url = new URL(req.url);
     const result = await handleUsersRequest(req, url, appState);
     expect(result?.status).toBe(409);
@@ -143,7 +143,7 @@ describe('handleUsersRequest()', () => {
       analyticsSql: sql,
     } satisfies import('../../src/index').AppState;
 
-    const req = makeRequest('DELETE', '/api/users/super-id', 'calypso_auth=fake-token');
+    const req = makeRequest('DELETE', '/api/users/super-id', 'tea_tax_auth=fake-token');
     const url = new URL(req.url);
     const result = await handleUsersRequest(req, url, appState);
     expect(result?.status).toBe(200);
@@ -174,7 +174,7 @@ describe('handleUsersRequest()', () => {
       analyticsSql: sql,
     } satisfies import('../../src/index').AppState;
 
-    const req = makeRequest('DELETE', '/api/users/other-id', 'calypso_auth=fake-token');
+    const req = makeRequest('DELETE', '/api/users/other-id', 'tea_tax_auth=fake-token');
     const url = new URL(req.url);
     const result = await handleUsersRequest(req, url, appState);
     expect(result?.status).toBe(403);
@@ -203,7 +203,7 @@ describe('handleUsersRequest()', () => {
       analyticsSql: sql,
     } satisfies import('../../src/index').AppState;
 
-    const req = makeRequest('DELETE', '/api/users/self-id', 'calypso_auth=fake-token');
+    const req = makeRequest('DELETE', '/api/users/self-id', 'tea_tax_auth=fake-token');
     const url = new URL(req.url);
     const result = await handleUsersRequest(req, url, appState);
     expect(result?.status).toBe(200);
@@ -234,7 +234,7 @@ describe('handleUsersRequest()', () => {
       analyticsSql: sql,
     } satisfies import('../../src/index').AppState;
 
-    const req = makeRequest('DELETE', '/api/users/regular-id', 'calypso_auth=fake-token');
+    const req = makeRequest('DELETE', '/api/users/regular-id', 'tea_tax_auth=fake-token');
     const url = new URL(req.url);
     const result = await handleUsersRequest(req, url, appState);
     expect(result?.status).toBe(200);

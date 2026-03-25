@@ -23,7 +23,7 @@
  * ----------------------
  * - AGENT_DATABASE_URL — read-only agent role connection string (required)
  * - AGENT_TYPE         — agent type name, e.g. "coding" (required)
- * - API_BASE_URL       — base URL of the Calypso API server (required)
+ * - API_BASE_URL       — base URL of the Tea Tax API server (required)
  * - CODEX_PATH         — path to the codex binary (default: /usr/local/bin/codex)
  * - WORKER_ID          — unique identifier for this worker instance (default: hostname)
  *
