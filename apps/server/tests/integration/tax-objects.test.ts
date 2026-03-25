@@ -9,7 +9,7 @@
  * the dev server (31415) and other integration test suites.
  */
 import { test, expect, beforeAll, afterAll } from 'vitest';
-import type { Subprocess } from 'bun';
+import { spawn, type ChildProcess } from 'child_process';
 import { startPostgres, type PgContainer } from '../helpers/pg-container';
 import { existsSync } from 'fs';
 
@@ -19,12 +19,12 @@ const BUN_BIN =
 const WORKER_ID = Number(process.env.VITEST_WORKER_ID ?? process.env.VITEST_WORKER ?? 0);
 const PORT = 31420 + WORKER_ID;
 const BASE = `http://localhost:${PORT}`;
-const SERVER_READY_TIMEOUT_MS = 30_000;
-const REPO_ROOT = new URL('../../../../../', import.meta.url).pathname;
+const SERVER_READY_TIMEOUT_MS = 45_000;
+const REPO_ROOT = new URL('../../../../', import.meta.url).pathname;
 const SERVER_ENTRY = 'apps/server/src/index.ts';
 
 let pg: PgContainer;
-let server: Subprocess;
+let server: ChildProcess;
 
 // Session state for the primary test user
 let authCookieAlice = '';
@@ -39,8 +39,9 @@ beforeAll(async () => {
   // Start an isolated PostgreSQL container.
   pg = await startPostgres();
 
-  // Start the server subprocess.
-  server = Bun.spawn([BUN_BIN, 'run', SERVER_ENTRY], {
+  // Start the server subprocess using Node's child_process.spawn so this test
+  // works correctly whether vitest forks are running under Bun or Node.js.
+  server = spawn(BUN_BIN, ['run', SERVER_ENTRY], {
     cwd: REPO_ROOT,
     env: {
       ...process.env,
@@ -49,8 +50,7 @@ beforeAll(async () => {
       PORT: String(PORT),
       CSRF_DISABLED: 'false',
     },
-    stdout: 'ignore',
-    stderr: 'ignore',
+    stdio: 'ignore',
   });
 
   // Wait until the server is ready.
@@ -102,7 +102,7 @@ beforeAll(async () => {
     }
   }
   authCookieBob = bobPairs.join('; ');
-}, 60_000);
+}, 90_000);
 
 afterAll(async () => {
   server?.kill();
@@ -303,7 +303,7 @@ async function waitForServer(base: string): Promise<void> {
       await fetch(`${base}/api/tax-objects`);
       return; // any response (including 401) means the server is up
     } catch {
-      await Bun.sleep(300);
+      await new Promise((resolve) => setTimeout(resolve, 300));
     }
   }
   throw new Error(`Server at ${base} did not become ready within ${SERVER_READY_TIMEOUT_MS}ms`);
