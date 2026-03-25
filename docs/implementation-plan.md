@@ -15,11 +15,11 @@ This plan maps the three v0 PRD deliverables to concrete implementation work ins
 
 ### v0 Deliverables
 
-| # | Deliverable | PRD Section | Timeline |
-|---|-------------|-------------|----------|
-| 1 | Tax Situation Object Schema Specification | 3.1 | Weeks 1–2 |
-| 2 | Tax Domain Knowledge Base | 3.2 | Weeks 3–4 |
-| 3 | Working Reference Implementation | 3.3 | Weeks 5–8 |
+| #   | Deliverable                               | PRD Section | Timeline  |
+| --- | ----------------------------------------- | ----------- | --------- |
+| 1   | Tax Situation Object Schema Specification | 3.1         | Weeks 1–2 |
+| 2   | Tax Domain Knowledge Base                 | 3.2         | Weeks 3–4 |
+| 3   | Working Reference Implementation          | 3.3         | Weeks 5–8 |
 
 ### Audience
 
@@ -32,17 +32,17 @@ This plan maps the three v0 PRD deliverables to concrete implementation work ins
 
 ### What exists
 
-| Layer | What | Where |
-|-------|------|-------|
-| Monorepo | Bun workspaces: `apps/web`, `apps/server`, `apps/worker`, `packages/core`, `packages/db`, `packages/ui` | Root `package.json` |
-| Database | PostgreSQL property graph: `entities` (JSONB), `relations`, `entity_types` registry. Dedicated tables for task queue, passkey credentials, worker credentials, API keys, revoked tokens. | `packages/db/schema.sql` |
-| Auth | Passkey (FIDO2 WebAuthn) + JWT (ES256 via Web Crypto). HTTP-only cookies. Token revocation table. CSRF verification. | `apps/server/src/auth/`, `apps/server/src/api/passkey.ts` |
-| API routing | Conditional path prefix matching in main fetch handler. `getAuthenticatedUser(req)` guard. `makeJson(corsHeaders)` response factory. AJV validation against `packages/core` schemas. Tagged template SQL with JSONB properties. | `apps/server/src/index.ts`, `apps/server/src/api/` |
-| Web | React + Vite + Tailwind PWA with task board, passkey login, resizable panels | `apps/web/src/` |
-| Worker | Ephemeral task runner, read-only DB role, API-mediated writes, LISTEN/NOTIFY wake | `apps/worker/src/` |
-| Testing | Vitest (unit + integration), Playwright (component + E2E), PG container utilities | Nested under each app's `tests/` dir + root `tests/` |
-| CI | GitHub Actions: `test-unit.yml`, `test-api.yml`, `test-component.yml`, `test-e2e.yml`, `quality-gate.yml`, `deploy.yml` | `.github/workflows/` |
-| Types | Generic `Entity`/`Relation` model, `Task`-specific types, JSON schemas for validation | `packages/core/types.ts` |
+| Layer       | What                                                                                                                                                                                                                            | Where                                                     |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Monorepo    | Bun workspaces: `apps/web`, `apps/server`, `apps/worker`, `packages/core`, `packages/db`, `packages/ui`                                                                                                                         | Root `package.json`                                       |
+| Database    | PostgreSQL property graph: `entities` (JSONB), `relations`, `entity_types` registry. Dedicated tables for task queue, passkey credentials, worker credentials, API keys, revoked tokens.                                        | `packages/db/schema.sql`                                  |
+| Auth        | Passkey (FIDO2 WebAuthn) + JWT (ES256 via Web Crypto). HTTP-only cookies. Token revocation table. CSRF verification.                                                                                                            | `apps/server/src/auth/`, `apps/server/src/api/passkey.ts` |
+| API routing | Conditional path prefix matching in main fetch handler. `getAuthenticatedUser(req)` guard. `makeJson(corsHeaders)` response factory. AJV validation against `packages/core` schemas. Tagged template SQL with JSONB properties. | `apps/server/src/index.ts`, `apps/server/src/api/`        |
+| Web         | React + Vite + Tailwind PWA with task board, passkey login, resizable panels                                                                                                                                                    | `apps/web/src/`                                           |
+| Worker      | Ephemeral task runner, read-only DB role, API-mediated writes, LISTEN/NOTIFY wake                                                                                                                                               | `apps/worker/src/`                                        |
+| Testing     | Vitest (unit + integration), Playwright (component + E2E), PG container utilities                                                                                                                                               | Nested under each app's `tests/` dir + root `tests/`      |
+| CI          | GitHub Actions: `test-unit.yml`, `test-api.yml`, `test-component.yml`, `test-e2e.yml`, `quality-gate.yml`, `deploy.yml`                                                                                                         | `.github/workflows/`                                      |
+| Types       | Generic `Entity`/`Relation` model, `Task`-specific types, JSON schemas for validation                                                                                                                                           | `packages/core/types.ts`                                  |
 
 ### What does NOT exist
 
@@ -66,6 +66,7 @@ The blueprint default is the property graph model (DATA-P-003, DATA-D-002). The 
 **Decision: Use the property graph for tax objects and tax returns.**
 
 Rationale:
+
 - Consistent with the existing pattern (users, tasks already in property graph)
 - Schema evolution via `entity_types` registry, not DDL migrations (DATA-P-003)
 - `situation_data` fits naturally in the JSONB `properties` column
@@ -75,14 +76,15 @@ Rationale:
 
 Add to `entity_types` registry:
 
-| Entity Type | Properties Schema | Sensitive Fields |
-|-------------|------------------|------------------|
-| `tax_object` | `{ object_type, display_name, status, created_by_user_id }` | None in v0 (synthetic data) |
+| Entity Type  | Properties Schema                                                                | Sensitive Fields                                                     |
+| ------------ | -------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `tax_object` | `{ object_type, display_name, status, created_by_user_id }`                      | None in v0 (synthetic data)                                          |
 | `tax_return` | `{ tax_object_id, tax_year, jurisdiction, return_type, status, situation_data }` | `situation_data` (deferred encryption — v0 uses synthetic data only) |
 
 ### Access enforcement
 
 The access spec's `tax_objects.created_by_user_id = current_user.id` rule is enforced at the application layer:
+
 - Every query for tax objects filters by `properties->>'created_by_user_id' = $userId`
 - Every tax return query joins through the owning tax object's ownership check
 - No RLS in v0 (creator-only model is simple enough for application-layer enforcement)
@@ -104,10 +106,10 @@ CREATE UNIQUE INDEX idx_tax_return_unique
 
 ### Relations
 
-| Relation Type | Source | Target | Purpose |
-|--------------|--------|--------|---------|
-| `owns` | `user` entity | `tax_object` entity | Ownership (redundant with `created_by_user_id` but enables graph traversal) |
-| `belongs_to` | `tax_return` entity | `tax_object` entity | Scoping returns under objects |
+| Relation Type | Source              | Target              | Purpose                                                                     |
+| ------------- | ------------------- | ------------------- | --------------------------------------------------------------------------- |
+| `owns`        | `user` entity       | `tax_object` entity | Ownership (redundant with `created_by_user_id` but enables graph traversal) |
+| `belongs_to`  | `tax_return` entity | `tax_object` entity | Scoping returns under objects                                               |
 
 ---
 
@@ -119,13 +121,13 @@ A machine-readable, validatable v0.1 definition of the Tax Situation Object with
 
 ### 4.2 Filing Scenarios
 
-| # | Scenario | Key Forms | Tier Signal |
-|---|----------|-----------|-------------|
-| 1 | W-2 only (single, no itemizing) | 1040, W-2 | Free tier at most providers |
-| 2 | Freelance / self-employed | 1040, 1099-NEC, Schedule C, Schedule SE | Mid/premium tier |
-| 3 | Investment income | 1040, 1099-B, 1099-DIV, 1099-INT, Schedule D, Form 8949 | Mid/premium tier |
-| 4 | Multi-state filer | 1040, W-2 (multiple states), state returns | Premium tier |
-| 5 | Rental income | 1040, Schedule E, 1099-MISC | Premium tier |
+| #   | Scenario                        | Key Forms                                               | Tier Signal                 |
+| --- | ------------------------------- | ------------------------------------------------------- | --------------------------- |
+| 1   | W-2 only (single, no itemizing) | 1040, W-2                                               | Free tier at most providers |
+| 2   | Freelance / self-employed       | 1040, 1099-NEC, Schedule C, Schedule SE                 | Mid/premium tier            |
+| 3   | Investment income               | 1040, 1099-B, 1099-DIV, 1099-INT, Schedule D, Form 8949 | Mid/premium tier            |
+| 4   | Multi-state filer               | 1040, W-2 (multiple states), state returns              | Premium tier                |
+| 5   | Rental income                   | 1040, Schedule E, 1099-MISC                             | Premium tier                |
 
 ### 4.3 Type Definitions — `packages/core/tax-situation.ts`
 
@@ -136,8 +138,8 @@ All types live in `packages/core/` as the single canonical source (ARCH-P-004, A
 ```typescript
 export interface TaxSituation {
   id: string;
-  version: string;                    // "0.1.0" — schema version
-  filingYear: number;                 // e.g., 2025
+  version: string; // "0.1.0" — schema version
+  filingYear: number; // e.g., 2025
   filingStatus: FilingStatus;
   dependents: Dependent[];
   incomeStreams: IncomeStream[];
@@ -146,7 +148,7 @@ export interface TaxSituation {
   lifeEvents: LifeEvent[];
   priorYearContext: PriorYearContext | null;
   stateResidency: StateResidency;
-  documentationCompleteness: number;  // 0.0–1.0
+  documentationCompleteness: number; // 0.0–1.0
   confidenceScores: ConfidenceScores;
   rawArtifacts: RawArtifact[];
   metadata: SituationMetadata;
@@ -155,55 +157,55 @@ export interface TaxSituation {
 
 #### 4.3.2 Enums (concrete values — CTO requirement)
 
-| Enum | Values |
-|------|--------|
-| `FilingStatus` | `'single'`, `'married_filing_jointly'`, `'married_filing_separately'`, `'head_of_household'`, `'qualifying_surviving_spouse'` |
-| `IncomeStreamType` | `'w2'`, `'1099_nec'`, `'1099_misc'`, `'1099_b'`, `'1099_div'`, `'1099_int'`, `'1099_r'`, `'k1'`, `'rental'`, `'other'` |
-| `DeductionType` | `'standard'`, `'mortgage_interest'`, `'state_local_taxes'`, `'charitable'`, `'medical'`, `'student_loan_interest'`, `'educator_expense'`, `'other'` |
-| `CreditType` | `'child_tax'`, `'earned_income'`, `'education_american_opportunity'`, `'education_lifetime_learning'`, `'child_dependent_care'`, `'saver'`, `'other'` |
-| `LifeEventType` | `'marriage'`, `'divorce'`, `'birth'`, `'adoption'`, `'death_of_spouse'`, `'home_purchase'`, `'home_sale'`, `'job_change'`, `'retirement'`, `'other'` |
-| `TaxObjectType` | `'individual'`, `'joint_household'`, `'business'`, `'dependent'`, `'estate_or_trust'` |
-| `StateCode` | Two-letter US state/territory codes (50 states + DC + territories) |
-| `ArtifactType` | `'document'`, `'photo'`, `'recording'` |
+| Enum               | Values                                                                                                                                                |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FilingStatus`     | `'single'`, `'married_filing_jointly'`, `'married_filing_separately'`, `'head_of_household'`, `'qualifying_surviving_spouse'`                         |
+| `IncomeStreamType` | `'w2'`, `'1099_nec'`, `'1099_misc'`, `'1099_b'`, `'1099_div'`, `'1099_int'`, `'1099_r'`, `'k1'`, `'rental'`, `'other'`                                |
+| `DeductionType`    | `'standard'`, `'mortgage_interest'`, `'state_local_taxes'`, `'charitable'`, `'medical'`, `'student_loan_interest'`, `'educator_expense'`, `'other'`   |
+| `CreditType`       | `'child_tax'`, `'earned_income'`, `'education_american_opportunity'`, `'education_lifetime_learning'`, `'child_dependent_care'`, `'saver'`, `'other'` |
+| `LifeEventType`    | `'marriage'`, `'divorce'`, `'birth'`, `'adoption'`, `'death_of_spouse'`, `'home_purchase'`, `'home_sale'`, `'job_change'`, `'retirement'`, `'other'`  |
+| `TaxObjectType`    | `'individual'`, `'joint_household'`, `'business'`, `'dependent'`, `'estate_or_trust'`                                                                 |
+| `StateCode`        | Two-letter US state/territory codes (50 states + DC + territories)                                                                                    |
+| `ArtifactType`     | `'document'`, `'photo'`, `'recording'`                                                                                                                |
 
 #### 4.3.3 Sub-Types (key structures)
 
 ```typescript
 export interface IncomeStream {
   type: IncomeStreamType;
-  source: string;                    // Employer name, payer, property address
-  amount: number;                    // Gross amount
-  employerEIN?: string;              // W-2 only
+  source: string; // Employer name, payer, property address
+  amount: number; // Gross amount
+  employerEIN?: string; // W-2 only
   documentation: DocumentRef[];
-  w2Data?: W2Data;                   // Present when type === 'w2'
-  form1099Data?: Form1099Data;       // Present for 1099 variants
+  w2Data?: W2Data; // Present when type === 'w2'
+  form1099Data?: Form1099Data; // Present for 1099 variants
 }
 
 export interface W2Data {
-  wages: number;                     // Box 1
-  federalTaxWithheld: number;       // Box 2
-  socialSecurityWages: number;      // Box 3
+  wages: number; // Box 1
+  federalTaxWithheld: number; // Box 2
+  socialSecurityWages: number; // Box 3
   socialSecurityTaxWithheld: number; // Box 4
-  medicareWages: number;            // Box 5
-  medicareTaxWithheld: number;      // Box 6
-  stateName?: string;               // Box 15
-  stateWages?: number;              // Box 16
-  stateTaxWithheld?: number;        // Box 17
+  medicareWages: number; // Box 5
+  medicareTaxWithheld: number; // Box 6
+  stateName?: string; // Box 15
+  stateWages?: number; // Box 16
+  stateTaxWithheld?: number; // Box 17
 }
 
 export interface Dependent {
   firstName: string;
   lastName: string;
   relationship: string;
-  dateOfBirth: string;               // ISO 8601 date
-  ssn_last4?: string;                // Only last 4 digits (data minimization, DATA-P-005)
+  dateOfBirth: string; // ISO 8601 date
+  ssn_last4?: string; // Only last 4 digits (data minimization, DATA-P-005)
   qualifiesForChildTaxCredit: boolean;
   qualifiesForEIC: boolean;
 }
 
 export interface StateResidency {
   primary: StateCode;
-  additional: StateCode[];           // Multi-state filers
+  additional: StateCode[]; // Multi-state filers
 }
 
 export interface PriorYearContext {
@@ -217,8 +219,8 @@ export interface PriorYearContext {
 
 ```typescript
 export interface ConfidenceScores {
-  overall: number;                           // 0.0–1.0
-  perField: Record<string, number>;          // Keyed by dotted field path
+  overall: number; // 0.0–1.0
+  perField: Record<string, number>; // Keyed by dotted field path
 }
 
 export type ValidationSeverity = 'error' | 'warning' | 'info';
@@ -227,14 +229,14 @@ export interface ValidationResult {
   valid: boolean;
   errors: ValidationIssue[];
   warnings: ValidationIssue[];
-  completeness: number;                      // 0.0–1.0
-  formsRequired: string[];                   // Form IDs from taxonomy
+  completeness: number; // 0.0–1.0
+  formsRequired: string[]; // Form IDs from taxonomy
 }
 
 export interface ValidationIssue {
-  code: string;                              // e.g., "MISSING_SCHEDULE_SE"
+  code: string; // e.g., "MISSING_SCHEDULE_SE"
   severity: ValidationSeverity;
-  field: string;                             // Dotted path: "incomeStreams[0].amount"
+  field: string; // Dotted path: "incomeStreams[0].amount"
   message: string;
   suggestedAction?: string;
 }
@@ -244,22 +246,24 @@ When the system cannot classify a situation, it expresses uncertainty through lo
 
 #### 4.3.5 Versioning Strategy (CTO requirement)
 
-| What | Scheme | Rationale |
-|------|--------|-----------|
-| Schema version | Semantic: `MAJOR.MINOR.PATCH` | CTO needs migration path. Minor for additive fields; major for breaking changes. |
-| Version field | `version: "0.1.0"` on every `TaxSituation` | Every object self-describes its schema version |
-| Knowledge base | `taxYear`-scoped + `version` field | Rules change per tax year; version within year for corrections |
-| Backward compat | v0.1 makes no stability promises | Pre-consortium. Working group in Phase 3 handles stability. |
+| What            | Scheme                                     | Rationale                                                                        |
+| --------------- | ------------------------------------------ | -------------------------------------------------------------------------------- |
+| Schema version  | Semantic: `MAJOR.MINOR.PATCH`              | CTO needs migration path. Minor for additive fields; major for breaking changes. |
+| Version field   | `version: "0.1.0"` on every `TaxSituation` | Every object self-describes its schema version                                   |
+| Knowledge base  | `taxYear`-scoped + `version` field         | Rules change per tax year; version within year for corrections                   |
+| Backward compat | v0.1 makes no stability promises           | Pre-consortium. Working group in Phase 3 handles stability.                      |
 
 ### 4.4 JSON Schema — `packages/core/tax-situation-schema.ts`
 
 A JSON Schema object for runtime validation of TaxSituation objects. Serves two purposes:
+
 1. Runtime validation in the server (via AJV, matching existing validation pattern in `apps/server/src/api/validation.ts`)
 2. Machine-readable spec for CTO evaluation
 
 Exported alongside TypeScript types. Kept in sync manually — no code generation dependency (ARCH-P-003: dependencies are liabilities).
 
 **Schema objects to export:**
+
 - `createTaxObjectSchema` — validates POST body for tax object creation
 - `patchTaxObjectSchema` — validates PATCH body for tax object update
 - `createTaxReturnSchema` — validates POST body for tax return creation
@@ -272,11 +276,14 @@ New handler function following the existing pattern:
 
 ```typescript
 export async function handleTaxObjectRequest(
-  req: Request, url: URL, appState: AppState
-): Promise<Response | null>
+  req: Request,
+  url: URL,
+  appState: AppState,
+): Promise<Response | null>;
 ```
 
 Registered in `apps/server/src/index.ts` via:
+
 ```typescript
 if (url.pathname.startsWith('/api/tax-objects')) {
   const res = await handleTaxObjectRequest(req, url, appState);
@@ -286,15 +293,15 @@ if (url.pathname.startsWith('/api/tax-objects')) {
 
 #### Endpoint specifications
 
-| Method | Path | Purpose | Auth |
-|--------|------|---------|------|
-| `POST` | `/api/tax-objects` | Create tax object | `getAuthenticatedUser(req)` + CSRF |
-| `GET` | `/api/tax-objects` | List user's tax objects | `getAuthenticatedUser(req)` |
-| `GET` | `/api/tax-objects/:id` | Get single tax object | `getAuthenticatedUser(req)` + ownership check |
-| `PATCH` | `/api/tax-objects/:id` | Update tax object | `getAuthenticatedUser(req)` + ownership check + CSRF |
-| `POST` | `/api/tax-objects/:id/returns` | Create tax return | `getAuthenticatedUser(req)` + ownership check + CSRF |
-| `GET` | `/api/tax-objects/:id/returns` | List returns under object | `getAuthenticatedUser(req)` + ownership check |
-| `GET` | `/api/tax-objects/:id/returns/:returnId` | Get single return | `getAuthenticatedUser(req)` + ownership check |
+| Method  | Path                                     | Purpose                                    | Auth                                                 |
+| ------- | ---------------------------------------- | ------------------------------------------ | ---------------------------------------------------- |
+| `POST`  | `/api/tax-objects`                       | Create tax object                          | `getAuthenticatedUser(req)` + CSRF                   |
+| `GET`   | `/api/tax-objects`                       | List user's tax objects                    | `getAuthenticatedUser(req)`                          |
+| `GET`   | `/api/tax-objects/:id`                   | Get single tax object                      | `getAuthenticatedUser(req)` + ownership check        |
+| `PATCH` | `/api/tax-objects/:id`                   | Update tax object                          | `getAuthenticatedUser(req)` + ownership check + CSRF |
+| `POST`  | `/api/tax-objects/:id/returns`           | Create tax return                          | `getAuthenticatedUser(req)` + ownership check + CSRF |
+| `GET`   | `/api/tax-objects/:id/returns`           | List returns under object                  | `getAuthenticatedUser(req)` + ownership check        |
+| `GET`   | `/api/tax-objects/:id/returns/:returnId` | Get single return                          | `getAuthenticatedUser(req)` + ownership check        |
 | `PATCH` | `/api/tax-objects/:id/returns/:returnId` | Update return (including `situation_data`) | `getAuthenticatedUser(req)` + ownership check + CSRF |
 
 #### Implementation details (matching existing server patterns)
@@ -357,14 +364,14 @@ Note: `situation_data` is listed as sensitive. In v0 (synthetic data only), encr
 
 ### 4.7 Issues (Plan Items)
 
-| # | Issue Title | Deps | Exit Criteria |
-|---|-------------|------|---------------|
-| 1 | Define TaxSituation TypeScript types, enums, and sub-types in `packages/core` | — | Types compile; cover all 5 filing scenarios; exported from `packages/core/index.ts` |
-| 2 | Create JSON Schema objects for TaxSituation and API request/response validation | 1 | Schemas validate sample objects for all 5 scenarios via AJV |
-| 3 | Register `tax_object` and `tax_return` entity types in `entity_types` registry; add unique index for returns | — | Entity types seeded; unique constraint enforced; migration script runs cleanly |
-| 4 | Implement tax-objects CRUD API endpoints (POST, GET list, GET by ID, PATCH) | 1, 3 | All 4 operations pass integration tests; ownership enforced; follows existing handler pattern |
-| 5 | Implement tax-returns CRUD API endpoints (POST, GET list, GET by ID, PATCH) with `situation_data` | 1, 3, 4 | All 4 operations pass integration tests; `tax_object_id` scoping enforced; `situation_data` validated against schema |
-| 6 | Implement TaxSituation validation engine | 1, 2 | Takes a TaxSituation object, returns ValidationResult; unit tests for each of the 5 scenarios |
+| #   | Issue Title                                                                                                  | Deps    | Exit Criteria                                                                                                        |
+| --- | ------------------------------------------------------------------------------------------------------------ | ------- | -------------------------------------------------------------------------------------------------------------------- |
+| 1   | Define TaxSituation TypeScript types, enums, and sub-types in `packages/core`                                | —       | Types compile; cover all 5 filing scenarios; exported from `packages/core/index.ts`                                  |
+| 2   | Create JSON Schema objects for TaxSituation and API request/response validation                              | 1       | Schemas validate sample objects for all 5 scenarios via AJV                                                          |
+| 3   | Register `tax_object` and `tax_return` entity types in `entity_types` registry; add unique index for returns | —       | Entity types seeded; unique constraint enforced; migration script runs cleanly                                       |
+| 4   | Implement tax-objects CRUD API endpoints (POST, GET list, GET by ID, PATCH)                                  | 1, 3    | All 4 operations pass integration tests; ownership enforced; follows existing handler pattern                        |
+| 5   | Implement tax-returns CRUD API endpoints (POST, GET list, GET by ID, PATCH) with `situation_data`            | 1, 3, 4 | All 4 operations pass integration tests; `tax_object_id` scoping enforced; `situation_data` validated against schema |
+| 6   | Implement TaxSituation validation engine                                                                     | 1, 2    | Takes a TaxSituation object, returns ValidationResult; unit tests for each of the 5 scenarios                        |
 
 ---
 
@@ -382,11 +389,11 @@ A machine-readable encoding of tax domain rules that makes the schema evaluable 
 
 **Format decision:**
 
-| Option | Pros | Cons | Decision |
-|--------|------|------|----------|
-| TypeScript modules | Importable, type-safe, testable, no new dependency | Not directly usable as ML training data | **Source of truth** |
-| JSON export | Portable, parseable by any language, ML-ready | No type safety without schema | **Generated artifact** for training |
-| Rule engine library | Declarative, separable | New dependency violates ARCH-P-003 | **Rejected** |
+| Option              | Pros                                               | Cons                                    | Decision                            |
+| ------------------- | -------------------------------------------------- | --------------------------------------- | ----------------------------------- |
+| TypeScript modules  | Importable, type-safe, testable, no new dependency | Not directly usable as ML training data | **Source of truth**                 |
+| JSON export         | Portable, parseable by any language, ML-ready      | No type safety without schema           | **Generated artifact** for training |
+| Rule engine library | Declarative, separable                             | New dependency violates ARCH-P-003      | **Rejected**                        |
 
 TypeScript modules are the source of truth. A build step generates `knowledge-base.json` for training and portability. No new dependencies — rule evaluation is conditional logic.
 
@@ -394,37 +401,37 @@ TypeScript modules are the source of truth. A build step generates `knowledge-ba
 
 ```typescript
 export interface FormDefinition {
-  formId: string;              // "1040", "schedule-c", "form-8949"
-  name: string;                // "U.S. Individual Income Tax Return"
-  requiredFields: string[];    // TaxSituation field paths that trigger this form
-  dependencies: string[];      // Form IDs this form requires (e.g., SE requires C)
-  triggeredBy: TriggerRule[];  // Machine-evaluable conditions
+  formId: string; // "1040", "schedule-c", "form-8949"
+  name: string; // "U.S. Individual Income Tax Return"
+  requiredFields: string[]; // TaxSituation field paths that trigger this form
+  dependencies: string[]; // Form IDs this form requires (e.g., SE requires C)
+  triggeredBy: TriggerRule[]; // Machine-evaluable conditions
 }
 
 export interface TriggerRule {
-  field: string;               // Dotted path into TaxSituation
+  field: string; // Dotted path into TaxSituation
   operator: 'equals' | 'contains' | 'exists' | 'gt' | 'lt';
   value: unknown;
-  description: string;         // Human-readable explanation
+  description: string; // Human-readable explanation
 }
 ```
 
 **v0.1 form coverage:**
 
-| Form/Schedule | Trigger Condition | Dependencies |
-|--------------|-------------------|--------------|
-| 1040 | Always (federal individual return) | — |
-| W-2 | `incomeStream.type === 'w2'` | 1040 |
-| Schedule C | `incomeStream.type === '1099_nec'` | 1040 |
-| Schedule SE | Schedule C present AND net self-employment > $400 | Schedule C |
-| Schedule D | `incomeStream.type === '1099_b'` | 1040 |
-| Form 8949 | Capital gains/losses reported | Schedule D |
-| Schedule E | `incomeStream.type === 'rental'` | 1040 |
-| Schedule A | Itemized deductions claimed (total > standard deduction) | 1040 |
-| Schedule B | Interest + dividends > $1,500 | 1040 |
-| 1099-DIV | Dividend income present | 1040 |
-| 1099-INT | Interest income present | 1040 |
-| State returns | `stateResidency.primary` or `stateResidency.additional[]` set | 1040 |
+| Form/Schedule | Trigger Condition                                             | Dependencies |
+| ------------- | ------------------------------------------------------------- | ------------ |
+| 1040          | Always (federal individual return)                            | —            |
+| W-2           | `incomeStream.type === 'w2'`                                  | 1040         |
+| Schedule C    | `incomeStream.type === '1099_nec'`                            | 1040         |
+| Schedule SE   | Schedule C present AND net self-employment > $400             | Schedule C   |
+| Schedule D    | `incomeStream.type === '1099_b'`                              | 1040         |
+| Form 8949     | Capital gains/losses reported                                 | Schedule D   |
+| Schedule E    | `incomeStream.type === 'rental'`                              | 1040         |
+| Schedule A    | Itemized deductions claimed (total > standard deduction)      | 1040         |
+| Schedule B    | Interest + dividends > $1,500                                 | 1040         |
+| 1099-DIV      | Dividend income present                                       | 1040         |
+| 1099-INT      | Interest income present                                       | 1040         |
+| State returns | `stateResidency.primary` or `stateResidency.additional[]` set | 1040         |
 
 The form taxonomy is a directed acyclic graph. Each form points to its dependencies. Traversal from a TaxSituation object produces the complete list of required forms.
 
@@ -432,36 +439,36 @@ The form taxonomy is a directed acyclic graph. Each form points to its dependenc
 
 ```typescript
 export interface ProviderDefinition {
-  providerId: string;           // "turbotax", "hrblock", "taxact", "freetaxusa", "cashapp"
-  providerName: string;         // Display name
+  providerId: string; // "turbotax", "hrblock", "taxact", "freetaxusa", "cashapp"
+  providerName: string; // Display name
   tiers: ProviderTier[];
 }
 
 export interface ProviderTier {
-  tierName: string;             // "Free", "Deluxe", "Premium", "Self-Employed"
-  price: number | null;         // Advertised federal price in USD (null if unknown)
-  statePrice: number | null;    // Per-state add-on price
+  tierName: string; // "Free", "Deluxe", "Premium", "Self-Employed"
+  price: number | null; // Advertised federal price in USD (null if unknown)
+  statePrice: number | null; // Per-state add-on price
   qualifyingConditions: TierCondition[];
   disqualifyingConditions: TierCondition[];
 }
 
 export interface TierCondition {
-  field: string;                // Dotted path into TaxSituation
+  field: string; // Dotted path into TaxSituation
   operator: 'equals' | 'contains' | 'gt' | 'lt' | 'exists' | 'not_exists';
   value: unknown;
-  description: string;          // Human-readable
+  description: string; // Human-readable
 }
 ```
 
 **v0.1 provider coverage (top 5):**
 
-| Provider | Tiers | Source |
-|----------|-------|--------|
-| TurboTax (Intuit) | Free, Deluxe ($69), Premium ($129), Self-Employed ($129) | Public pricing pages, 2025 season |
-| H&R Block | Free Online, Deluxe ($55), Premium ($85), Self-Employed ($110) | Public pricing pages, 2025 season |
-| TaxAct | Free, Deluxe+ ($49.99), Premier ($79.99), Self-Employed+ ($99.99) | Public pricing pages, 2025 season |
-| FreeTaxUSA | Free (federal), Deluxe ($7.99/state) | Public pricing pages, 2025 season |
-| Cash App Taxes | Free (all supported) | Public pricing pages, 2025 season |
+| Provider          | Tiers                                                             | Source                            |
+| ----------------- | ----------------------------------------------------------------- | --------------------------------- |
+| TurboTax (Intuit) | Free, Deluxe ($69), Premium ($129), Self-Employed ($129)          | Public pricing pages, 2025 season |
+| H&R Block         | Free Online, Deluxe ($55), Premium ($85), Self-Employed ($110)    | Public pricing pages, 2025 season |
+| TaxAct            | Free, Deluxe+ ($49.99), Premier ($79.99), Self-Employed+ ($99.99) | Public pricing pages, 2025 season |
+| FreeTaxUSA        | Free (federal), Deluxe ($7.99/state)                              | Public pricing pages, 2025 season |
+| Cash App Taxes    | Free (all supported)                                              | Public pricing pages, 2025 season |
 
 **Critical design constraint (from CEO interviews):** The tier mapping determines which tier a situation maps to at each provider. The protocol does NOT recommend a provider to the consumer. Providers apply their own tier logic. The knowledge base mapping is for validation and demonstration only. This is a hard requirement from every CEO interviewed — the protocol validates and structures, it does not recommend.
 
@@ -469,32 +476,32 @@ export interface TierCondition {
 
 ```typescript
 export interface ValidationRuleDefinition {
-  id: string;                   // "MISSING_SCHEDULE_SE"
+  id: string; // "MISSING_SCHEDULE_SE"
   severity: 'error' | 'warning';
   category: ValidationCategory;
   description: string;
-  check: (situation: TaxSituation) => boolean;  // true = violation found
+  check: (situation: TaxSituation) => boolean; // true = violation found
   message: string;
   suggestedAction: string;
 }
 
 export type ValidationCategory =
-  | 'missing_dependency'     // Required form/data not present
-  | 'contradiction'          // Conflicting field values
-  | 'implausible_value'      // Values outside reasonable range
-  | 'incomplete_chain'       // Form dependency chain broken
-  | 'threshold_violation';   // Regulatory threshold exceeded
+  | 'missing_dependency' // Required form/data not present
+  | 'contradiction' // Conflicting field values
+  | 'implausible_value' // Values outside reasonable range
+  | 'incomplete_chain' // Form dependency chain broken
+  | 'threshold_violation'; // Regulatory threshold exceeded
 ```
 
 **v0.1 rule coverage:**
 
-| Category | Rules |
-|----------|-------|
-| Missing dependency | 1099-NEC without Schedule C data; Schedule C without SE (if net > $400); 1099-B without Schedule D; rental income without Schedule E |
-| Contradiction | Single filing status + dependent spouse; head_of_household without qualifying dependent; married_filing_separately + EITC claim |
-| Implausible value | Negative AGI without capital loss documentation; W-2 wages > $10M; negative withholding; dependent age > 24 for child tax credit (unless disabled) |
-| Incomplete chain | Schedule D without Form 8949 entries; itemized deductions claimed but no Schedule A items; Schedule C present but missing business income |
-| Threshold | Free File AGI > $89,000 (2025 limit); EITC above qualifying threshold by filing status + children; self-employment net < $400 with SE scheduled |
+| Category           | Rules                                                                                                                                              |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Missing dependency | 1099-NEC without Schedule C data; Schedule C without SE (if net > $400); 1099-B without Schedule D; rental income without Schedule E               |
+| Contradiction      | Single filing status + dependent spouse; head_of_household without qualifying dependent; married_filing_separately + EITC claim                    |
+| Implausible value  | Negative AGI without capital loss documentation; W-2 wages > $10M; negative withholding; dependent age > 24 for child tax credit (unless disabled) |
+| Incomplete chain   | Schedule D without Form 8949 entries; itemized deductions claimed but no Schedule A items; Schedule C present but missing business income          |
+| Threshold          | Free File AGI > $89,000 (2025 limit); EITC above qualifying threshold by filing status + children; self-employment net < $400 with SE scheduled    |
 
 ### 5.6 Tax Code Thresholds — `packages/core/knowledge-base/thresholds.ts`
 
@@ -502,13 +509,13 @@ export type ValidationCategory =
 export interface TaxYearThresholds {
   taxYear: number;
   standardDeduction: Record<FilingStatus, number>;
-  freeFileAGILimit: number;                     // $89,000 (2025)
-  selfEmploymentThreshold: number;              // $400
-  eitcThresholds: Record<string, number>;       // Key: "{filingStatus}_{childCount}" → max AGI
-  capitalLossLimit: number;                     // $3,000 ($1,500 MFS)
-  estimatedTaxSafeHarbor: number;               // 90% current year or 100% prior year
-  scheduleBThreshold: number;                   // $1,500 (interest + dividends)
-  childTaxCreditAmount: number;                 // $2,000 per qualifying child (2025)
+  freeFileAGILimit: number; // $89,000 (2025)
+  selfEmploymentThreshold: number; // $400
+  eitcThresholds: Record<string, number>; // Key: "{filingStatus}_{childCount}" → max AGI
+  capitalLossLimit: number; // $3,000 ($1,500 MFS)
+  estimatedTaxSafeHarbor: number; // 90% current year or 100% prior year
+  scheduleBThreshold: number; // $1,500 (interest + dividends)
+  childTaxCreditAmount: number; // $2,000 per qualifying child (2025)
   childTaxCreditPhaseOutStart: Record<FilingStatus, number>;
 }
 ```
@@ -518,6 +525,7 @@ v0.1 ships with **2025 tax year values only**. Thresholds are sourced from IRS p
 ### 5.7 JSON Export — `packages/core/knowledge-base/export.ts`
 
 A script that serializes the entire knowledge base (form taxonomy, tier mappings, validation rules, thresholds) into a single `knowledge-base.json` file. This serves double duty:
+
 1. Portable artifact for CTO review (can be loaded into any tool)
 2. Future training corpus for v1 fine-tuned model (PRD §5)
 
@@ -525,13 +533,13 @@ The export strips function references from validation rules and replaces them wi
 
 ### 5.8 Issues (Plan Items)
 
-| # | Issue Title | Deps | Exit Criteria |
-|---|-------------|------|---------------|
-| 7 | Implement IRS form taxonomy with dependency graph | 1 | All forms in coverage table defined; graph traversal produces correct required-form lists for all 5 scenarios |
-| 8 | Implement provider tier mapping rules (5 providers) | 1 | Tier rules for all 5 providers defined; sample situations correctly tier-placed; unit tests per provider |
-| 9 | Implement validation rules (5 categories) | 1, 7 | All rule categories covered; unit tests for each individual rule |
-| 10 | Implement 2025 tax code thresholds | 1 | All threshold values sourced from IRS publications; citations documented; used by validation rules |
-| 11 | Build knowledge base JSON export script | 7, 8, 9, 10 | `knowledge-base.json` generated; structurally valid; loadable by external tools |
+| #   | Issue Title                                         | Deps        | Exit Criteria                                                                                                 |
+| --- | --------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------- |
+| 7   | Implement IRS form taxonomy with dependency graph   | 1           | All forms in coverage table defined; graph traversal produces correct required-form lists for all 5 scenarios |
+| 8   | Implement provider tier mapping rules (5 providers) | 1           | Tier rules for all 5 providers defined; sample situations correctly tier-placed; unit tests per provider      |
+| 9   | Implement validation rules (5 categories)           | 1, 7        | All rule categories covered; unit tests for each individual rule                                              |
+| 10  | Implement 2025 tax code thresholds                  | 1           | All threshold values sourced from IRS publications; citations documented; used by validation rules            |
+| 11  | Build knowledge base JSON export script             | 7, 8, 9, 10 | `knowledge-base.json` generated; structurally valid; loadable by external tools                               |
 
 ---
 
@@ -548,6 +556,7 @@ A transport-agnostic demo that takes messy input, produces a structured Tax Situ
 ### 6.2 Single Modality: W-2 Document OCR
 
 Per CTO feedback (Simulated CEO Interview §CTO) and PRD §10 risk mitigation, v0 picks **one input modality**. W-2 document OCR is the strongest choice:
+
 - Tangible and verifiable (W-2 has known fields in known positions)
 - Directly relevant to every provider's intake pipeline
 - Produces concrete, checkable output
@@ -600,16 +609,16 @@ Per UX-P-001 ("service delivery precedes surface design") and UX-D-001 ("authori
 
 **States:**
 
-| State | Actor | Action | Transition |
-|-------|-------|--------|------------|
-| START | end-user | Uploads W-2 image | → EXTRACTING |
-| EXTRACTING | system | Calls extraction API | → REVIEWING (success) or ERROR (failure) |
-| REVIEWING | end-user | Confirms or edits extracted data | → COMPLETING |
-| COMPLETING | end-user | Fills remaining TaxSituation fields | → VALIDATING (on save) |
-| VALIDATING | system | Calls validation endpoint | → EVALUATING |
-| EVALUATING | system | Calls tier evaluation endpoint | → RESULTS |
-| RESULTS | end-user | Views validation results + tier placements | Terminal |
-| ERROR | end-user | Retry upload or exit | → START |
+| State      | Actor    | Action                                     | Transition                               |
+| ---------- | -------- | ------------------------------------------ | ---------------------------------------- |
+| START      | end-user | Uploads W-2 image                          | → EXTRACTING                             |
+| EXTRACTING | system   | Calls extraction API                       | → REVIEWING (success) or ERROR (failure) |
+| REVIEWING  | end-user | Confirms or edits extracted data           | → COMPLETING                             |
+| COMPLETING | end-user | Fills remaining TaxSituation fields        | → VALIDATING (on save)                   |
+| VALIDATING | system   | Calls validation endpoint                  | → EVALUATING                             |
+| EVALUATING | system   | Calls tier evaluation endpoint             | → RESULTS                                |
+| RESULTS    | end-user | Views validation results + tier placements | Terminal                                 |
+| ERROR      | end-user | Retry upload or exit                       | → START                                  |
 
 ### 6.4 Visual Identity
 
@@ -703,66 +712,67 @@ theme: {
 
 **Surfaces and elevation:**
 
-| Element | Treatment | Notes |
-|---------|-----------|-------|
-| Page background | `bg-surface-50` | Cool off-white. Never warm zinc. |
-| Card / panel | `bg-white shadow-card` | Shadow replaces border as primary card indicator. No visible border by default. |
-| Card with structure | `bg-white shadow-card border border-surface-200/60` | Very faint border only when cards are adjacent and shadows alone don't separate. The `/60` opacity is deliberate — full borders are heavy. |
-| Dark sidebar | `bg-brand-800` | Dark navy. Anchors the layout. Not black — black is harsh under projector light. |
-| Table header row | `bg-surface-50` | Subtle differentiation from white card body. |
-| Elevated surface (modal) | `bg-white shadow-lg` | No border. Shadow carries the elevation. |
+| Element                  | Treatment                                           | Notes                                                                                                                                      |
+| ------------------------ | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Page background          | `bg-surface-50`                                     | Cool off-white. Never warm zinc.                                                                                                           |
+| Card / panel             | `bg-white shadow-card`                              | Shadow replaces border as primary card indicator. No visible border by default.                                                            |
+| Card with structure      | `bg-white shadow-card border border-surface-200/60` | Very faint border only when cards are adjacent and shadows alone don't separate. The `/60` opacity is deliberate — full borders are heavy. |
+| Dark sidebar             | `bg-brand-800`                                      | Dark navy. Anchors the layout. Not black — black is harsh under projector light.                                                           |
+| Table header row         | `bg-surface-50`                                     | Subtle differentiation from white card body.                                                                                               |
+| Elevated surface (modal) | `bg-white shadow-lg`                                | No border. Shadow carries the elevation.                                                                                                   |
 
 **Key principle: Borders are a last resort.** Use shadow (`shadow-card`) for card separation. Use whitespace for section separation. Use a very faint border (`border-surface-200/60`) only when two cards are touching and shadow alone doesn't create enough separation. Heavy visible borders (`border-zinc-200` on everything) flatten the hierarchy and look like a wireframe.
 
 **Text hierarchy:**
 
-| Level | Color | Weight | Usage |
-|-------|-------|--------|-------|
-| Display | `surface-900` | `font-bold tracking-tight` | Page title only |
-| Heading | `surface-800` | `font-semibold` | Section and card headings |
-| Body | `surface-600` | `font-normal` | Descriptions, form help text |
-| Secondary | `surface-500` | `font-normal` | Labels, metadata |
-| Muted | `surface-400` | `font-normal` | Placeholders, disabled, timestamps |
-| Inverse | `white` | varies | On dark sidebar, on accent buttons |
-| Inverse muted | `brand-300` | `font-normal` | Secondary text on dark sidebar |
+| Level         | Color         | Weight                     | Usage                              |
+| ------------- | ------------- | -------------------------- | ---------------------------------- |
+| Display       | `surface-900` | `font-bold tracking-tight` | Page title only                    |
+| Heading       | `surface-800` | `font-semibold`            | Section and card headings          |
+| Body          | `surface-600` | `font-normal`              | Descriptions, form help text       |
+| Secondary     | `surface-500` | `font-normal`              | Labels, metadata                   |
+| Muted         | `surface-400` | `font-normal`              | Placeholders, disabled, timestamps |
+| Inverse       | `white`       | varies                     | On dark sidebar, on accent buttons |
+| Inverse muted | `brand-300`   | `font-normal`              | Secondary text on dark sidebar     |
 
 **Interactive states:**
 
-| State | Treatment |
-|-------|-----------|
-| Default button (primary) | `bg-accent-500 text-white rounded` — teal, not blue. Reads as action without visual noise. |
-| Primary hover | `bg-accent-600` — one step darker. No scale transform. |
-| Primary pressed | `bg-accent-700` |
-| Secondary button | `bg-white text-surface-700 border border-surface-200 shadow-sm rounded` |
-| Secondary hover | `bg-surface-50` |
-| Ghost button | `text-surface-600 hover:bg-surface-100 rounded` — no border, no shadow |
-| Text link | `text-accent-600 hover:text-accent-700 underline-offset-2` — underline on hover only |
-| Input default | `bg-white border border-surface-200 rounded text-surface-800` — 1px solid border, NOT dashed |
-| Input focus | `border-accent-500 ring-1 ring-accent-500/30` — single ring, not ring-2. Subtle, not blinding. |
-| Input error | `border-signal-error ring-1 ring-signal-error/30` |
-| Disabled | `opacity-40 cursor-not-allowed` — stronger dimming than 50% |
-| Sidebar nav (default) | `text-brand-300 hover:text-white hover:bg-brand-700/50 rounded` |
-| Sidebar nav (active) | `text-white bg-brand-900 rounded` — bright text on darkest bg |
+| State                    | Treatment                                                                                      |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
+| Default button (primary) | `bg-accent-500 text-white rounded` — teal, not blue. Reads as action without visual noise.     |
+| Primary hover            | `bg-accent-600` — one step darker. No scale transform.                                         |
+| Primary pressed          | `bg-accent-700`                                                                                |
+| Secondary button         | `bg-white text-surface-700 border border-surface-200 shadow-sm rounded`                        |
+| Secondary hover          | `bg-surface-50`                                                                                |
+| Ghost button             | `text-surface-600 hover:bg-surface-100 rounded` — no border, no shadow                         |
+| Text link                | `text-accent-600 hover:text-accent-700 underline-offset-2` — underline on hover only           |
+| Input default            | `bg-white border border-surface-200 rounded text-surface-800` — 1px solid border, NOT dashed   |
+| Input focus              | `border-accent-500 ring-1 ring-accent-500/30` — single ring, not ring-2. Subtle, not blinding. |
+| Input error              | `border-signal-error ring-1 ring-signal-error/30`                                              |
+| Disabled                 | `opacity-40 cursor-not-allowed` — stronger dimming than 50%                                    |
+| Sidebar nav (default)    | `text-brand-300 hover:text-white hover:bg-brand-700/50 rounded`                                |
+| Sidebar nav (active)     | `text-white bg-brand-900 rounded` — bright text on darkest bg                                  |
 
 #### 6.4.4 Typography
 
-| Element | Specification |
-|---------|--------------|
-| Page title | `text-xl font-bold tracking-tight text-surface-900` — NOT text-2xl. Quieter is more confident. |
-| Section heading | `text-sm font-semibold text-surface-800 uppercase tracking-wider` — small caps for sections. Reads as structured, not shouty. |
-| Card heading | `text-base font-semibold text-surface-800` |
-| Body text | `text-sm text-surface-600 leading-relaxed` |
-| Form label | `text-xs font-medium text-surface-500 uppercase tracking-wider` — medium weight, not bold. Labels should recede. |
-| Table header | `text-[11px] font-semibold text-surface-400 uppercase tracking-widest` — smallest text in the system. Table headers are structure, not content. |
-| Data cell | `text-sm text-surface-800` |
-| Dollar amounts | `font-mono text-sm tabular-nums text-surface-800` — right-aligned in tables |
-| Large dollar (hero) | `font-mono text-lg font-semibold tabular-nums` — for the "$0" free tier callout |
-| Code / field path | `font-mono text-xs text-surface-500 bg-surface-50 px-1 rounded-sm` — inline code treatment |
-| Schema version | `font-mono text-xs text-surface-400` |
+| Element             | Specification                                                                                                                                   |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Page title          | `text-xl font-bold tracking-tight text-surface-900` — NOT text-2xl. Quieter is more confident.                                                  |
+| Section heading     | `text-sm font-semibold text-surface-800 uppercase tracking-wider` — small caps for sections. Reads as structured, not shouty.                   |
+| Card heading        | `text-base font-semibold text-surface-800`                                                                                                      |
+| Body text           | `text-sm text-surface-600 leading-relaxed`                                                                                                      |
+| Form label          | `text-xs font-medium text-surface-500 uppercase tracking-wider` — medium weight, not bold. Labels should recede.                                |
+| Table header        | `text-[11px] font-semibold text-surface-400 uppercase tracking-widest` — smallest text in the system. Table headers are structure, not content. |
+| Data cell           | `text-sm text-surface-800`                                                                                                                      |
+| Dollar amounts      | `font-mono text-sm tabular-nums text-surface-800` — right-aligned in tables                                                                     |
+| Large dollar (hero) | `font-mono text-lg font-semibold tabular-nums` — for the "$0" free tier callout                                                                 |
+| Code / field path   | `font-mono text-xs text-surface-500 bg-surface-50 px-1 rounded-sm` — inline code treatment                                                      |
+| Schema version      | `font-mono text-xs text-surface-400`                                                                                                            |
 
 #### 6.4.5 Component Patterns
 
 **Dark sidebar (replacing existing white sidebar):**
+
 - Background: `bg-brand-800`
 - Width: `w-56` (wider than current `w-16` — shows text labels, not just icons)
 - Logo area: "Tea Tax" wordmark in `text-white font-bold text-lg` with a small `bg-accent-500 rounded-sm` square mark (4x4) to the left. Not a gradient logo — a single-color geometric mark.
@@ -786,6 +796,7 @@ Horizontal bar at the top of the content area. Not circles — a segmented progr
 - Overall container: `bg-surface-50 px-6 py-3 border-b border-surface-200/60` — subtle separation from content below
 
 **Upload zone (Step 1):**
+
 - Border: `border border-dashed border-surface-300 rounded-lg bg-surface-50/50` — single-weight dashed border, not heavy `border-2`
 - Hover: `border-accent-500 bg-accent-500/5` — barely tinted, not a solid color fill
 - Active drag: `border-accent-500 bg-accent-500/10 ring-1 ring-accent-500/20`
@@ -794,6 +805,7 @@ Horizontal bar at the top of the content area. Not circles — a segmented progr
 - Processing state: subtle pulsing background (`animate-pulse bg-surface-50`) + "Analyzing document..." in `text-sm text-surface-500`
 
 **Extracted data review card:**
+
 - `bg-white shadow-card rounded-lg`
 - Header: `text-base font-semibold text-surface-800` "Extracted W-2 Data" + overall confidence badge (see below)
 - Field layout: CSS Grid, two columns. Each field:
@@ -804,15 +816,16 @@ Horizontal bar at the top of the content area. Not circles — a segmented progr
 
 **Confidence indicators:**
 
-| Score | Color | Dot | Badge text |
-|-------|-------|-----|-----------|
-| ≥ 0.9 | `signal-success` | 6px green dot | "High" in `text-signal-success bg-signal-success/10 rounded-sm px-1.5 py-0.5 text-xs font-medium` |
-| 0.7 – 0.9 | `signal-caution` | 6px amber dot | "Review" in same pattern with caution color |
-| < 0.7 | `signal-error` | 6px red dot | "Low" in same pattern with error color |
+| Score     | Color            | Dot           | Badge text                                                                                        |
+| --------- | ---------------- | ------------- | ------------------------------------------------------------------------------------------------- |
+| ≥ 0.9     | `signal-success` | 6px green dot | "High" in `text-signal-success bg-signal-success/10 rounded-sm px-1.5 py-0.5 text-xs font-medium` |
+| 0.7 – 0.9 | `signal-caution` | 6px amber dot | "Review" in same pattern with caution color                                                       |
+| < 0.7     | `signal-error`   | 6px red dot   | "Low" in same pattern with error color                                                            |
 
 The badge replaces the dot in the card header (overall confidence). Individual fields show dots only. Tooltip on hover shows numeric score.
 
 **Form inputs (Step 2):**
+
 - Input: `bg-white border border-surface-200 rounded text-sm text-surface-800 px-3 py-2`
 - Focus: `border-accent-500 ring-1 ring-accent-500/30 outline-none`
 - Labels: `text-xs font-medium text-surface-500 uppercase tracking-wider mb-1.5`
@@ -824,11 +837,13 @@ The badge replaces the dot in the card header (overall confidence). Individual f
 **Validation results (Step 3 — top section):**
 
 Completeness meter:
+
 - Track: `h-1.5 rounded-full bg-surface-100`
 - Fill: `bg-accent-500` (or `bg-signal-success` at 100%)
 - Label: `text-sm font-medium text-surface-700` "{N}% complete"
 
 Issue list:
+
 - Clean rows, not alert boxes. Each row:
   - Left: 3px colored bar (`border-l-[3px]`) — `border-signal-error`, `border-signal-caution`, or `border-signal-info`
   - Background: `bg-white` (not colored bg — colored backgrounds on every row is noisy)
@@ -840,6 +855,7 @@ Issue list:
 - Container: `shadow-card rounded-lg overflow-hidden`
 
 Required forms:
+
 - Horizontal pill row: `bg-surface-100 text-surface-600 rounded-sm px-2 py-0.5 text-xs font-mono font-medium` — squared-off pills, not rounded-full
 
 **Provider tier comparison table (Step 3 — bottom section):**
@@ -869,6 +885,7 @@ This is the culminating visual — the "show me that this standard works" moment
 #### 6.4.6 Layout
 
 **Demo page layout:**
+
 - Max width: `max-w-3xl mx-auto` — centered content column
 - Padding: `px-8 py-10` — generous padding signals luxury and focus
 - Step indicator: fixed at top of content area with `border-b border-surface-200/60`
@@ -876,6 +893,7 @@ This is the culminating visual — the "show me that this standard works" moment
 
 **Responsive behavior:**
 The user flow is identical on all form factors — one flow, not separate desktop and mobile experiences. The layout adapts responsively:
+
 - **Desktop** (1280px+): Dark sidebar visible, two-column form layouts, tier comparison table. CEO demos on laptops and projectors.
 - **Tablet** (768px–1279px): Sidebar collapses to icon-only or hidden. Single-column content. Tier table horizontal-scrolls or switches to stacked cards. Camera detection offers "Take Photo" option on upload step.
 - **Mobile** (375px–767px): No sidebar. Full-width content. Stacked provider cards instead of table. Larger touch targets (`py-3` inputs). Camera detection offers "Take Photo" option on upload step.
@@ -884,12 +902,14 @@ The user flow is identical on all form factors — one flow, not separate deskto
 #### 6.4.7 Iconography
 
 All icons from `lucide-react` (existing dependency). Consistent treatment:
+
 - `strokeWidth={1.5}` everywhere. The default 2.0 is too heavy for this aesthetic. Thinner strokes read as more refined.
 - Navigation: `size={18}`
 - Inline: `size={14}`
 - Upload zone / empty states: `size={36}` (not 48 — oversized icons look amateurish)
 
 Key icons:
+
 - Upload: `Upload`
 - Document: `FileText`
 - Validation error: `AlertCircle`
@@ -912,11 +932,13 @@ Sits inside the content area, right of the dark sidebar. The sidebar nav gets a 
 #### 6.4.9 Empty and Loading States
 
 Loading:
+
 - Primary: `animate-pulse` on the content area placeholder (skeleton shapes, not a spinner). A subtle pulse reads as "the system is working" without the anxiety of a spinning wheel.
 - Extraction specifically: card body with two pulsing rows of `bg-surface-100 h-4 rounded-sm` + text "Analyzing document..." in `text-sm text-surface-400`
 - Validation/tier eval: same skeleton pulse pattern
 
 Empty states:
+
 - Centered vertically in the content area
 - Icon: relevant lucide icon in `text-surface-300`, `size={36}`
 - Heading: `text-sm font-medium text-surface-600` — "No tax objects yet"
@@ -924,6 +946,7 @@ Empty states:
 - CTA: primary accent button
 
 Error states:
+
 - Inline alert: `bg-signal-error/5 border-l-[3px] border-signal-error rounded-r-md px-4 py-3`
 - Icon: `AlertCircle` in `text-signal-error`, `size={14}`
 - Message: `text-sm text-surface-700`
@@ -940,31 +963,37 @@ Error states:
 The flow is identical across breakpoints. Only layout density and navigation change.
 
 **Sidebar:**
+
 - Desktop (1280px+): full dark sidebar `w-56` with text labels.
 - Tablet (768px–1279px): sidebar collapsed to icon-only `w-16` or hidden behind hamburger.
 - Mobile (<768px): no sidebar. Top bar: `bg-brand-800 text-white px-4 py-3` with "Tea Tax" wordmark + schema version badge.
 
 **Upload zone — camera detection:**
 When `use-platform.ts` detects camera availability (`getUserMedia` or `inputCapture`), the upload zone shows two options:
+
 - Primary: "Take Photo" button — `bg-accent-500 text-white rounded-lg py-3 px-6 font-semibold`. Triggers `<input type="file" accept="image/*" capture="environment">`.
 - Secondary: "Upload File" or drag-and-drop zone (same dashed-border treatment as §6.4.5).
 - On desktop without camera: drag-and-drop zone only (no "Take Photo" button).
 - Camera detection is progressive enhancement — the flow works without a camera.
 
 **Extracted data review card:**
+
 - Desktop: CSS Grid two-column layout.
 - Tablet/Mobile (<1024px): single-column stack. Inputs get `py-3` instead of `py-2` for touch targets. "Confirm & Continue" button: `w-full py-3`.
 
 **Situation completion form:**
+
 - Desktop: two-column form grid where sensible (e.g., first name / last name).
 - Tablet/Mobile: single-column stack. Same sections, same fields, same add/remove controls.
 
 **Provider tier results:**
+
 - Desktop: comparison table (§6.4.5).
 - Tablet (768px–1023px): table with horizontal scroll.
 - Mobile (<768px): stacked provider cards. One card per provider showing: provider name, tier badge, federal price, state price, qualifying factors. Each card: `bg-white shadow-card rounded-lg p-4 space-y-2`.
 
 **Step indicator:**
+
 - Desktop: segmented horizontal bar (§6.4.5).
 - Mobile (<768px): three dots with labels below. `flex justify-between px-4 py-2`.
 
@@ -980,9 +1009,9 @@ When `use-platform.ts` detects camera availability (`getUserMedia` or `inputCapt
 
 #### Dependency Decision
 
-| Dependency | ARCH-D-002 Test | Decision |
-|------------|-----------------|----------|
-| `@anthropic-ai/sdk` | (1) Infeasible to build vision-based document extraction internally? **Yes.** (2) Package mature, minimal, well-maintained? **Yes.** | **Buy** |
+| Dependency          | ARCH-D-002 Test                                                                                                                      | Decision |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| `@anthropic-ai/sdk` | (1) Infeasible to build vision-based document extraction internally? **Yes.** (2) Package mature, minimal, well-maintained? **Yes.** | **Buy**  |
 
 This is the **only new external dependency** for v0. All other functionality (validation engine, tier mapping evaluator, form taxonomy traversal) is built internally with tests.
 
@@ -992,8 +1021,8 @@ This is the **only new external dependency** for v0. All other functionality (va
 export interface W2ExtractionResponse {
   success: boolean;
   data: W2ExtractedData | null;
-  confidence: number;           // 0.0–1.0
-  warnings: string[];           // e.g., "Low confidence on Box 16 (state wages)"
+  confidence: number; // 0.0–1.0
+  warnings: string[]; // e.g., "Low confidence on Box 16 (state wages)"
   error?: string;
 }
 ```
@@ -1021,10 +1050,10 @@ export interface TierEvaluationResult {
 export interface ProviderEvaluation {
   providerId: string;
   providerName: string;
-  matchedTier: string | null;    // null if no tier matches
+  matchedTier: string | null; // null if no tier matches
   estimatedPrice: number | null;
-  matchedConditions: string[];   // Human-readable descriptions
-  disqualifiedBy: string[];      // Conditions that eliminated higher/lower tiers
+  matchedConditions: string[]; // Human-readable descriptions
+  disqualifiedBy: string[]; // Conditions that eliminated higher/lower tiers
 }
 ```
 
@@ -1035,12 +1064,14 @@ export interface ProviderEvaluation {
 Three-step visual flow matching the service state machine (§6.3). All visual treatments follow the identity specified in §6.4.
 
 **Step 1 — Upload & Extract**
+
 - Upload zone component (§6.4.4: dashed border, drag-and-drop, processing state)
 - Calls `POST /api/extract/w2`
 - On success: extracted data review card (§6.4.4) with per-field confidence dots and editable values
 - User confirms or corrects, then "Confirm & Continue"
 
 **Step 2 — Complete Situation**
+
 - Form sections for remaining TaxSituation fields, grouped by category:
   - **Filing basics:** filing status (radio group), dependents (add/remove rows)
   - **Income:** additional income streams beyond W-2 (add/remove rows with type selector dropdown)
@@ -1052,6 +1083,7 @@ Three-step visual flow matching the service state machine (§6.3). All visual tr
 - Visual: form input pattern from §6.4.4, section separators with `border-t border-zinc-100`
 
 **Step 3 — Validate & Evaluate**
+
 - Top section: completeness meter + validation issue list (§6.4.4: severity-colored alert rows)
 - Bottom section: provider tier comparison table (§6.4.4: the culminating visual with colored tier badges, mono prices, qualifying conditions)
 - Required forms shown as pill row above the comparison table
@@ -1070,54 +1102,54 @@ v0 uses **synthetic data only** (PRD §10: privacy open items unresolved; no rea
 
 **Fixtures to create:**
 
-| Fixture | Scenario | Contents |
-|---------|----------|----------|
-| `w2-only.json` | W-2 single filer | Complete TaxSituation + sample W-2 image |
-| `freelance.json` | Freelancer with 1099-NEC | TaxSituation with Schedule C/SE data |
-| `investments.json` | Investment income | TaxSituation with 1099-B, 1099-DIV, Schedule D |
-| `multi-state.json` | Multi-state W-2 filer | TaxSituation with two-state residency |
-| `rental.json` | Rental income | TaxSituation with Schedule E data |
+| Fixture            | Scenario                 | Contents                                       |
+| ------------------ | ------------------------ | ---------------------------------------------- |
+| `w2-only.json`     | W-2 single filer         | Complete TaxSituation + sample W-2 image       |
+| `freelance.json`   | Freelancer with 1099-NEC | TaxSituation with Schedule C/SE data           |
+| `investments.json` | Investment income        | TaxSituation with 1099-B, 1099-DIV, Schedule D |
+| `multi-state.json` | Multi-state W-2 filer    | TaxSituation with two-state residency          |
+| `rental.json`      | Rental income            | TaxSituation with Schedule E data              |
 
 Each fixture includes: a complete TaxSituation object, the expected ValidationResult, and the expected tier placements across all 5 providers.
 
 ### 6.10 Issues (Plan Items)
 
-| # | Issue Title | Deps | Exit Criteria |
-|---|-------------|------|---------------|
-| 12 | Implement W-2 extraction endpoint with AI model API | 1, 4, 5 | Extracts W-2 fields from sample images; returns structured data with confidence scores; integration test passes |
-| 13 | Implement validation endpoint | 6, 4, 5 | Returns correct ValidationResult for all 5 scenario fixtures |
-| 14 | Implement tier evaluation endpoint | 8, 4, 5 | Returns correct tier placements for all 5 providers across all 5 scenario fixtures |
-| 15 | Build demo UI: upload and extract step | 12 | User can upload W-2 image, see extracted data with confidence, confirm/edit fields |
-| 16 | Build demo UI: situation completion form | 1, 4, 5 | User can fill all TaxSituation fields, save to tax return entity |
-| 17 | Build demo UI: validation and tier results display | 13, 14 | User sees validation results (errors, warnings, completeness) and provider tier table |
-| 18 | Create synthetic demo fixtures for all 5 scenarios | 1, 7, 8, 9, 10 | Complete fixtures with TaxSituation, expected validation, and expected tier placements |
-| 19 | End-to-end dry run and polish | 12–18, 20 | Full demo flow runs for all 5 scenarios at desktop, tablet, and mobile breakpoints; camera capture works on camera-equipped devices; visually polished; CEO-presentable |
-| 20 | Update PWA manifest, icons, and install flow for tax demo branding | visual identity | Manifest reflects Tea Tax branding; icons updated; install prompts work on iOS and Android |
+| #   | Issue Title                                                        | Deps            | Exit Criteria                                                                                                                                                           |
+| --- | ------------------------------------------------------------------ | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 12  | Implement W-2 extraction endpoint with AI model API                | 1, 4, 5         | Extracts W-2 fields from sample images; returns structured data with confidence scores; integration test passes                                                         |
+| 13  | Implement validation endpoint                                      | 6, 4, 5         | Returns correct ValidationResult for all 5 scenario fixtures                                                                                                            |
+| 14  | Implement tier evaluation endpoint                                 | 8, 4, 5         | Returns correct tier placements for all 5 providers across all 5 scenario fixtures                                                                                      |
+| 15  | Build demo UI: upload and extract step                             | 12              | User can upload W-2 image, see extracted data with confidence, confirm/edit fields                                                                                      |
+| 16  | Build demo UI: situation completion form                           | 1, 4, 5         | User can fill all TaxSituation fields, save to tax return entity                                                                                                        |
+| 17  | Build demo UI: validation and tier results display                 | 13, 14          | User sees validation results (errors, warnings, completeness) and provider tier table                                                                                   |
+| 18  | Create synthetic demo fixtures for all 5 scenarios                 | 1, 7, 8, 9, 10  | Complete fixtures with TaxSituation, expected validation, and expected tier placements                                                                                  |
+| 19  | End-to-end dry run and polish                                      | 12–18, 20       | Full demo flow runs for all 5 scenarios at desktop, tablet, and mobile breakpoints; camera capture works on camera-equipped devices; visually polished; CEO-presentable |
+| 20  | Update PWA manifest, icons, and install flow for tax demo branding | visual identity | Manifest reflects Tea Tax branding; icons updated; install prompts work on iOS and Android                                                                              |
 
 ---
 
 ## 7. Blueprint Compliance Matrix
 
-| Blueprint | Key Rules Applied | How This Plan Complies |
-|-----------|-------------------|----------------------|
-| **ARCH-P-004** Types shared, logic not | All TaxSituation types in `packages/core/`. Server business logic in `apps/server/`. Web rendering logic in `apps/web/`. No shared runtime code across boundary. |
-| **ARCH-D-004** Type-safe API contracts | All request/response types and JSON schemas defined in `packages/core/`, imported by both server (validation) and web (type safety). |
-| **ARCH-P-003** Dependencies are liabilities | ONE new dependency (`@anthropic-ai/sdk`). Knowledge base rules, validation engine, tier evaluator, form taxonomy — all built internally. |
-| **ARCH-D-003** Explicit package boundaries | New code in existing packages (`packages/core/knowledge-base/`, `apps/server/src/api/tax-objects.ts`). No new packages created. |
-| **DATA-P-003** Property graph model | Tax objects and returns stored as entity types in existing property graph. Entity types registered in `entity_types`. Unique constraint via partial index on JSONB. |
-| **DATA-D-003** Type registry validation | Entity schemas registered in `entity_types`. Application-layer validation via AJV (matching existing pattern). |
-| **DATA-P-005** Data minimization | Raw W-2 images not persisted. Only user-confirmed extracted data saved. SSN stored as last-4 only. v0 uses synthetic data — no real PII. |
-| **DATA-D-005** Key-per-type encryption | `situation_data` marked as sensitive in entity type registry. Encryption deferred in v0 (synthetic data). Infrastructure ready for `FieldEncryptor` when real data arrives. |
-| **AUTH-D-008** HTTP-only session cookies | All new endpoints use `getAuthenticatedUser(req)` which verifies HTTP-only cookie + JWT (ES256). |
-| **AUTH-P-002** Tokens opaque to browsers | No changes to auth infrastructure. Existing cookie-based sessions used. |
-| **TEST-P-001** Real dependencies over mocks | Integration tests use real PG container. API tests hit real server. No mocking of database or AI API (use golden fixtures for extraction tests per TEST-D-001). |
-| **TEST-P-004** Tests before code | Issue structure places test stubs in scaffold phase. Failing tests written before implementation in each issue. |
-| **TEST-D-002** Suite per workflow CI | Existing per-suite CI workflows used. New tests added to existing suites. |
-| **UX-P-001** Service delivery before surface | Service flow state machine defined (§6.3) before any UI specifications. |
-| **UX-P-002** Beauty is functional requirement | Demo UI styling explicitly called out as polished. CEO-presentable is an exit criterion. |
-| **PROCESS-P-001** Commit is unit of progress | Small, frequent commits per issue. Conventional commits. Stage files explicitly. |
-| **WORKER** (no changes) | No worker modifications in v0. Extraction runs in server process. If future extraction tasks are queued, payloads carry `tax_return_id` only (TQ: opaque references). |
-| **ENV** (no changes) | No new containers. Code runs in existing server and PG containers. |
+| Blueprint                                     | Key Rules Applied                                                                                                                                                           | How This Plan Complies |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| **ARCH-P-004** Types shared, logic not        | All TaxSituation types in `packages/core/`. Server business logic in `apps/server/`. Web rendering logic in `apps/web/`. No shared runtime code across boundary.            |
+| **ARCH-D-004** Type-safe API contracts        | All request/response types and JSON schemas defined in `packages/core/`, imported by both server (validation) and web (type safety).                                        |
+| **ARCH-P-003** Dependencies are liabilities   | ONE new dependency (`@anthropic-ai/sdk`). Knowledge base rules, validation engine, tier evaluator, form taxonomy — all built internally.                                    |
+| **ARCH-D-003** Explicit package boundaries    | New code in existing packages (`packages/core/knowledge-base/`, `apps/server/src/api/tax-objects.ts`). No new packages created.                                             |
+| **DATA-P-003** Property graph model           | Tax objects and returns stored as entity types in existing property graph. Entity types registered in `entity_types`. Unique constraint via partial index on JSONB.         |
+| **DATA-D-003** Type registry validation       | Entity schemas registered in `entity_types`. Application-layer validation via AJV (matching existing pattern).                                                              |
+| **DATA-P-005** Data minimization              | Raw W-2 images not persisted. Only user-confirmed extracted data saved. SSN stored as last-4 only. v0 uses synthetic data — no real PII.                                    |
+| **DATA-D-005** Key-per-type encryption        | `situation_data` marked as sensitive in entity type registry. Encryption deferred in v0 (synthetic data). Infrastructure ready for `FieldEncryptor` when real data arrives. |
+| **AUTH-D-008** HTTP-only session cookies      | All new endpoints use `getAuthenticatedUser(req)` which verifies HTTP-only cookie + JWT (ES256).                                                                            |
+| **AUTH-P-002** Tokens opaque to browsers      | No changes to auth infrastructure. Existing cookie-based sessions used.                                                                                                     |
+| **TEST-P-001** Real dependencies over mocks   | Integration tests use real PG container. API tests hit real server. No mocking of database or AI API (use golden fixtures for extraction tests per TEST-D-001).             |
+| **TEST-P-004** Tests before code              | Issue structure places test stubs in scaffold phase. Failing tests written before implementation in each issue.                                                             |
+| **TEST-D-002** Suite per workflow CI          | Existing per-suite CI workflows used. New tests added to existing suites.                                                                                                   |
+| **UX-P-001** Service delivery before surface  | Service flow state machine defined (§6.3) before any UI specifications.                                                                                                     |
+| **UX-P-002** Beauty is functional requirement | Demo UI styling explicitly called out as polished. CEO-presentable is an exit criterion.                                                                                    |
+| **PROCESS-P-001** Commit is unit of progress  | Small, frequent commits per issue. Conventional commits. Stage files explicitly.                                                                                            |
+| **WORKER** (no changes)                       | No worker modifications in v0. Extraction runs in server process. If future extraction tasks are queued, payloads carry `tax_return_id` only (TQ: opaque references).       |
+| **ENV** (no changes)                          | No new containers. Code runs in existing server and PG containers.                                                                                                          |
 
 ---
 
@@ -1125,12 +1157,12 @@ Each fixture includes: a complete TaxSituation object, the expected ValidationRe
 
 ### Test organization
 
-| Suite | What | Runner | Location |
-|-------|------|--------|----------|
-| Unit | Types, knowledge base rules, form taxonomy, tier mapping, thresholds, validation engine | Vitest (Bun) | `packages/core/knowledge-base/__tests__/` |
-| Integration (API) | Tax object CRUD, tax return CRUD, validation EP, tier evaluation EP, extraction EP | Vitest (Bun) + real PG container | `apps/server/tests/integration/` |
-| Component | Demo UI steps: upload component, form component, results component, mobile capture, mobile results | Vitest + Playwright Chromium | `apps/web/tests/component/` |
-| E2E | Full demo flow: upload → extract → complete → validate → tier evaluate (desktop + mobile viewport) | Vitest + Playwright Chromium | `tests/e2e/` |
+| Suite             | What                                                                                               | Runner                           | Location                                  |
+| ----------------- | -------------------------------------------------------------------------------------------------- | -------------------------------- | ----------------------------------------- |
+| Unit              | Types, knowledge base rules, form taxonomy, tier mapping, thresholds, validation engine            | Vitest (Bun)                     | `packages/core/knowledge-base/__tests__/` |
+| Integration (API) | Tax object CRUD, tax return CRUD, validation EP, tier evaluation EP, extraction EP                 | Vitest (Bun) + real PG container | `apps/server/tests/integration/`          |
+| Component         | Demo UI steps: upload component, form component, results component, mobile capture, mobile results | Vitest + Playwright Chromium     | `apps/web/tests/component/`               |
+| E2E               | Full demo flow: upload → extract → complete → validate → tier evaluate (desktop + mobile viewport) | Vitest + Playwright Chromium     | `tests/e2e/`                              |
 
 ### Fixture strategy
 
@@ -1190,10 +1222,12 @@ All demo UI issues (15–17) produce responsive layouts across desktop, tablet, 
 ### Execution Phases
 
 **Phase A — Foundation (parallel start):**
+
 - Issue 1: TaxSituation types and enums
 - Issue 3: Entity type registrations and unique index
 
 **Phase B — Schema + Knowledge Base (after Phase A):**
+
 - Issue 2: JSON schemas for validation
 - Issue 4: Tax objects CRUD API
 - Issue 7: Form taxonomy with dependency graph
@@ -1203,65 +1237,69 @@ All demo UI issues (15–17) produce responsive layouts across desktop, tablet, 
 - Visual identity setup (no deps)
 
 **Phase C — API Layer + Engine (after Phase B):**
+
 - Issue 5: Tax returns CRUD API (needs 4)
 - Issue 6: Validation engine (needs 2)
 - Issue 11: Knowledge base JSON export (needs 7–10)
 - Issue 18: Synthetic demo fixtures (needs 7–10)
 
 **Phase D — Endpoints (after Phase C):**
+
 - Issue 12: W-2 extraction endpoint (needs 5)
 - Issue 13: Validation endpoint (needs 5, 6)
 - Issue 14: Tier evaluation endpoint (needs 5, 8)
 
 **Phase E — Demo UI (after Phase D):**
+
 - Issue 15: Upload and extract UI with camera detection (needs 12). Responsive: desktop drag-and-drop + mobile/tablet "Take Photo" button.
 - Issue 16: Situation completion form (needs 5). Responsive: two-column grid on desktop, single-column on tablet/mobile.
 - Issue 17: Validation and tier results display (needs 13, 14). Responsive: comparison table on desktop, stacked cards on mobile.
 - Issue 20: PWA manifest/icon branding (needs visual identity)
 
 **Phase F — Polish (after Phase E):**
+
 - Issue 19: End-to-end dry run and polish (needs 15–18, 20). Tests at desktop, tablet, and mobile breakpoints. Camera flow tested on mobile viewport.
 
 ---
 
 ## 10. What This Plan Does NOT Cover
 
-| Out of Scope | Why | Where It Lives |
-|-------------|-----|----------------|
-| Voice/recording input | v0 is single-modality (W-2 OCR). PRD §10 risk mitigation. | Post-v0 reference implementation extension |
-| Financial account connections | v0 is single-modality. | Post-v0 |
-| Production deployment | PRD §9: out of scope for v0. | Post-v0 |
-| Field-level encryption of `situation_data` | v0 uses synthetic data only. Infrastructure marked ready (sensitive field in registry). | When real PII arrives |
-| Sharing / `tax_object_memberships` | Access spec defers to v2. | v2+ |
-| Transport bindings (MCP, OpenAI functions, REST spec) | PRD §9 + LG Review Change 1: transport is implementation detail. | Post-v0 packaging decisions |
-| Full consumer intake product (chat, voice, financial accounts) | PRD §9: full consumer product is Phase 5. v0 demo includes desktop and mobile PWA for CEO presentation. | Phase 5 / Calypso blueprint Phase 2 |
-| Fine-tuned domain model | PRD §5: v1 deliverable. v0 knowledge base is future training corpus. | v1 |
-| Consortium governance | PRD §1: organizational design out of scope. | Non-product |
-| Threat narrative deck | LG Review Change 3: go-to-market material, not product. | GTM workstream |
-| Provider recommendations to consumers | CEO interview constraint: protocol validates and structures, does NOT recommend. | Never (architectural constraint) |
+| Out of Scope                                                   | Why                                                                                                     | Where It Lives                             |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| Voice/recording input                                          | v0 is single-modality (W-2 OCR). PRD §10 risk mitigation.                                               | Post-v0 reference implementation extension |
+| Financial account connections                                  | v0 is single-modality.                                                                                  | Post-v0                                    |
+| Production deployment                                          | PRD §9: out of scope for v0.                                                                            | Post-v0                                    |
+| Field-level encryption of `situation_data`                     | v0 uses synthetic data only. Infrastructure marked ready (sensitive field in registry).                 | When real PII arrives                      |
+| Sharing / `tax_object_memberships`                             | Access spec defers to v2.                                                                               | v2+                                        |
+| Transport bindings (MCP, OpenAI functions, REST spec)          | PRD §9 + LG Review Change 1: transport is implementation detail.                                        | Post-v0 packaging decisions                |
+| Full consumer intake product (chat, voice, financial accounts) | PRD §9: full consumer product is Phase 5. v0 demo includes desktop and mobile PWA for CEO presentation. | Phase 5 / Calypso blueprint Phase 2        |
+| Fine-tuned domain model                                        | PRD §5: v1 deliverable. v0 knowledge base is future training corpus.                                    | v1                                         |
+| Consortium governance                                          | PRD §1: organizational design out of scope.                                                             | Non-product                                |
+| Threat narrative deck                                          | LG Review Change 3: go-to-market material, not product.                                                 | GTM workstream                             |
+| Provider recommendations to consumers                          | CEO interview constraint: protocol validates and structures, does NOT recommend.                        | Never (architectural constraint)           |
 
 ---
 
 ## 11. Risk Mitigation
 
-| Risk | Impact | Mitigation |
-|------|--------|-----------|
-| Schema requires more than 2 weeks | Outreach window compressed | v0.1 is aggressively minimal: 5 scenarios, core forms only. Working group in Phase 3 handles depth. |
-| Knowledge base scope creep | Blocks reference implementation | Fixed scope: top 5 providers, core 1040 forms, 2025 tax year. No additional providers or forms without explicit scope change. |
-| W-2 extraction accuracy | Demo quality risk | AI model API handles OCR. User review step catches errors. Synthetic demo data provides clean images. Golden fixtures ensure test stability. |
-| Demo scope inflation | Delays delivery | Single modality. Three-step UI. Exit criteria: CEO-presentable, not production-grade. |
-| Privacy concerns with real data | Legal/compliance risk | Synthetic data only in v0. No real PII collected, processed, or stored. Sensitive field marked in entity type registry for future encryption. |
-| Property graph performance for tax queries | Slow JSONB queries at scale | v0 has trivial data volumes (demo only). Partial indexes on JSONB fields mitigate. If needed post-v0, dedicated tables are permitted by blueprint (DATA-P-003). |
+| Risk                                       | Impact                          | Mitigation                                                                                                                                                      |
+| ------------------------------------------ | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Schema requires more than 2 weeks          | Outreach window compressed      | v0.1 is aggressively minimal: 5 scenarios, core forms only. Working group in Phase 3 handles depth.                                                             |
+| Knowledge base scope creep                 | Blocks reference implementation | Fixed scope: top 5 providers, core 1040 forms, 2025 tax year. No additional providers or forms without explicit scope change.                                   |
+| W-2 extraction accuracy                    | Demo quality risk               | AI model API handles OCR. User review step catches errors. Synthetic demo data provides clean images. Golden fixtures ensure test stability.                    |
+| Demo scope inflation                       | Delays delivery                 | Single modality. Three-step UI. Exit criteria: CEO-presentable, not production-grade.                                                                           |
+| Privacy concerns with real data            | Legal/compliance risk           | Synthetic data only in v0. No real PII collected, processed, or stored. Sensitive field marked in entity type registry for future encryption.                   |
+| Property graph performance for tax queries | Slow JSONB queries at scale     | v0 has trivial data volumes (demo only). Partial indexes on JSONB fields mitigate. If needed post-v0, dedicated tables are permitted by blueprint (DATA-P-003). |
 
 ---
 
 ## 12. Success Criteria (PRD §8, mapped to implementation)
 
-| PRD Criterion | Verification |
-|---------------|-------------|
-| Schema completeness | TypeScript types + JSON Schema cover all 5 filing scenarios. Unit tests validate each. Enums have concrete values. Versioning strategy documented. Error model implemented. |
-| Knowledge base coverage | Form taxonomy (12+ forms), tier mappings (5 providers × 3–4 tiers), validation rules (5 categories, 15+ rules), 2025 thresholds — all implemented, tested, and exported as JSON. |
+| PRD Criterion            | Verification                                                                                                                                                                                                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Schema completeness      | TypeScript types + JSON Schema cover all 5 filing scenarios. Unit tests validate each. Enums have concrete values. Versioning strategy documented. Error model implemented.                                                                                                                 |
+| Knowledge base coverage  | Form taxonomy (12+ forms), tier mappings (5 providers × 3–4 tiers), validation rules (5 categories, 15+ rules), 2025 thresholds — all implemented, tested, and exported as JSON.                                                                                                            |
 | Reference implementation | Demo: W-2 image → extraction → user review → situation completion → validation → tier evaluation. Same flow works at desktop, tablet, and mobile breakpoints. E2E test passes for all 5 scenario fixtures. On camera-equipped devices, "Take Photo" option available alongside file upload. |
-| Technical credibility | CTO can: (a) read the JSON Schema, (b) run the validator against sample objects, (c) trace form dependency chains in the taxonomy, (d) see the versioning strategy, (e) understand the error/uncertainty model. All within one afternoon. |
-| Executive credibility | CEO can: (a) photograph a W-2 from their phone or upload on desktop, (b) watch it become structured data, (c) see validation flag missing information, (d) see tier placement across 5 real providers. Same flow, any device, visually polished. |
-| Timeline | 20 issues across 6 execution phases within 8-week window. |
+| Technical credibility    | CTO can: (a) read the JSON Schema, (b) run the validator against sample objects, (c) trace form dependency chains in the taxonomy, (d) see the versioning strategy, (e) understand the error/uncertainty model. All within one afternoon.                                                   |
+| Executive credibility    | CEO can: (a) photograph a W-2 from their phone or upload on desktop, (b) watch it become structured data, (c) see validation flag missing information, (d) see tier placement across 5 real providers. Same flow, any device, visually polished.                                            |
+| Timeline                 | 20 issues across 6 execution phases within 8-week window.                                                                                                                                                                                                                                   |

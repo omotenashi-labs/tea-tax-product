@@ -199,33 +199,33 @@ IRS Circular 230 governs who can practice before the IRS and provide personalize
 
 ## 9. What v0 Is Not
 
-| Out of Scope                                                                   | Where It Lives                      |
-| ------------------------------------------------------------------------------ | ----------------------------------- |
-| Consortium governance, membership, and organizational structure                | Organizational design; not product  |
-| Fine-tuned domain model                                                        | v1                                  |
-| Specific transport bindings (agent protocol servers, function schemas)         | Implementation detail; post-v0      |
+| Out of Scope                                                                     | Where It Lives                      |
+| -------------------------------------------------------------------------------- | ----------------------------------- |
+| Consortium governance, membership, and organizational structure                  | Organizational design; not product  |
+| Fine-tuned domain model                                                          | v1                                  |
+| Specific transport bindings (agent protocol servers, function schemas)           | Implementation detail; post-v0      |
 | Full consumer-facing intake product (chat, voice, financial account connections) | Phase 5 / Calypso blueprint Phase 2 |
-| Comparison engine (pricing, sentiment, ancillary risk)                         | Phase 5 / Calypso blueprint Phase 4 |
-| Tax Second Opinion feature                                                     | Phase 5 / Calypso blueprint Phase 3 |
-| Community pricing database                                                     | Phase 5 / Calypso blueprint Phase 5 |
-| Practitioner Layer / CPA marketplace                                           | Phase 5+                            |
-| Done-for-you tax preparation (Superhuman CPA OS)                               | Separate product initiative         |
-| Consumer distribution (SEO, content creators, gig platforms, payroll partners) | Phase 5 / Distribution strategy     |
-| Political amplification (bipartisan pledge, congressional testimony)           | Post-consumer launch                |
-| Affiliate revenue model                                                        | Phase 5                             |
-| Threat narrative / pitch deck                                                  | Go-to-market material, not product  |
-| Production deployment infrastructure                                           | Post-v0                             |
+| Comparison engine (pricing, sentiment, ancillary risk)                           | Phase 5 / Calypso blueprint Phase 4 |
+| Tax Second Opinion feature                                                       | Phase 5 / Calypso blueprint Phase 3 |
+| Community pricing database                                                       | Phase 5 / Calypso blueprint Phase 5 |
+| Practitioner Layer / CPA marketplace                                             | Phase 5+                            |
+| Done-for-you tax preparation (Superhuman CPA OS)                                 | Separate product initiative         |
+| Consumer distribution (SEO, content creators, gig platforms, payroll partners)   | Phase 5 / Distribution strategy     |
+| Political amplification (bipartisan pledge, congressional testimony)             | Post-consumer launch                |
+| Affiliate revenue model                                                          | Phase 5                             |
+| Threat narrative / pitch deck                                                    | Go-to-market material, not product  |
+| Production deployment infrastructure                                             | Post-v0                             |
 
 ---
 
 ## 10. Engineering Risk
 
-| Risk                                        | Impact                                             | Mitigation                                                                           |
-| ------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Schema requires more iteration than 2 weeks | Phase 2 outreach window compressed                 | Scope v0.1 aggressively minimal. Working group in Phase 3 handles depth.             |
-| Knowledge base scope creep                  | Blocks reference implementation                    | Define minimum provider count (top 5) and scenario count upfront. Expand post-v0.    |
-| Reference implementation demo scope         | Desktop + mobile PWA demo surfaces                 | Single modality (W-2 OCR). Mobile PWA leverages existing camera/PWA infrastructure.  |
-| Privacy open items unresolved               | Blocks handling of real tax data                   | v0 reference implementation may use synthetic data only. Real PII handling deferred. |
+| Risk                                        | Impact                             | Mitigation                                                                           |
+| ------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------ |
+| Schema requires more iteration than 2 weeks | Phase 2 outreach window compressed | Scope v0.1 aggressively minimal. Working group in Phase 3 handles depth.             |
+| Knowledge base scope creep                  | Blocks reference implementation    | Define minimum provider count (top 5) and scenario count upfront. Expand post-v0.    |
+| Reference implementation demo scope         | Desktop + mobile PWA demo surfaces | Single modality (W-2 OCR). Mobile PWA leverages existing camera/PWA infrastructure.  |
+| Privacy open items unresolved               | Blocks handling of real tax data   | v0 reference implementation may use synthetic data only. Real PII handling deferred. |
 
 ---
 
