@@ -19,6 +19,7 @@ import { websocketHandler } from './websocket';
 import { handleAdminRequest } from './api/admin';
 import { handleUsersRequest } from './api/users';
 import { handleTaxObjectsRequest } from './api/tax-objects';
+import { handleTaxReturnsRequest } from './api/tax-returns';
 import { seedSuperuser } from './seed/superuser';
 import { getJwks } from './auth/jwt';
 
@@ -190,6 +191,13 @@ export default {
     }
 
     if (url.pathname.startsWith('/api/tax-objects')) {
+      // Tax-returns routes are nested under /api/tax-objects/:id/returns.
+      // Check them before the parent tax-objects handler to avoid early exit.
+      if (url.pathname.includes('/returns')) {
+        const taxReturnsRes = await handleTaxReturnsRequest(req, url, appState);
+        if (taxReturnsRes) return withTrace(taxReturnsRes);
+      }
+
       const taxObjectsRes = await handleTaxObjectsRequest(req, url, appState);
       if (taxObjectsRes) return withTrace(taxObjectsRes);
     }
