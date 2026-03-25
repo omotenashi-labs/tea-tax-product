@@ -129,8 +129,11 @@ export function InstallPrompt() {
         role="banner"
         className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-50 bg-white border border-zinc-200 rounded-2xl shadow-xl p-4 flex items-center gap-4"
       >
-        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center">
-          <span className="text-white font-black text-lg">T</span>
+        <div
+          className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ backgroundColor: '#243b53' }}
+        >
+          <span className="text-white font-black text-lg">TT</span>
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-zinc-900">Install Tea Tax</p>
@@ -141,13 +144,14 @@ export function InstallPrompt() {
         <div className="flex flex-col gap-1.5 flex-shrink-0">
           <button
             onClick={handleAndroidInstall}
-            className="px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium hover:bg-indigo-700 transition-colors"
+            className="px-3 py-1.5 rounded-lg text-white text-xs font-medium transition-colors"
+            style={{ backgroundColor: '#243b53' }}
           >
             Install
           </button>
           <button
             onClick={handleDismiss}
-            className="px-3 py-1.5 rounded-lg text-zinc-400 text-xs hover:text-zinc-600 transition-colors"
+            className="px-3 py-1.5 rounded-lg text-surface-400 text-xs hover:text-surface-600 transition-colors"
           >
             Not now
           </button>
@@ -167,8 +171,11 @@ export function InstallPrompt() {
         <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 flex flex-col gap-4">
           {/* Header */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-black text-lg">T</span>
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: '#243b53' }}
+            >
+              <span className="text-white font-black text-lg">TT</span>
             </div>
             <div>
               <p className="text-sm font-bold text-zinc-900">Install Tea Tax</p>
@@ -179,7 +186,10 @@ export function InstallPrompt() {
           {/* Step-by-step instructions */}
           <ol className="flex flex-col gap-3 text-sm text-zinc-700">
             <li className="flex items-start gap-2">
-              <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">
+              <span
+                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ backgroundColor: '#d9e2ec', color: '#243b53' }}
+              >
                 1
               </span>
               <span>
@@ -207,13 +217,19 @@ export function InstallPrompt() {
               </span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">
+              <span
+                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ backgroundColor: '#d9e2ec', color: '#243b53' }}
+              >
                 2
               </span>
               <span>Scroll down in the share sheet.</span>
             </li>
             <li className="flex items-start gap-2">
-              <span className="flex-shrink-0 w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">
+              <span
+                className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ backgroundColor: '#d9e2ec', color: '#243b53' }}
+              >
                 3
               </span>
               <span>
