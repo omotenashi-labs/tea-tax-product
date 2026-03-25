@@ -49,18 +49,30 @@ async function main() {
     stderr: 'inherit',
   });
 
-  // 4. Start Vite in middleware mode — single HTTP entry point, proxies to API
+  // 4. Create the HTTP server first so Vite can attach its WebSocket upgrade
+  //    handler to it. Without this, Vite's HMR WebSocket is never wired to the
+  //    server that is actually listening on WEB_PORT, which causes external
+  //    browser connections to stall (directSocketHost becomes 'localhost:undefined/').
+  const httpServer = createHttpServer();
+
+  // Start Vite in middleware mode — single HTTP entry point, proxies to API.
+  // Passing hmr: { server: httpServer } tells Vite to attach its WebSocket
+  // upgrade handler to the existing HTTP server instead of opening a second
+  // port. HTTP traffic is routed by wiring vite.middlewares as a 'request'
+  // listener below.
   const vite = await createViteServer({
     configFile: join(REPO_ROOT, 'apps', 'web', 'vite.config.ts'),
     root: join(REPO_ROOT, 'apps', 'web'),
     server: {
       middlewareMode: true,
+      hmr: { server: httpServer },
       proxy: createProxy({ ...process.env, PORT: String(API_PORT) }),
     },
     appType: 'spa',
   });
 
-  const httpServer = createHttpServer(vite.middlewares);
+  httpServer.on('request', vite.middlewares);
+
   httpServer.listen(WEB_PORT, '0.0.0.0', () => {
     const nets = networkInterfaces();
     const networkIp =
