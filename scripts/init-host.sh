@@ -198,14 +198,14 @@ if _is_legacy_call; then
 
   # ── 1. k3s installation ─────────────────────────────────────────────────────
   echo "==> [1/8] Checking k3s installation"
-  if command -v k3s &>/dev/null && k3s kubectl get nodes &>/dev/null 2>&1; then
+  if command -v k3s &>/dev/null && timeout 15 k3s kubectl get nodes &>/dev/null 2>&1; then
     echo "    k3s already installed and running — skipping."
   else
     echo "    Installing k3s..."
     curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644 --disable traefik" sh -
     echo "    Waiting for k3s to be ready..."
-    for i in $(seq 1 30); do
-      if k3s kubectl get nodes &>/dev/null 2>&1; then
+    for i in $(seq 1 60); do
+      if timeout 10 k3s kubectl get nodes &>/dev/null 2>&1; then
         echo "    k3s ready after ${i} attempts."
         break
       fi
