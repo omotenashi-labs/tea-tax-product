@@ -142,6 +142,26 @@ export async function handleFixtureRequest(req: Request, statePath: string): Pro
     return fixtureJson(state.w2Extraction ?? defaultExtraction);
   }
 
+  // CSRF token endpoint (used by TaxSituationForm before PATCH)
+  if (req.method === 'GET' && url.pathname === '/api/auth/csrf') {
+    return json({ token: 'fixture-csrf-token' });
+  }
+
+  // Tax returns PATCH endpoint — /api/tax-objects/:id/returns/:returnId
+  if (req.method === 'PATCH' && /^\/api\/tax-objects\/[^/]+\/returns\/[^/]+$/.test(url.pathname)) {
+    const body = (await req.json()) as Record<string, unknown>;
+    return json({
+      id: url.pathname.split('/').at(-1) ?? 'return-id',
+      type: 'tax_return',
+      properties: {
+        tax_object_id: url.pathname.split('/')[3] ?? 'obj-id',
+        filing_status: body.filingStatus ?? 'single',
+        situation_data: body.situationData ?? null,
+        status: 'draft',
+      },
+    });
+  }
+
   return new Response(
     JSON.stringify({ error: `Unhandled fixture route ${req.method} ${url.pathname}` }),
     {
