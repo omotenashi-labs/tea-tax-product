@@ -300,7 +300,10 @@ export interface ProviderEvaluation {
   providerId: string;
   providerName: string;
   matchedTier: string | null; // null if no tier matches
-  estimatedPrice: number | null;
+  /** Advertised federal filing price in USD (null if no tier matched). */
+  federalPrice: number | null;
+  /** Per-state return add-on price in USD (null if no tier matched). */
+  statePrice: number | null;
   matchedConditions: string[]; // Human-readable descriptions
   disqualifiedBy: string[]; // Conditions that eliminated higher/lower tiers
 }

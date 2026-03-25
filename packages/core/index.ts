@@ -8,4 +8,5 @@ export * from './logger';
 export * from './encryption';
 export * from './scrub-pii';
 export * from './knowledge-base/form-taxonomy';
+export * from './knowledge-base/tier-mapping';
 export const coreHelper = () => true;
