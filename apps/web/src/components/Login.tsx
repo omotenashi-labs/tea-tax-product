@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { PasskeyLoginButton } from './PasskeyButton';
 
-/** Demo users pre-seeded for frictionless demo access. */
+/** Demo personas pre-seeded for frictionless demo access. */
 const DEMO_USERS = [
-  { label: 'Demo as Alice', username: 'alice', password: 'alice123' },
-  { label: 'Demo as Bob', username: 'bob', password: 'bob123' },
+  { label: 'Demo as Admin', username: 'demo_admin', password: 'demo_admin123' },
+  { label: 'Demo as Tax Filer', username: 'demo_filer', password: 'demo_filer123' },
 ];
 
 export const Login: React.FC = () => {

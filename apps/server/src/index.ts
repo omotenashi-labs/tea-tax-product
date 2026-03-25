@@ -23,6 +23,7 @@ import { handleTaxReturnsRequest } from './api/tax-returns';
 import { handleTierEvaluateRequest } from './api/tier-evaluate';
 import { handleExtractW2Request } from './api/extract-w2';
 import { seedSuperuser } from './seed/superuser';
+import { seedDemoUsers } from './seed/demoUsers';
 import { getJwks } from './auth/jwt';
 
 // Starter behavior:
@@ -51,6 +52,8 @@ startStaleClaimRecovery();
 
 // Seed the initial superuser if none exists yet.
 await seedSuperuser({ sql }).catch((err) => console.error('[seed] Superuser seeding failed:', err));
+// Seed demo personas (admin + tax_filer) for frictionless demo access.
+await seedDemoUsers({ sql }).catch((err) => console.error('[seed] Demo user seeding failed:', err));
 
 export interface AppState {
   sql: typeof sql;
