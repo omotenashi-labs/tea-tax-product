@@ -1,90 +1,33 @@
 /**
  * @file w2-upload-zone.tsx
  *
- * STUB — dev-scout placeholder for Issue #32.
+ * W-2 upload zone component for the demo flow.
  *
- * Full implementation will be carried out in the issue #32 implementation
- * pass. This stub exports the correct public surface (component + prop types)
- * so that downstream components (#33 tax situation form, #34 validation
- * results) can import from this path without changes.
- *
- * ## What the full implementation will do
- *
- * Upload zone accepts W-2 images via:
+ * Accepts W-2 images via:
  *   1. Drag-and-drop (desktop)
  *   2. File picker (all platforms)
- *   3. Camera capture — "Take Photo" button when `use-platform.ts` detects
- *      camera availability (`supports.getUserMedia || supports.inputCapture`).
- *      Uses the same `<input type="file" capture="environment">` +
- *      getUserMedia progressive enhancement pattern from `camera-demo.tsx`.
+ *   3. Camera capture — "Take Photo" button when use-platform.ts detects
+ *      camera availability. Uses <input type="file" capture="environment">
+ *      with getUserMedia progressive enhancement (same as camera-demo.tsx).
  *
- * On file selection the component calls `POST /api/extract/w2` with a
- * `multipart/form-data` payload. While extraction is in progress it renders
- * a pulsing skeleton state. On success it hands off `W2ExtractionResponse`
- * to the parent via `onExtractionComplete`. On failure it shows an error
- * state with a retry option.
+ * Calls POST /api/extract/w2 on file selection and transitions through
+ * uploading → extracting states. On success calls onExtractionComplete.
+ * On failure renders error state with retry.
  *
- * ## Visual identity
+ * Visual identity follows docs/implementation-plan.md §6.4.5 (upload zone
+ * spec) and §6.4.11 (responsive adaptations).
  *
- * Follows `docs/implementation-plan.md §6.4.5` upload zone spec:
- *   - Border: `border border-dashed border-surface-300 rounded-lg bg-surface-50/50`
- *   - Hover: `border-accent-500 bg-accent-500/5`
- *   - Active drag: `border-accent-500 bg-accent-500/10 ring-1 ring-accent-500/20`
- *   - Center: lucide `Upload` (40px), "Drop your W-2 here", "JPEG, PNG, or PDF"
- *   - Min height: `min-h-[200px]`
- *   - Processing: `animate-pulse bg-surface-50` + "Analyzing document..."
- *
- * ## Responsive layout
- *
- * See `docs/implementation-plan.md §6.4.6` and §6.4.11:
- *   - Desktop (1280px+): Full upload zone with drag-and-drop target.
- *   - Tablet/Mobile (<1280px): Single-column, full-width. "Take Photo" button
- *     as primary action when camera is detected. Larger touch targets (py-3).
- *
- * ## Camera detection integration
- *
- * Camera detection uses the existing `usePlatform` hook from
- * `apps/web/src/hooks/use-platform.ts`. When
- * `platform.supports.getUserMedia` is true, the "Take Photo" button renders
- * as the primary CTA using camera-demo.tsx's proven capture flow.
- *
- * ## API integration
- *
- * `POST /api/extract/w2` — see `docs/implementation-plan.md §6.5`.
- * Request: `multipart/form-data`, field name `file`.
- * Response: `W2ExtractionResponse` from `packages/core/tax-situation.ts`.
- *
- * Raw image is NOT persisted (DATA-P-005 data minimization). Extracted data
- * is returned to the client for user review before any storage.
- *
- * ## Integration risks discovered during scouting
- *
- * - iOS standalone mode: `getUserMedia` is unreliable (WebKit bugs). The
- *   camera-demo.tsx already guards against this; W2UploadZone must apply the
- *   same guard: `canUseGetUserMedia = supports.getUserMedia && !(os === 'ios' && isStandalone)`.
- * - File size limit: The server currently has no explicit multipart size cap.
- *   W-2 images from phone cameras can be 5–15 MB. The extraction endpoint
- *   must reject files exceeding a documented limit before forwarding to the AI
- *   API. Recommend documenting this as a risk in issue #32 acceptance tests.
- * - PDF support: The acceptance criteria include PDF as a valid upload format,
- *   but the AI vision API accepts images only. A server-side PDF-to-image
- *   conversion step (or rejection of PDFs with a clear error message) must be
- *   decided before implementation. Flagged for issue #32 implementer.
- *
- * Canonical docs:
- * - Implementation plan §6.4.5 (upload zone visual spec): `docs/implementation-plan.md`
- * - Implementation plan §6.4.6/§6.4.11 (responsive layout): `docs/implementation-plan.md`
- * - Implementation plan §6.5 (extraction endpoint): `docs/implementation-plan.md`
- * - camera-demo.tsx (camera capture infrastructure): `apps/web/src/components/pwa/demos/camera-demo.tsx`
- * - use-platform.ts (camera / API detection): `apps/web/src/hooks/use-platform.ts`
- * - W2ExtractionResponse type: `packages/core/tax-situation.ts`
+ * iOS standalone guard: canUseGetUserMedia = supports.getUserMedia && !(os
+ * === 'ios' && isStandalone) — same as camera-demo.tsx.
  */
 
-import React from 'react';
+import React, { useCallback, useRef, useState } from 'react';
+import { Upload, Camera, AlertCircle, RotateCcw } from 'lucide-react';
+import { usePlatform } from '../../hooks/use-platform';
 import type { W2ExtractionResponse } from 'core';
 
 // ---------------------------------------------------------------------------
-// Public prop types (stable API surface — implementation must match)
+// Public prop types (stable API surface)
 // ---------------------------------------------------------------------------
 
 export type W2UploadState = 'idle' | 'uploading' | 'extracting' | 'error';
@@ -98,23 +41,223 @@ export interface W2UploadZoneProps {
   errorMessage?: string;
 }
 
-/**
- * W2UploadZone — stub component.
- *
- * Renders a placeholder that signals the seam exists without any real
- * behaviour. The full implementation (Issue #32) replaces this with the
- * drag-and-drop / camera-capture upload zone described in the JSDoc above.
- */
-export function W2UploadZone({ onExtractionComplete: _onExtractionComplete }: W2UploadZoneProps) {
-  // Stub: no-op render only. Runtime behaviour is a placeholder message.
+// ---------------------------------------------------------------------------
+// Helper — call POST /api/extract/w2
+// ---------------------------------------------------------------------------
+
+async function extractW2(file: File): Promise<W2ExtractionResponse> {
+  const body = new FormData();
+  body.append('file', file);
+
+  const res = await fetch('/api/extract/w2', { method: 'POST', body });
+  if (!res.ok) {
+    const text = await res.text().catch(() => 'Unknown server error');
+    throw new Error(text || `Server responded with ${res.status}`);
+  }
+  return (await res.json()) as W2ExtractionResponse;
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
+export function W2UploadZone({
+  onExtractionComplete,
+  uploadState: controlledState,
+  errorMessage: controlledError,
+}: W2UploadZoneProps) {
+  const { os, isStandalone, supports } = usePlatform();
+
+  // Camera is available when getUserMedia works AND we're not on iOS standalone
+  // (WebKit reliability bugs — same guard as camera-demo.tsx).
+  const canUseCamera =
+    (supports.getUserMedia && !(os === 'ios' && isStandalone)) || supports.inputCapture;
+
+  // Internal state (ignored when controlledState is provided).
+  const [internalState, setInternalState] = useState<W2UploadState>('idle');
+  const [internalError, setInternalError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const state = controlledState ?? internalState;
+  const errorMsg = controlledError ?? internalError;
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  // Process a file — upload then extract.
+  const processFile = useCallback(
+    async (file: File) => {
+      setInternalState('uploading');
+      setInternalError(null);
+      try {
+        setInternalState('extracting');
+        const response = await extractW2(file);
+        if (!response.success) {
+          throw new Error(response.error ?? 'Extraction failed');
+        }
+        onExtractionComplete(response);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'An unexpected error occurred';
+        setInternalError(msg);
+        setInternalState('error');
+      }
+    },
+    [onExtractionComplete],
+  );
+
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      void processFile(file);
+    },
+    [processFile],
+  );
+
+  const handleRetry = useCallback(() => {
+    setInternalState('idle');
+    setInternalError(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
+  }, []);
+
+  // Drag-and-drop handlers
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      setIsDragOver(false);
+      const file = e.dataTransfer.files?.[0];
+      if (!file) return;
+      void processFile(file);
+    },
+    [processFile],
+  );
+
+  // ---------------------------------------------------------------------------
+  // Render: processing state
+  // ---------------------------------------------------------------------------
+
+  if (state === 'uploading' || state === 'extracting') {
+    return (
+      <div
+        data-testid="w2-upload-zone"
+        className="border border-dashed border-surface-300 rounded-lg bg-surface-50 min-h-[200px] flex flex-col items-center justify-center gap-3 animate-pulse"
+      >
+        <div className="w-10 h-10 rounded-full bg-surface-200" />
+        <p className="text-sm text-surface-500">
+          {state === 'uploading' ? 'Uploading…' : 'Analyzing document…'}
+        </p>
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Render: error state
+  // ---------------------------------------------------------------------------
+
+  if (state === 'error') {
+    return (
+      <div
+        data-testid="w2-upload-zone"
+        className="border border-dashed border-signal-error/40 rounded-lg bg-signal-error/5 min-h-[200px] flex flex-col items-center justify-center gap-4 px-6 py-8"
+      >
+        <AlertCircle size={36} strokeWidth={1.5} className="text-signal-error" />
+        <div className="text-center">
+          <p className="text-sm font-medium text-surface-800">Extraction failed</p>
+          {errorMsg && <p className="text-xs text-surface-500 mt-1">{errorMsg}</p>}
+        </div>
+        <button
+          onClick={handleRetry}
+          className="flex items-center gap-1.5 text-sm font-medium text-accent-600 hover:text-accent-700 transition-colors"
+        >
+          <RotateCcw size={14} strokeWidth={1.5} />
+          Try again
+        </button>
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Render: idle state (upload zone)
+  // ---------------------------------------------------------------------------
+
+  const dropZoneClasses = [
+    'border border-dashed rounded-lg min-h-[200px] flex flex-col items-center justify-center gap-4 px-6 py-8 transition-colors cursor-pointer',
+    isDragOver
+      ? 'border-accent-500 bg-accent-500/10 ring-1 ring-accent-500/20'
+      : 'border-surface-300 bg-surface-50/50 hover:border-accent-500 hover:bg-accent-500/5',
+  ].join(' ');
+
   return (
-    <div
-      data-testid="w2-upload-zone-stub"
-      className="border border-dashed border-surface-300 rounded-lg bg-surface-50/50 min-h-[200px] flex items-center justify-center"
-    >
-      <p className="text-sm text-surface-400">
-        W-2 upload zone — implementation pending (Issue #32)
-      </p>
+    <div data-testid="w2-upload-zone" className="flex flex-col gap-4">
+      {/* Camera capture — primary action on camera-equipped devices */}
+      {canUseCamera && (
+        <>
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileChange}
+            className="hidden"
+            id="w2-camera-input"
+            data-testid="w2-camera-input"
+          />
+          <label
+            htmlFor="w2-camera-input"
+            className="flex items-center justify-center gap-2 w-full bg-accent-500 hover:bg-accent-600 text-white rounded-lg py-3 px-6 font-semibold text-sm cursor-pointer transition-colors"
+            data-testid="take-photo-button"
+          >
+            <Camera size={18} strokeWidth={1.5} />
+            Take Photo
+          </label>
+        </>
+      )}
+
+      {/* File picker hidden input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,application/pdf"
+        onChange={handleFileChange}
+        className="hidden"
+        id="w2-file-input"
+        data-testid="w2-file-input"
+      />
+
+      {/* Drag-and-drop zone */}
+      <div
+        className={dropZoneClasses}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        aria-label="Upload W-2 document"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click();
+        }}
+      >
+        <Upload size={36} strokeWidth={1.5} className="text-surface-400" />
+        <div className="text-center">
+          <p className="text-sm font-medium text-surface-700">Drop your W-2 here</p>
+          <p className="text-xs text-surface-400 mt-1">
+            {canUseCamera ? 'or click to choose a file' : 'or click to choose a file'}
+          </p>
+          <p className="text-xs text-surface-400 mt-0.5">JPEG, PNG, or PDF</p>
+        </div>
+      </div>
     </div>
   );
 }

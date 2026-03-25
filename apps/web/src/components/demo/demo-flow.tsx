@@ -1,102 +1,33 @@
 /**
  * @file demo-flow.tsx
  *
- * STUB — dev-scout placeholder for Issue #32.
+ * Top-level orchestrator for the three-step CEO demo.
  *
- * Full implementation will be carried out in the issue #32 implementation
- * pass. This stub exports the correct public surface (component + prop types)
- * so that App.tsx and downstream issues (#33, #34) can import from this path
- * without changes.
+ * Step 1 — W-2 Upload & Extraction   (Issue #32 — this file)
+ * Step 2 — Tax Situation Form         (Issue #33 — placeholder)
+ * Step 3 — Validation & Tier Results  (Issue #34 — placeholder)
  *
- * ## What the full implementation will do
+ * Owns the state machine from docs/implementation-plan.md §6.3.
+ * Demo page header (§6.4.8): title, subtitle, three-segment step indicator.
+ * Responsive: max-w-3xl centered content column (§6.4.6).
  *
- * DemoFlow is the top-level orchestrator for the three-step CEO demo:
- *
- *   Step 1 — W-2 Upload & Extraction   (Issue #32)
- *   Step 2 — Tax Situation Form         (Issue #33)
- *   Step 3 — Validation & Tier Results  (Issue #34)
- *
- * It owns the state machine described in `docs/implementation-plan.md §6.3`:
- *
- *   START → EXTRACTING → REVIEWING → COMPLETING → VALIDATING → RESULTS
- *   ERROR state with retry on any async failure
- *
- * The demo page header (§6.4.8) lives here: segmented progress indicator
- * (three segments: Upload, Review, Results), Tea Tax branding, responsive
- * layout container.
- *
- * ## State machine
- *
- * | State       | Actor    | Description                                         |
- * |-------------|----------|-----------------------------------------------------|
- * | START       | user     | Uploads W-2 image                                   |
- * | EXTRACTING  | system   | Calls `POST /api/extract/w2`                        |
- * | REVIEWING   | user     | Confirms or edits extracted data (W2ReviewCard)     |
- * | COMPLETING  | user     | Fills tax situation form (Issue #33)                |
- * | VALIDATING  | system   | Calls validation + tier endpoints (Issue #34)       |
- * | RESULTS     | user     | Reads validation + tier comparison (Issue #34)      |
- * | ERROR       | user     | Retry upload or exit                                |
- *
- * ## Progress indicator (demo page header §6.4.8)
- *
- * Three-segment horizontal bar. Visual spec from §6.4.5 (step progress):
- *   - Active segment: `text-accent-500 font-semibold`, `bg-accent-500` fill
- *   - Completed: `text-signal-success font-medium` + small check, `bg-signal-success`
- *   - Future: `text-surface-400`, `bg-surface-200`
- *   - Bar height: `h-1`
- *   - Step labels: `text-xs uppercase tracking-wider`
- *   - Container: `bg-surface-50 px-6 py-3 border-b border-surface-200/60`
- *
- * ## Responsive layout (§6.4.6)
- *
- * - Desktop (1280px+): Two-column grid in review and form steps.
- * - Tablet (768–1279px): Single-column. Sidebar collapses to icon-only.
- * - Mobile (<768px): No sidebar. Full-width stacked. Camera "Take Photo"
- *   primary on upload step. `py-3` inputs, full-width CTAs.
- *
- * ## Integration handoffs discovered during scouting
- *
- * - Issue #33 (tax situation form): DemoFlow passes `W2ExtractedData` from
- *   the review step as `initialData` to the tax situation form, which
- *   pre-populates income fields. The interface between DemoFlow and the form
- *   is `onFormComplete(situation: TaxSituation)`.
- * - Issue #34 (validation/tier results): DemoFlow triggers validation and
- *   tier evaluation after the form step, then renders the results view.
- *   The integration seam is the `taxObjectId` + `returnId` pair created when
- *   the tax return is persisted via `PATCH /api/tax-objects/:id/returns/:returnId`.
- * - Issue #36 (PWA branding): DemoFlow renders within the existing App.tsx
- *   shell. The demo header should pick up the Tea Tax branding that issue #36
- *   will apply to the PWA manifest and install flow.
- *
- * ## Integration risks discovered during scouting
- *
- * - State persistence: If the user refreshes mid-flow, all in-memory state is
- *   lost. For the CEO demo this may be acceptable (redirect to step 1 on
- *   reload), but the implementer should decide explicitly and document the
- *   decision in the PR.
- * - Concurrent flows: The current App.tsx has a single `activeView` string.
- *   DemoFlow must be integrated into this without breaking the settings view.
- *   Recommend extending `activeView` with a `'demo'` variant and rendering
- *   DemoFlow as the content panel when active.
- *
- * Canonical docs:
- * - Implementation plan §6.3 (state machine): `docs/implementation-plan.md`
- * - Implementation plan §6.4.8 (demo page header): `docs/implementation-plan.md`
- * - Implementation plan §6.4.6/§6.4.11 (responsive layout): `docs/implementation-plan.md`
- * - App.tsx (integration point): `apps/web/src/App.tsx`
- * - W2UploadZone (Step 1): `apps/web/src/components/demo/w2-upload-zone.tsx`
- * - W2ReviewCard (Step 1 review): `apps/web/src/components/demo/w2-review-card.tsx`
+ * State persistence: In-memory only. Refresh returns to step 1.
+ * This is acceptable for the CEO demo — decision documented here.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { CheckCircle2 } from 'lucide-react';
+import { W2UploadZone } from './w2-upload-zone';
+import { W2ReviewCard } from './w2-review-card';
+import type { W2ExtractionResponse, W2ExtractedData, ConfidenceScores } from 'core';
 
 // ---------------------------------------------------------------------------
-// Public types (stable API surface — implementation must match)
+// Public types (stable API surface)
 // ---------------------------------------------------------------------------
 
 /**
  * Top-level state of the demo flow.
- * Mirrors the state machine in `docs/implementation-plan.md §6.3`.
+ * Mirrors the state machine in docs/implementation-plan.md §6.3.
  */
 export type DemoFlowState =
   | 'start'
@@ -112,18 +43,189 @@ export interface DemoFlowProps {
   onExit?: () => void;
 }
 
-/**
- * DemoFlow — stub component.
- *
- * Renders a placeholder that signals the seam exists. The full implementation
- * (Issue #32) replaces this with the three-step demo orchestrator described
- * in the JSDoc above.
- */
-export function DemoFlow({ onExit: _onExit }: DemoFlowProps) {
-  // Stub: no-op render only.
+// ---------------------------------------------------------------------------
+// Step indicator
+// ---------------------------------------------------------------------------
+
+type StepStatus = 'completed' | 'active' | 'future';
+
+interface StepIndicatorProps {
+  steps: { label: string; status: StepStatus }[];
+}
+
+function StepIndicator({ steps }: StepIndicatorProps) {
   return (
-    <div data-testid="demo-flow-stub" className="p-8 text-surface-400 text-sm">
-      Demo flow — W-2 upload, review, and tax situation steps coming in Issue #32.
+    <div
+      className="bg-surface-50 px-6 py-3 border-b border-surface-200/60"
+      aria-label="Demo progress"
+      data-testid="step-indicator"
+    >
+      <div className="flex items-center gap-0">
+        {steps.map((step, i) => {
+          const isLast = i === steps.length - 1;
+          const labelClass =
+            step.status === 'active'
+              ? 'text-accent-500 font-semibold'
+              : step.status === 'completed'
+                ? 'text-signal-success font-medium'
+                : 'text-surface-400';
+          const barClass =
+            step.status === 'completed'
+              ? 'bg-signal-success'
+              : step.status === 'active'
+                ? 'bg-accent-500'
+                : 'bg-surface-200';
+
+          return (
+            <React.Fragment key={step.label}>
+              <div className="flex flex-col items-center gap-1 min-w-0">
+                <span
+                  className={`text-xs uppercase tracking-wider whitespace-nowrap flex items-center gap-1 ${labelClass}`}
+                >
+                  {step.status === 'completed' && (
+                    <CheckCircle2 size={12} strokeWidth={1.5} className="text-signal-success" />
+                  )}
+                  {step.label}
+                </span>
+                <div className={`h-1 w-20 rounded-full ${barClass}`} />
+              </div>
+              {!isLast && <div className="flex-1 h-1 bg-surface-200 mx-1 rounded-full" />}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// DemoFlow
+// ---------------------------------------------------------------------------
+
+export function DemoFlow({ onExit }: DemoFlowProps) {
+  const [flowState, setFlowState] = useState<DemoFlowState>('start');
+  const [extractionResponse, setExtractionResponse] = useState<W2ExtractionResponse | null>(null);
+
+  // Build per-field confidence from the W2ExtractionResponse overall score
+  // (server returns a single overall score, not per-field in this version).
+  function buildConfidence(response: W2ExtractionResponse): ConfidenceScores {
+    return {
+      overall: response.confidence,
+      perField: {},
+    };
+  }
+
+  const handleExtractionComplete = (response: W2ExtractionResponse) => {
+    setExtractionResponse(response);
+    setFlowState('reviewing');
+  };
+
+  const handleConfirm = (confirmedData: W2ExtractedData) => {
+    // confirmedData will be passed to the tax situation form in Issue #33.
+    // For now, advance to the completing placeholder.
+    void confirmedData;
+    setFlowState('completing');
+  };
+
+  const handleReupload = () => {
+    setExtractionResponse(null);
+    setFlowState('start');
+  };
+
+  // Step indicator data
+  const uploadStatus: StepStatus = flowState === 'start' ? 'active' : 'completed';
+  const reviewStatus: StepStatus =
+    flowState === 'reviewing'
+      ? 'active'
+      : flowState === 'completing' || flowState === 'validating' || flowState === 'results'
+        ? 'completed'
+        : 'future';
+  const resultsStatus: StepStatus = flowState === 'results' ? 'active' : 'future';
+
+  const steps = [
+    { label: 'Upload', status: uploadStatus },
+    { label: 'Review', status: reviewStatus },
+    { label: 'Results', status: resultsStatus },
+  ];
+
+  return (
+    <div className="flex flex-col h-full" data-testid="demo-flow">
+      {/* Step indicator */}
+      <StepIndicator steps={steps} />
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-8 py-10 space-y-8">
+          {/* Page header */}
+          <div className="space-y-1">
+            <h1 className="text-xl font-bold tracking-tight text-surface-900">
+              Tax Situation Protocol
+            </h1>
+            <p className="text-sm text-surface-400 font-normal">
+              v0.1 Reference Implementation{' '}
+              <span className="font-mono text-xs text-surface-400 bg-surface-100 px-1.5 py-0.5 rounded-sm">
+                schema v0.1.0
+              </span>
+            </p>
+          </div>
+
+          {/* Step 1: Upload */}
+          {flowState === 'start' && (
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold text-surface-700 uppercase tracking-wider">
+                Step 1 — Upload W-2
+              </h2>
+              <W2UploadZone onExtractionComplete={handleExtractionComplete} />
+            </div>
+          )}
+
+          {/* Step 1 → Step 2 transition: Review */}
+          {flowState === 'reviewing' && extractionResponse?.data && (
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold text-surface-700 uppercase tracking-wider">
+                Step 2 — Review Extracted Data
+              </h2>
+              <W2ReviewCard
+                extractedData={extractionResponse.data}
+                confidence={buildConfidence(extractionResponse)}
+                onConfirm={handleConfirm}
+                onReupload={handleReupload}
+              />
+              {extractionResponse.warnings.length > 0 && (
+                <ul className="space-y-1">
+                  {extractionResponse.warnings.map((w, i) => (
+                    <li key={i} className="text-xs text-signal-caution">
+                      ⚠ {w}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {/* Step 2 placeholder (Issue #33) */}
+          {flowState === 'completing' && (
+            <div className="space-y-4">
+              <h2 className="text-sm font-semibold text-surface-700 uppercase tracking-wider">
+                Step 2 — Tax Situation Form
+              </h2>
+              <p className="text-sm text-surface-400">Tax situation form coming in Issue #33.</p>
+            </div>
+          )}
+
+          {/* Exit link */}
+          {onExit && (
+            <div className="pt-4">
+              <button
+                onClick={onExit}
+                className="text-xs text-surface-400 hover:text-surface-600 transition-colors"
+              >
+                Exit demo
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -24,6 +24,14 @@ type OAuthStatus = { connected: boolean };
 type OAuthInitResponse = { url: string };
 type OAuthCompleteResponse = { connected: boolean };
 
+type W2ExtractionFixture = {
+  success: boolean;
+  data: Record<string, unknown> | null;
+  confidence: number;
+  warnings: string[];
+  error?: string;
+};
+
 type FixtureState = {
   tasks?: FixtureTask[];
   /** OAuth status response */
@@ -32,6 +40,8 @@ type FixtureState = {
   oauthInit?: OAuthInitResponse | FixtureResponse<OAuthInitResponse>;
   /** OAuth complete response */
   oauthComplete?: OAuthCompleteResponse | FixtureResponse<OAuthCompleteResponse>;
+  /** W-2 extraction response */
+  w2Extraction?: W2ExtractionFixture | FixtureResponse<W2ExtractionFixture>;
 };
 
 type FixtureStore = Record<string, FixtureState>;
@@ -107,6 +117,29 @@ export async function handleFixtureRequest(req: Request, statePath: string): Pro
   // OAuth complete endpoint
   if (req.method === 'POST' && url.pathname === '/api/auth/oauth/complete') {
     return fixtureJson(state.oauthComplete ?? { connected: true });
+  }
+
+  // W-2 extraction endpoint
+  if (req.method === 'POST' && url.pathname === '/api/extract/w2') {
+    const defaultExtraction: W2ExtractionFixture = {
+      success: true,
+      data: {
+        employerName: 'Acme Corp',
+        employerEIN: '12-3456789',
+        wages: 75000,
+        federalTaxWithheld: 12000,
+        socialSecurityWages: 75000,
+        socialSecurityTaxWithheld: 4650,
+        medicareWages: 75000,
+        medicareTaxWithheld: 1087.5,
+        stateName: 'CA',
+        stateWages: 75000,
+        stateTaxWithheld: 5000,
+      },
+      confidence: 0.95,
+      warnings: [],
+    };
+    return fixtureJson(state.w2Extraction ?? defaultExtraction);
   }
 
   return new Response(
