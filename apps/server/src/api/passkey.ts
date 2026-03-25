@@ -27,13 +27,27 @@ import type { AppState } from '../index';
 import { getCorsHeaders } from './auth';
 import { signJwt } from '../auth/jwt';
 
-// The Relying Party configuration.
-// RP_ID must match the effective domain of the origin.
-// In development (localhost) the rpID is 'localhost'.
-// For production, override via RP_ID / RP_NAME / ORIGIN env vars.
-const RP_ID = process.env.RP_ID ?? 'localhost';
 const RP_NAME = process.env.RP_NAME ?? 'Tea Tax';
-const ORIGIN = process.env.ORIGIN ?? `http://localhost:5174`;
+
+/** Derive rpId and expectedOrigin from the request when env vars are not set. */
+function getRpConfig(req: Request): { rpId: string; origin: string } {
+  if (process.env.RP_ID && process.env.ORIGIN) {
+    return { rpId: process.env.RP_ID, origin: process.env.ORIGIN };
+  }
+  const requestOrigin = req.headers.get('origin') ?? req.headers.get('referer') ?? '';
+  try {
+    const parsed = new URL(requestOrigin);
+    return {
+      rpId: process.env.RP_ID ?? parsed.hostname,
+      origin: process.env.ORIGIN ?? parsed.origin,
+    };
+  } catch {
+    return {
+      rpId: process.env.RP_ID ?? 'localhost',
+      origin: process.env.ORIGIN ?? 'http://localhost:5174',
+    };
+  }
+}
 
 export async function handlePasskeyRequest(
   req: Request,
@@ -78,9 +92,10 @@ export async function handlePasskeyRequest(
         (row) => ({ id: row.credential_id }),
       );
 
+      const { rpId } = getRpConfig(req);
       const options = await generateRegistrationOptions({
         rpName: RP_NAME,
-        rpID: RP_ID,
+        rpID: rpId,
         userName: user.username,
         userDisplayName: user.username,
         excludeCredentials,
@@ -135,11 +150,12 @@ export async function handlePasskeyRequest(
       // Delete the challenge immediately (single-use)
       await sql`DELETE FROM passkey_challenges WHERE id = ${challengeRow.id}`;
 
+      const { rpId, origin: expectedOrigin } = getRpConfig(req);
       const verification = await verifyRegistrationResponse({
         response,
         expectedChallenge: challengeRow.challenge,
-        expectedOrigin: ORIGIN,
-        expectedRPID: RP_ID,
+        expectedOrigin,
+        expectedRPID: rpId,
       });
 
       if (!verification.verified || !verification.registrationInfo) {
@@ -188,8 +204,9 @@ export async function handlePasskeyRequest(
         }));
       }
 
+      const { rpId } = getRpConfig(req);
       const options = await generateAuthenticationOptions({
-        rpID: RP_ID,
+        rpID: rpId,
         allowCredentials,
         userVerification: 'preferred',
         timeout: 60_000,
@@ -258,11 +275,12 @@ export async function handlePasskeyRequest(
       // Delete challenge immediately (single-use)
       await sql`DELETE FROM passkey_challenges WHERE id = ${challengeRow.id}`;
 
+      const { rpId, origin: expectedOrigin } = getRpConfig(req);
       const verification = await verifyAuthenticationResponse({
         response,
         expectedChallenge: challengeRow.challenge,
-        expectedOrigin: ORIGIN,
-        expectedRPID: RP_ID,
+        expectedOrigin,
+        expectedRPID: rpId,
         credential: {
           id: cred.credential_id,
           publicKey: new Uint8Array(cred.public_key),

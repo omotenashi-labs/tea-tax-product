@@ -4,6 +4,7 @@ import { Login } from './components/Login';
 import { Settings, User, Receipt, FileText } from 'lucide-react';
 import { DemoFlow } from './components/demo/demo-flow';
 import { TaxSituationForm } from './components/TaxSituationForm';
+import { RegisterPasskeyButton } from './components/PasskeyButton';
 
 function App() {
   const { user, logout, loading } = useAuth();
@@ -95,7 +96,10 @@ function App() {
               <TaxSituationForm taxObjectId="demo-tax-object-id" returnId="demo-return-id" />
             )}
             {activeView === 'settings' && (
-              <div className="p-8 text-zinc-400 text-sm">Settings coming soon.</div>
+              <div className="p-8 max-w-sm space-y-4">
+                <h2 className="text-sm font-semibold text-zinc-700">Security</h2>
+                <RegisterPasskeyButton userId={user.id} />
+              </div>
             )}
           </div>
         </div>
