@@ -11,7 +11,7 @@ import {
   tracedFetch,
   extractTraceId,
   traceLog,
-} from './trace';
+} from '../../trace';
 
 // ---------------------------------------------------------------------------
 // extractTraceId

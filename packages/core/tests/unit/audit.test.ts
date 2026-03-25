@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { computeAuditHash } from './audit';
+import { computeAuditHash } from '../../audit';
 
 const GENESIS_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
 

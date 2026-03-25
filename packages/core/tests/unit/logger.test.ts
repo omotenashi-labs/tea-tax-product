@@ -2,7 +2,13 @@ import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { mkdtempSync, readFileSync, rmSync, existsSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { log, rotateLogs, templateMessage, configureLogger, resetDeduplication } from './logger';
+import {
+  log,
+  rotateLogs,
+  templateMessage,
+  configureLogger,
+  resetDeduplication,
+} from '../../logger';
 
 // ---------------------------------------------------------------------------
 // Helpers

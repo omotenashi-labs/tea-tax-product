@@ -6,7 +6,7 @@ import {
   encryptField,
   encryptProperties,
   SENSITIVE_FIELDS,
-} from './encryption';
+} from '../../encryption';
 
 // A deterministic 32-byte key expressed as 64 hex characters.
 const TEST_MASTER_KEY = 'a'.repeat(64);

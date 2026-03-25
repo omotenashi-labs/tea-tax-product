@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { scrubPii, PII_FIELD_NAMES } from './scrub-pii';
+import { scrubPii, PII_FIELD_NAMES } from '../../scrub-pii';
 
 describe('scrubPii', () => {
   it('returns primitives unchanged', () => {

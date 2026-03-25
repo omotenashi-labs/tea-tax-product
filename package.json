@@ -10,7 +10,7 @@
     "build": "bun run --filter '*' build",
     "test": "bun run test:unit && bun run test:api && bun run test:component && bun run test:e2e",
     "test:migration": "bun --bun vitest run --config apps/server/vitest.migration.config.ts",
-    "test:unit": "bun --bun vitest run tests/unit apps/*/tests/unit",
+    "test:unit": "bun --bun vitest run apps/*/tests/unit packages/*/tests/unit",
     "test:api": "bun --bun vitest run --config apps/server/vitest.integration.config.ts",
     "test:pg-container": "bun --bun vitest run apps/server/tests/integration/pg-container.test.ts",
     "test:component": "bun --bun vitest run --config apps/web/vitest.browser.config.ts",
