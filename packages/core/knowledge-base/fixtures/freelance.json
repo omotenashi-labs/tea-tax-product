@@ -1,0 +1,137 @@
+{
+  "taxSituation": {
+    "id": "fixture-freelance-002",
+    "version": "0.1.0",
+    "filingYear": 2025,
+    "filingStatus": "single",
+    "dependents": [],
+    "incomeStreams": [
+      {
+        "type": "1099_nec",
+        "source": "BuildRight Consulting LLC",
+        "amount": 62000,
+        "documentation": [
+          {
+            "artifactId": "art-nec-001",
+            "description": "1099-NEC from BuildRight Consulting LLC — 2025"
+          }
+        ],
+        "form1099Data": {
+          "payerName": "BuildRight Consulting LLC",
+          "payerTIN": "83-4567890",
+          "nonEmployeeCompensation": 62000
+        }
+      }
+    ],
+    "deductions": [
+      {
+        "type": "other",
+        "amount": 8400,
+        "documentation": [
+          {
+            "artifactId": "art-exp-001",
+            "description": "Business expense receipts — software, equipment, home office"
+          }
+        ]
+      }
+    ],
+    "credits": [],
+    "lifeEvents": [
+      {
+        "type": "job_change",
+        "date": "2025-02-01",
+        "details": "Left salaried role to work full-time as an independent contractor"
+      }
+    ],
+    "priorYearContext": {
+      "estimatedAGI": 55000,
+      "filingMethod": "self_prepared",
+      "provider": null
+    },
+    "stateResidency": {
+      "primary": "NY",
+      "additional": []
+    },
+    "documentationCompleteness": 0.88,
+    "confidenceScores": {
+      "overall": 0.91,
+      "perField": {
+        "incomeStreams[0].amount": 0.95,
+        "deductions[0].amount": 0.82
+      }
+    },
+    "rawArtifacts": [
+      {
+        "id": "art-nec-001",
+        "type": "document",
+        "source": "upload",
+        "extractedData": {
+          "formType": "1099-NEC",
+          "taxYear": 2025,
+          "payer": "BuildRight Consulting LLC"
+        }
+      },
+      {
+        "id": "art-exp-001",
+        "type": "document",
+        "source": "upload"
+      }
+    ],
+    "metadata": {
+      "createdAt": "2026-01-20T09:00:00.000Z",
+      "updatedAt": "2026-01-20T09:00:00.000Z",
+      "objectType": "individual",
+      "schemaVersion": "0.1.0"
+    }
+  },
+  "expectedValidationResult": {
+    "valid": false,
+    "errors": [
+      {
+        "code": "MISSING_SCHEDULE_SE",
+        "severity": "error",
+        "field": "incomeStreams",
+        "message": "Self-employment net income exceeds $400 but Schedule SE (self-employment tax) has not been accounted for.",
+        "suggestedAction": "Ensure Schedule SE is included to calculate self-employment tax on this net income."
+      }
+    ],
+    "warnings": [
+      {
+        "code": "INCOMPLETE_CHAIN_ITEMIZED_WITHOUT_SCHEDULE_A",
+        "severity": "warning",
+        "field": "deductions",
+        "message": "Non-standard deductions are present but no Schedule A line items (mortgage interest, SALT, charitable, or medical) were found.",
+        "suggestedAction": "Add Schedule A deduction line items or switch to the standard deduction."
+      }
+    ],
+    "completeness": 0.985,
+    "formsRequired": ["1040", "schedule-c", "schedule-se", "state-return"]
+  },
+  "expectedTierPlacements": {
+    "turbotax": {
+      "matchedTier": "Self-Employed",
+      "federalPrice": 129,
+      "statePrice": 59
+    },
+    "hrblock": {
+      "matchedTier": "Self-Employed",
+      "federalPrice": 110,
+      "statePrice": 37
+    },
+    "taxact": {
+      "matchedTier": "Self-Employed+",
+      "federalPrice": 99.99,
+      "statePrice": 54.99
+    },
+    "freetaxusa": {
+      "matchedTier": "Deluxe",
+      "federalPrice": 0,
+      "statePrice": 14.99
+    },
+    "cashapp": {
+      "matchedTier": "Free",
+      "federalPrice": 0,
+      "statePrice": 0
+    }
+  }
+}

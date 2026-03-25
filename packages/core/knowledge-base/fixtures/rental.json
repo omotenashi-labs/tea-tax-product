@@ -1,0 +1,171 @@
+{
+  "taxSituation": {
+    "id": "fixture-rental-005",
+    "version": "0.1.0",
+    "filingYear": 2025,
+    "filingStatus": "head_of_household",
+    "dependents": [
+      {
+        "firstName": "Marcus",
+        "lastName": "Okafor",
+        "relationship": "son",
+        "dateOfBirth": "2013-03-22",
+        "ssn_last4": "4491",
+        "qualifiesForChildTaxCredit": true,
+        "qualifiesForEIC": true
+      }
+    ],
+    "incomeStreams": [
+      {
+        "type": "w2",
+        "source": "Greenfield Medical Center",
+        "amount": 74000,
+        "employerEIN": "59-2345678",
+        "documentation": [
+          {
+            "artifactId": "art-rental-w2-001",
+            "description": "W-2 from Greenfield Medical Center — 2025"
+          }
+        ],
+        "w2Data": {
+          "wages": 74000,
+          "federalTaxWithheld": 12950,
+          "socialSecurityWages": 74000,
+          "socialSecurityTaxWithheld": 4588,
+          "medicareWages": 74000,
+          "medicareTaxWithheld": 1073,
+          "stateName": "FL",
+          "stateWages": 74000,
+          "stateTaxWithheld": 0
+        }
+      },
+      {
+        "type": "rental",
+        "source": "742 Evergreen Terrace, Orlando FL 32801",
+        "amount": 21600,
+        "documentation": [
+          {
+            "artifactId": "art-rental-lease-001",
+            "description": "Rental lease agreement and rent receipts — 742 Evergreen Terrace 2025"
+          }
+        ]
+      }
+    ],
+    "deductions": [
+      {
+        "type": "mortgage_interest",
+        "amount": 9600,
+        "documentation": [
+          {
+            "artifactId": "art-rental-1098-001",
+            "description": "Form 1098 — mortgage interest statement for rental property"
+          }
+        ]
+      },
+      {
+        "type": "state_local_taxes",
+        "amount": 4200,
+        "documentation": []
+      }
+    ],
+    "credits": [
+      {
+        "type": "child_tax",
+        "amount": 2000,
+        "documentation": []
+      }
+    ],
+    "lifeEvents": [],
+    "priorYearContext": {
+      "estimatedAGI": 88000,
+      "filingMethod": "self_prepared",
+      "provider": "TurboTax"
+    },
+    "stateResidency": {
+      "primary": "FL",
+      "additional": []
+    },
+    "documentationCompleteness": 0.93,
+    "confidenceScores": {
+      "overall": 0.92,
+      "perField": {
+        "incomeStreams[1].amount": 0.9,
+        "deductions[0].amount": 0.94
+      }
+    },
+    "rawArtifacts": [
+      {
+        "id": "art-rental-w2-001",
+        "type": "document",
+        "source": "upload",
+        "extractedData": {
+          "formType": "W-2",
+          "taxYear": 2025,
+          "employer": "Greenfield Medical Center"
+        }
+      },
+      {
+        "id": "art-rental-lease-001",
+        "type": "document",
+        "source": "upload"
+      },
+      {
+        "id": "art-rental-1098-001",
+        "type": "document",
+        "source": "upload",
+        "extractedData": {
+          "formType": "1098",
+          "taxYear": 2025
+        }
+      }
+    ],
+    "metadata": {
+      "createdAt": "2026-01-28T16:00:00.000Z",
+      "updatedAt": "2026-01-28T16:00:00.000Z",
+      "objectType": "individual",
+      "schemaVersion": "0.1.0"
+    }
+  },
+  "expectedValidationResult": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+      {
+        "code": "THRESHOLD_FREE_FILE_AGI_EXCEEDED",
+        "severity": "info",
+        "field": "incomeStreams",
+        "message": "Income exceeds the IRS Free File AGI limit, making Free File ineligible.",
+        "suggestedAction": "Use a paid tax preparation service or direct filing option instead of IRS Free File."
+      }
+    ],
+    "completeness": 0.99125,
+    "formsRequired": ["1040", "schedule-a", "schedule-e", "state-return", "w-2"]
+  },
+  "expectedTierPlacements": {
+    "turbotax": {
+      "matchedTier": "Premium",
+      "federalPrice": 129,
+      "statePrice": 59
+    },
+    "hrblock": {
+      "matchedTier": "Premium",
+      "federalPrice": 85,
+      "statePrice": 37
+    },
+    "taxact": {
+      "matchedTier": "Premier",
+      "federalPrice": 79.99,
+      "statePrice": 54.99
+    },
+    "freetaxusa": {
+      "matchedTier": "Deluxe",
+      "federalPrice": 0,
+      "statePrice": 14.99
+    },
+    "cashapp": {
+      "matchedTier": "Free",
+      "federalPrice": 0,
+      "statePrice": 0
+    }
+  }
+}

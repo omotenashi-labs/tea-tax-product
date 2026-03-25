@@ -1,0 +1,142 @@
+{
+  "taxSituation": {
+    "id": "fixture-multistate-004",
+    "version": "0.1.0",
+    "filingYear": 2025,
+    "filingStatus": "married_filing_jointly",
+    "dependents": [
+      {
+        "firstName": "Lily",
+        "lastName": "Nakamura",
+        "relationship": "daughter",
+        "dateOfBirth": "2016-08-12",
+        "ssn_last4": "7823",
+        "qualifiesForChildTaxCredit": true,
+        "qualifiesForEIC": false
+      }
+    ],
+    "incomeStreams": [
+      {
+        "type": "w2",
+        "source": "Summit Financial Group",
+        "amount": 88000,
+        "employerEIN": "36-5678901",
+        "documentation": [
+          {
+            "artifactId": "art-ms-w2-001",
+            "description": "W-2 from Summit Financial Group — NY wages 2025"
+          }
+        ],
+        "w2Data": {
+          "wages": 88000,
+          "federalTaxWithheld": 16720,
+          "socialSecurityWages": 88000,
+          "socialSecurityTaxWithheld": 5456,
+          "medicareWages": 88000,
+          "medicareTaxWithheld": 1276,
+          "stateName": "NY",
+          "stateWages": 50000,
+          "stateTaxWithheld": 3250
+        }
+      }
+    ],
+    "deductions": [
+      {
+        "type": "standard",
+        "amount": 30000,
+        "documentation": []
+      }
+    ],
+    "credits": [
+      {
+        "type": "child_tax",
+        "amount": 2000,
+        "documentation": []
+      }
+    ],
+    "lifeEvents": [
+      {
+        "type": "job_change",
+        "date": "2025-07-15",
+        "details": "Relocated from New Jersey to New York; NJ part-year resident"
+      }
+    ],
+    "priorYearContext": {
+      "estimatedAGI": 82000,
+      "filingMethod": "tax_professional",
+      "provider": "H&R Block"
+    },
+    "stateResidency": {
+      "primary": "NY",
+      "additional": ["NJ"]
+    },
+    "documentationCompleteness": 0.92,
+    "confidenceScores": {
+      "overall": 0.89,
+      "perField": {
+        "incomeStreams[0].w2Data.stateWages": 0.85,
+        "stateResidency.additional": 0.92
+      }
+    },
+    "rawArtifacts": [
+      {
+        "id": "art-ms-w2-001",
+        "type": "document",
+        "source": "upload",
+        "extractedData": {
+          "formType": "W-2",
+          "taxYear": 2025,
+          "employer": "Summit Financial Group"
+        }
+      }
+    ],
+    "metadata": {
+      "createdAt": "2026-02-01T11:00:00.000Z",
+      "updatedAt": "2026-02-01T11:00:00.000Z",
+      "objectType": "joint_household",
+      "schemaVersion": "0.1.0"
+    }
+  },
+  "expectedValidationResult": {
+    "valid": true,
+    "errors": [],
+    "warnings": [
+      {
+        "code": "THRESHOLD_FREE_FILE_AGI_EXCEEDED",
+        "severity": "info",
+        "field": "incomeStreams",
+        "message": "Income exceeds the IRS Free File AGI limit, making Free File ineligible.",
+        "suggestedAction": "Use a paid tax preparation service or direct filing option instead of IRS Free File."
+      }
+    ],
+    "completeness": 0.99,
+    "formsRequired": ["1040", "state-return", "w-2"]
+  },
+  "expectedTierPlacements": {
+    "turbotax": {
+      "matchedTier": "Free",
+      "federalPrice": 0,
+      "statePrice": 0
+    },
+    "hrblock": {
+      "matchedTier": "Free Online",
+      "federalPrice": 0,
+      "statePrice": 0
+    },
+    "taxact": {
+      "matchedTier": "Free",
+      "federalPrice": 0,
+      "statePrice": 39.99
+    },
+    "freetaxusa": {
+      "matchedTier": "Deluxe",
+      "federalPrice": 0,
+      "statePrice": 14.99
+    },
+    "cashapp": {
+      "matchedTier": "Free",
+      "federalPrice": 0,
+      "statePrice": 0
+    }
+  }
+}
