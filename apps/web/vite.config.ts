@@ -28,6 +28,7 @@ export default defineConfig({
   },
   server: {
     proxy: createProxy(),
+    allowedHosts: true,
   },
   css: {
     postcss: {
