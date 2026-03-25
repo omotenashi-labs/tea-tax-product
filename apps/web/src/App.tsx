@@ -9,7 +9,9 @@ function App() {
   const { user, logout, loading } = useAuth();
 
   // Core Layout State
-  const [activeView, setActiveView] = useState<'home' | 'demo' | 'tax-situation' | 'settings'>('home');
+  const [activeView, setActiveView] = useState<'home' | 'demo' | 'tax-situation' | 'settings'>(
+    'home',
+  );
 
   if (loading) {
     return (
