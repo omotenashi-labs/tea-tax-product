@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Login } from './components/Login';
-import { Settings, User, Receipt, FileText, ShieldAlert, BarChart2 } from 'lucide-react';
-import { DemoFlow } from './components/demo/demo-flow';
+import { Settings, User, FileText, ShieldAlert, BarChart2 } from 'lucide-react';
 import { TaxSituationForm } from './components/TaxSituationForm';
 import { W2CaptureZone } from './components/W2CaptureZone';
 import { TaxProgressIndicator } from './components/TaxProgressIndicator';
@@ -21,8 +20,8 @@ function App() {
   // Role-aware default: superadmin lands on Admin panel; all other roles land on Tax Situation.
   const defaultView = isSuperadmin ? 'admin' : 'tax-situation';
   const [activeView, setActiveView] = useState<
-    'demo' | 'tax-situation' | 'tier-results' | 'settings' | 'admin'
-  >(defaultView as 'demo' | 'tax-situation' | 'tier-results' | 'settings' | 'admin');
+    'tax-situation' | 'tier-results' | 'settings' | 'admin'
+  >(defaultView as 'tax-situation' | 'tier-results' | 'settings' | 'admin');
 
   /**
    * Tax-situation intake state machine.
@@ -36,7 +35,7 @@ function App() {
   const [w2Data, setW2Data] = useState<W2ExtractedData | null>(null);
   // Parsed fields from the describe-path to pre-populate TaxSituationForm
   const [parsedFields, setParsedFields] = useState<ParsedTaxFields | null>(null);
-  // Current step (1-based) within the Tax Situation Protocol flow (1 = W-2 Import … 7 = Review)
+  // Current step (1-based) within the tax intake form flow (1 = W-2 Import … 7 = Review)
   const [taxCurrentStep, setTaxCurrentStep] = useState(1);
 
   // Redirect non-superadmin users away from the admin view if they somehow land there
@@ -78,13 +77,6 @@ function App() {
           </div>
 
           <div className="flex flex-col gap-4 mt-4 w-full px-2">
-            <button
-              onClick={() => setActiveView('demo')}
-              className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === 'demo' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
-              title="Tax Demo"
-            >
-              <Receipt size={20} strokeWidth={2.5} />
-            </button>
             <button
               onClick={() => setActiveView('tax-situation')}
               className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === 'tax-situation' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
@@ -164,7 +156,6 @@ function App() {
 
           {/* Content — add bottom padding on mobile to account for bottom nav */}
           <div className="flex-1 overflow-hidden overflow-y-auto pb-16 sm:pb-0">
-            {activeView === 'demo' && <DemoFlow onExit={() => setActiveView('tax-situation')} />}
             {activeView === 'tax-situation' && taxIntakePath === 'selector' && (
               <IntakeSelector
                 onSelectAiWizard={() => setTaxIntakePath('ai-wizard')}
@@ -217,14 +208,6 @@ function App() {
         className="sm:hidden fixed bottom-0 inset-x-0 z-20 bg-white border-t border-surface-200 flex items-center justify-around h-16"
         aria-label="Bottom navigation"
       >
-        <button
-          onClick={() => setActiveView('demo')}
-          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'demo' ? 'text-accent-500' : 'text-surface-400'}`}
-          aria-current={activeView === 'demo' ? 'page' : undefined}
-        >
-          <Receipt size={22} strokeWidth={2} />
-          <span>Demo</span>
-        </button>
         <button
           onClick={() => setActiveView('tax-situation')}
           className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'tax-situation' ? 'text-accent-500' : 'text-surface-400'}`}
