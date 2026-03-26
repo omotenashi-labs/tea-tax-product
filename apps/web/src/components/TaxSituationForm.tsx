@@ -18,6 +18,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useMobileOrPwa } from '../hooks/use-mobile-or-pwa';
+import { getCsrfToken } from '../lib/csrf';
 import type {
   TaxSituation,
   FilingStatus,
@@ -580,17 +581,12 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
     };
 
     try {
-      // Fetch CSRF token first
-      const csrfRes = await fetch('/api/auth/csrf', { credentials: 'include' });
-      const csrfData = csrfRes.ok ? await csrfRes.json() : null;
-      const csrfToken: string = csrfData?.token ?? '';
-
       const res = await fetch(`/api/tax-objects/${taxObjectId}/returns/${returnId}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
+          'X-CSRF-Token': getCsrfToken(),
         },
         body: JSON.stringify({
           filingStatus: form.filingStatus,

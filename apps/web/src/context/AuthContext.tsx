@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getCsrfToken } from '../lib/csrf';
 
 export interface User {
   id: string;
@@ -42,7 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'X-CSRF-Token': getCsrfToken() },
+      });
       setUser(null);
     } catch (err) {
       console.error(err);

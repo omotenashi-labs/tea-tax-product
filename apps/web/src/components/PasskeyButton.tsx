@@ -21,6 +21,7 @@ import {
   browserSupportsWebAuthn,
 } from '@simplewebauthn/browser';
 import type { User } from '../context/AuthContext';
+import { getCsrfToken } from '../lib/csrf';
 
 // ---- Passkey Registration -----------------------------------------------
 
@@ -68,7 +69,7 @@ export const RegisterPasskeyButton: React.FC<RegisterPasskeyButtonProps> = ({
       // Step 3: send response to server for verification and storage
       const completeRes = await fetch('/api/auth/passkey/register/complete', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
         credentials: 'include',
         body: JSON.stringify({ userId, response: registrationResponse }),
       });
@@ -146,7 +147,7 @@ export const PasskeyLoginButton: React.FC<PasskeyLoginButtonProps> = ({ onSucces
       // Step 3: send response to server for verification
       const completeRes = await fetch('/api/auth/passkey/login/complete', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
         credentials: 'include',
         body: JSON.stringify({ response: authenticationResponse }),
       });

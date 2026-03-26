@@ -20,6 +20,7 @@
 
 import React, { useState } from 'react';
 import type { ParsedTaxFields } from 'core';
+import { getCsrfToken } from '../lib/csrf';
 
 interface DescribeIntakePathProps {
   taxObjectId: string;
@@ -91,7 +92,7 @@ async function callParseDescription(
   const res = await fetch(`/api/tax-objects/${taxObjectId}/returns/${returnId}/parse-description`, {
     method: 'POST',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
     body: JSON.stringify({ description }),
   });
 
