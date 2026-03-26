@@ -5,7 +5,8 @@
  * of the passkey handler without requiring a database or authenticator device.
  */
 
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
+import { verifyCsrf } from '../../src/auth/csrf';
 
 describe('passkey route matching', () => {
   test('register/begin path is distinct from /api/auth/register', () => {
@@ -81,5 +82,68 @@ describe('passkey RP configuration defaults', () => {
   test('default ORIGIN is http://localhost:5174', () => {
     const ORIGIN = process.env.ORIGIN ?? 'http://localhost:5174';
     expect(ORIGIN).toBe('http://localhost:5174');
+  });
+});
+
+describe('register/complete CSRF guard', () => {
+  const VALID_TOKEN = 'abc123token';
+  const COOKIE_NAME = '__Host-csrf-token';
+
+  beforeEach(() => {
+    vi.stubEnv('CSRF_DISABLED', 'false');
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  test('returns 403 when X-CSRF-Token header is absent', () => {
+    const cookies: Record<string, string> = { [COOKIE_NAME]: VALID_TOKEN };
+    // Remove header so it is absent
+    const reqNoHeader = new Request('http://localhost/api/auth/passkey/register/complete', {
+      method: 'POST',
+      headers: { Cookie: `${COOKIE_NAME}=${VALID_TOKEN}` },
+    });
+    const result = verifyCsrf(reqNoHeader, cookies);
+    // X-CSRF-Token header not set — headerToken is null — mismatch
+    expect(result).not.toBeNull();
+    expect(result?.status).toBe(403);
+  });
+
+  test('returns 403 when X-CSRF-Token does not match cookie', () => {
+    const req = new Request('http://localhost/api/auth/passkey/register/complete', {
+      method: 'POST',
+      headers: {
+        Cookie: `${COOKIE_NAME}=${VALID_TOKEN}`,
+        'X-CSRF-Token': 'wrong-token',
+      },
+    });
+    const cookies: Record<string, string> = { [COOKIE_NAME]: VALID_TOKEN };
+    const result = verifyCsrf(req, cookies);
+    expect(result).not.toBeNull();
+    expect(result?.status).toBe(403);
+  });
+
+  test('returns null (allowed) when X-CSRF-Token matches cookie', () => {
+    const req = new Request('http://localhost/api/auth/passkey/register/complete', {
+      method: 'POST',
+      headers: {
+        Cookie: `${COOKIE_NAME}=${VALID_TOKEN}`,
+        'X-CSRF-Token': VALID_TOKEN,
+      },
+    });
+    const cookies: Record<string, string> = { [COOKIE_NAME]: VALID_TOKEN };
+    const result = verifyCsrf(req, cookies);
+    expect(result).toBeNull();
+  });
+
+  test('returns null (bypassed) when CSRF_DISABLED=true', () => {
+    vi.stubEnv('CSRF_DISABLED', 'true');
+    const req = new Request('http://localhost/api/auth/passkey/register/complete', {
+      method: 'POST',
+      // No CSRF header at all
+    });
+    const result = verifyCsrf(req, {});
+    expect(result).toBeNull();
   });
 });

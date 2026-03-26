@@ -24,8 +24,9 @@ import {
 } from '@simplewebauthn/server';
 import type { RegistrationResponseJSON, AuthenticationResponseJSON } from '@simplewebauthn/server';
 import type { AppState } from '../index';
-import { getCorsHeaders, getAuthenticatedUser } from './auth';
+import { getCorsHeaders, getAuthenticatedUser, parseCookies } from './auth';
 import { signJwt } from '../auth/jwt';
+import { verifyCsrf } from '../auth/csrf';
 
 const RP_NAME = process.env.RP_NAME ?? 'Tea Tax';
 
@@ -123,6 +124,11 @@ export async function handlePasskeyRequest(
   // POST /api/auth/passkey/register/complete
   // ------------------------------------------------------------------
   if (req.method === 'POST' && url.pathname === '/api/auth/passkey/register/complete') {
+    // CSRF verification for state-mutating method.
+    const cookies = parseCookies(req.headers.get('Cookie'));
+    const csrfError = verifyCsrf(req, cookies);
+    if (csrfError) return csrfError;
+
     try {
       const { userId, response } = (await req.json()) as {
         userId: string;
@@ -164,8 +170,8 @@ export async function handlePasskeyRequest(
 
       const { credential, aaguid } = verification.registrationInfo;
 
-      // Store the credential
-      await sql`
+      // Store the credential and return the new record
+      const inserted = await sql`
         INSERT INTO passkey_credentials
           (user_id, credential_id, public_key, counter, aaguid, transports)
         VALUES (
@@ -176,9 +182,18 @@ export async function handlePasskeyRequest(
           ${aaguid ?? ''},
           ${credential.transports ?? []}
         )
+        RETURNING id, credential_id, created_at, last_used_at
       `;
+      const newCredential = (
+        inserted as unknown as {
+          id: string;
+          credential_id: string;
+          created_at: string;
+          last_used_at: string | null;
+        }[]
+      )[0];
 
-      return json({ verified: true }, 200, corsHeaders);
+      return json({ verified: true, credential: newCredential }, 200, corsHeaders);
     } catch (err) {
       console.error('PASSKEY REGISTER COMPLETE ERROR:', err);
       return json({ error: 'Internal Server Error' }, 500, corsHeaders);
