@@ -75,9 +75,19 @@ interface TaskQueueRow {
   updated_at: string;
 }
 
-// ─── Tab types ────────────────────────────────────────────────────────────────
+// ─── Section types ────────────────────────────────────────────────────────────
 
-type Tab = 'users' | 'registrations' | 'tax-activity' | 'audit' | 'demo-status' | 'task-queue';
+/** The six admin sections, driven by the global nav in App.tsx. */
+export type AdminSection =
+  | 'users'
+  | 'registrations'
+  | 'tax-activity'
+  | 'audit'
+  | 'demo-status'
+  | 'task-queue';
+
+/** @deprecated Use AdminSection. Retained for internal TabButton compatibility. */
+type Tab = AdminSection;
 
 // ─── Small helpers ─────────────────────────────────────────────────────────────
 
@@ -736,8 +746,21 @@ function TaskQueueTab() {
 
 // ─── Main AdminPanel ──────────────────────────────────────────────────────────
 
-export function AdminPanel() {
+export interface AdminPanelProps {
+  /**
+   * The active admin section to display. When provided, the internal tab bar
+   * is hidden and navigation is handled by the global nav in App.tsx.
+   * When omitted, falls back to rendering the internal tab bar (legacy mode).
+   */
+  activeSection?: AdminSection;
+}
+
+export function AdminPanel({ activeSection }: AdminPanelProps = {}) {
+  // Internal tab state — only used in legacy fallback mode (no activeSection prop)
   const [activeTab, setActiveTab] = useState<Tab>('users');
+
+  // Resolve which section to show: prop takes precedence over internal state
+  const visibleSection: Tab = activeSection ?? activeTab;
 
   const TABS: { id: Tab; label: string }[] = [
     { id: 'users', label: 'Users' },
@@ -750,27 +773,29 @@ export function AdminPanel() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Tab bar */}
-      <div className="border-b border-surface-200 px-6 flex gap-1 bg-white shrink-0">
-        {TABS.map((t) => (
-          <TabButton
-            key={t.id}
-            id={t.id}
-            label={t.label}
-            active={activeTab === t.id}
-            onClick={setActiveTab}
-          />
-        ))}
-      </div>
+      {/* Internal tab bar — only rendered in legacy fallback mode (no activeSection prop) */}
+      {activeSection === undefined && (
+        <div className="border-b border-surface-200 px-6 flex gap-1 bg-white shrink-0">
+          {TABS.map((t) => (
+            <TabButton
+              key={t.id}
+              id={t.id}
+              label={t.label}
+              active={activeTab === t.id}
+              onClick={setActiveTab}
+            />
+          ))}
+        </div>
+      )}
 
-      {/* Tab content */}
+      {/* Section content */}
       <div className="flex-1 overflow-y-auto bg-white">
-        {activeTab === 'users' && <UsersTab />}
-        {activeTab === 'registrations' && <RegistrationsTab />}
-        {activeTab === 'tax-activity' && <TaxActivityTab />}
-        {activeTab === 'audit' && <AuditLogTab />}
-        {activeTab === 'demo-status' && <DemoStatusTab />}
-        {activeTab === 'task-queue' && <TaskQueueTab />}
+        {visibleSection === 'users' && <UsersTab />}
+        {visibleSection === 'registrations' && <RegistrationsTab />}
+        {visibleSection === 'tax-activity' && <TaxActivityTab />}
+        {visibleSection === 'audit' && <AuditLogTab />}
+        {visibleSection === 'demo-status' && <DemoStatusTab />}
+        {visibleSection === 'task-queue' && <TaskQueueTab />}
       </div>
     </div>
   );
