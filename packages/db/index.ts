@@ -80,6 +80,26 @@ export function resolveSchemaSqlPath(
   return candidates[0];
 }
 
+export function resolveAuditSchemaSqlPath(
+  moduleUrl: string = import.meta.url,
+  cwd: string = process.cwd(),
+): string {
+  const moduleDir = dirname(fileURLToPath(moduleUrl));
+  const candidates = [
+    resolve(moduleDir, 'audit-schema.sql'),
+    resolve(moduleDir, '../packages/db/audit-schema.sql'),
+    resolve(cwd, 'packages/db/audit-schema.sql'),
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return candidates[0];
+}
+
 /**
  * Split a SQL string into individual statements on top-level semicolons,
  * respecting dollar-quoted blocks ($$...$$) so PL/pgSQL function bodies
@@ -174,19 +194,19 @@ export async function migrate(options: MigrateOptions = {}) {
 }
 
 /**
- * Verifies connectivity to the audit database at server startup.
+ * Verifies connectivity to the audit database at server startup and applies
+ * the audit schema DDL from audit-schema.sql.
  *
- * The audit schema (audit_log table, indexes, grants) is created by
- * init-remote.ts running as a database admin at deploy time. Attempting to
- * re-run that DDL here as audit_w fails on PG 15+ because audit_w only holds
- * USAGE on the public schema, not CREATE. This function replaces the old
- * DDL-executing migration with a lightweight SELECT 1 connectivity probe so
- * that server startup succeeds and emitAuditEvent works on the first request.
+ * audit-schema.sql uses CREATE TABLE IF NOT EXISTS and CREATE INDEX IF NOT
+ * EXISTS throughout, so this is safe to run on every startup (idempotent).
+ * This ensures the audit_events table exists on local dev without requiring
+ * the Kubernetes init-remote.ts deploy path.
  */
 export async function migrateAudit(options: MigrateAuditOptions = {}) {
-  console.log('[db] Verifying audit database connectivity...');
+  console.log('[db] Initializing audit database schema...');
+  const auditSchemaSql = readFileSync(resolveAuditSchemaSqlPath(), 'utf-8');
   const databaseUrl = options.databaseUrl ?? databaseUrls.audit;
-  const connectSql =
+  const migrationSql =
     options.databaseUrl === undefined
       ? auditSql
       : postgres(databaseUrl, {
@@ -197,14 +217,28 @@ export async function migrateAudit(options: MigrateAuditOptions = {}) {
         });
 
   try {
-    await connectSql`SELECT 1`;
+    // Connectivity probe before applying DDL
+    await migrationSql`SELECT 1`;
     console.log('[db] Audit database connectivity verified.');
+
+    // Remove single-line and block comments, then split by top-level semicolons.
+    const cleanSql = auditSchemaSql
+      .replace(/--.*$/gm, '') // Remove single-line comments
+      .replace(/\/\*[\s\S]*?\*\//g, ''); // Remove multi-line comments
+
+    const statements = splitSqlStatements(cleanSql).filter((s) => s.length > 0);
+
+    // Execute sequentially
+    for (const statement of statements) {
+      await migrationSql.unsafe(statement);
+    }
+    console.log('[db] Audit schema migration complete.');
   } catch (err) {
-    console.error('[db] Audit database connectivity check failed:', err);
+    console.error('[db] Audit schema migration failed:', err);
     throw err;
   } finally {
-    if (connectSql !== auditSql) {
-      await connectSql.end({ timeout: 5 });
+    if (migrationSql !== auditSql) {
+      await migrationSql.end({ timeout: 5 });
     }
   }
 }
