@@ -95,11 +95,10 @@ export function TierResultsView({ taxObjectId, returnId }: TierResultsViewProps)
     }
   }, [taxObjectId, returnId]);
 
-  // Auto-evaluate on first render
+  // Auto-evaluate on first render (evaluate is stable — memoized with taxObjectId/returnId deps)
   React.useEffect(() => {
     void evaluate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [evaluate]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6" data-testid="tier-results-view">
