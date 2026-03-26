@@ -232,3 +232,105 @@ describe('AuthContext /api/auth/me response handling', () => {
     expect(authMeAction(503, false)).toBe('warn');
   });
 });
+
+// ---------------------------------------------------------------------------
+// AuditLogTab — pagination helper logic
+// ---------------------------------------------------------------------------
+
+/**
+ * Pure helpers that mirror the pagination state logic in AuditLogTab.
+ */
+
+/** Returns total number of pages given total events and page size. */
+function totalPages(total: number, pageSize: number): number {
+  if (total === 0 || pageSize === 0) return 0;
+  return Math.ceil(total / pageSize);
+}
+
+/** Returns true when pagination controls should be shown. */
+function showPagination(total: number, pageSize: number): boolean {
+  return total > pageSize;
+}
+
+/** Returns the next page number (capped at totalPgs). */
+function nextPage(current: number, totalPgs: number): number {
+  return Math.min(totalPgs, current + 1);
+}
+
+/** Returns the previous page number (floored at 1). */
+function prevPage(current: number): number {
+  return Math.max(1, current - 1);
+}
+
+describe('AuditLogTab pagination helpers', () => {
+  test('totalPages returns 0 when total is 0', () => {
+    expect(totalPages(0, 50)).toBe(0);
+  });
+
+  test('totalPages returns 1 when total equals pageSize', () => {
+    expect(totalPages(50, 50)).toBe(1);
+  });
+
+  test('totalPages rounds up for partial last page', () => {
+    expect(totalPages(51, 50)).toBe(2);
+    expect(totalPages(99, 50)).toBe(2);
+    expect(totalPages(100, 50)).toBe(2);
+    expect(totalPages(101, 50)).toBe(3);
+  });
+
+  test('showPagination returns false when total <= pageSize', () => {
+    expect(showPagination(0, 50)).toBe(false);
+    expect(showPagination(50, 50)).toBe(false);
+    expect(showPagination(49, 50)).toBe(false);
+  });
+
+  test('showPagination returns true when total > pageSize', () => {
+    expect(showPagination(51, 50)).toBe(true);
+    expect(showPagination(200, 50)).toBe(true);
+  });
+
+  test('nextPage advances by 1 up to totalPgs', () => {
+    expect(nextPage(1, 3)).toBe(2);
+    expect(nextPage(2, 3)).toBe(3);
+    expect(nextPage(3, 3)).toBe(3); // capped
+  });
+
+  test('prevPage retreats by 1 down to 1', () => {
+    expect(prevPage(3)).toBe(2);
+    expect(prevPage(2)).toBe(1);
+    expect(prevPage(1)).toBe(1); // floored
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AuditLogTab — hasDiff helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Pure helper that mirrors the hasDiff check in AuditEventRow.
+ * A row has a diff when before or after is non-null.
+ */
+function hasDiff(
+  before: Record<string, unknown> | null,
+  after: Record<string, unknown> | null,
+): boolean {
+  return before !== null || after !== null;
+}
+
+describe('AuditEventRow hasDiff helper', () => {
+  test('returns false when both before and after are null', () => {
+    expect(hasDiff(null, null)).toBe(false);
+  });
+
+  test('returns true when before is non-null', () => {
+    expect(hasDiff({ status: 'pending' }, null)).toBe(true);
+  });
+
+  test('returns true when after is non-null', () => {
+    expect(hasDiff(null, { status: 'done' })).toBe(true);
+  });
+
+  test('returns true when both are non-null', () => {
+    expect(hasDiff({ status: 'pending' }, { status: 'done' })).toBe(true);
+  });
+});
