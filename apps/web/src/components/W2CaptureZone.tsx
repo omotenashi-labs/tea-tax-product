@@ -1,9 +1,10 @@
 /**
  * @file W2CaptureZone
  *
- * W-2 document capture and extraction UI.
+ * AI-wizard step: W-2 document capture and extraction UI.
+ * Reached only via the AI-assisted intake path — never shown on the manual path.
  *
- * Four entry paths:
+ * Three sub-options inside the AI wizard:
  *   1. "Use demo W-2" — loads the bundled fixture image (no upload needed)
  *   2. Upload a file — standard file picker (any platform)
  *   3. Take a photo — <input capture=environment> (mobile / PWA)
@@ -18,6 +19,8 @@
  * On text description:
  *   - Shows DescribeIntakePath inline
  *   - Calls onDescriptionParsed(fields) when the user confirms
+ *
+ * onBack navigates back to the IntakeSelector (optional).
  */
 
 import React, { useRef, useState } from 'react';
@@ -26,9 +29,10 @@ import { DescribeIntakePath } from './DescribeIntakePath';
 
 interface W2CaptureZoneProps {
   onExtracted: (data: W2ExtractedData) => void;
-  onSkip: () => void;
   /** Called when user confirms text-description extraction. */
   onDescriptionParsed?: (fields: ParsedTaxFields) => void;
+  /** Navigate back to the intake selector. */
+  onBack?: () => void;
   /** Required for the text-description path to call the parse endpoint. */
   taxObjectId?: string;
   returnId?: string;
@@ -161,8 +165,8 @@ function buildFieldRows(data: W2ExtractedData, confidence: number): FieldRow[] {
 
 export function W2CaptureZone({
   onExtracted,
-  onSkip,
   onDescriptionParsed,
+  onBack,
   taxObjectId,
   returnId,
 }: W2CaptureZoneProps) {
@@ -226,9 +230,10 @@ export function W2CaptureZone({
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="mb-5">
-        <h2 className="text-base font-semibold text-surface-800">Import your W-2</h2>
+        <h2 className="text-base font-semibold text-surface-800">AI-assisted wizard</h2>
         <p className="text-sm text-surface-500 mt-0.5">
-          Claude reads your W-2 and fills in the form automatically.
+          Upload your W-2 or describe your situation — Claude extracts your tax fields
+          automatically.
         </p>
       </div>
 
@@ -315,13 +320,15 @@ export function W2CaptureZone({
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={onSkip}
-            className="text-sm text-surface-400 hover:text-surface-600 text-left transition-colors mt-1"
-          >
-            Skip — I&apos;ll enter my information manually →
-          </button>
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="text-sm text-surface-400 hover:text-surface-600 text-left transition-colors mt-1"
+            >
+              ← Back to path selection
+            </button>
+          )}
         </div>
       )}
 

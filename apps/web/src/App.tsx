@@ -9,8 +9,9 @@ import { TaxProgressIndicator } from './components/TaxProgressIndicator';
 import { SettingsView } from './components/SettingsView';
 import { AdminPanel } from './components/AdminPanel';
 import { TierResultsView } from './components/TierResultsView';
-import type { W2ExtractedData } from 'core';
+import type { W2ExtractedData, ParsedTaxFields } from 'core';
 import { InstallPrompt } from './components/pwa/install-prompt';
+import { IntakeSelector } from './components/IntakeSelector';
 
 function App() {
   const { user, logout, loading } = useAuth();
@@ -23,10 +24,18 @@ function App() {
     'demo' | 'tax-situation' | 'tier-results' | 'settings' | 'admin'
   >(defaultView as 'demo' | 'tax-situation' | 'tier-results' | 'settings' | 'admin');
 
-  // W-2 extraction state: null = not yet extracted, data = confirmed extraction
+  /**
+   * Tax-situation intake state machine.
+   *
+   *   'selector'  — entry: user picks AI wizard or manual form
+   *   'ai-wizard' — AI-assisted: W-2 upload or describe → feeds extracted data into form
+   *   'form'      — TaxSituationForm (pre-populated or empty)
+   */
+  const [taxIntakePath, setTaxIntakePath] = useState<'selector' | 'ai-wizard' | 'form'>('selector');
+  // Extracted W-2 data to pre-populate TaxSituationForm after the AI wizard
   const [w2Data, setW2Data] = useState<W2ExtractedData | null>(null);
-  // Whether the W2CaptureZone step has been completed (skipped or confirmed)
-  const [w2StepDone, setW2StepDone] = useState(false);
+  // Parsed fields from the describe-path to pre-populate TaxSituationForm
+  const [parsedFields, setParsedFields] = useState<ParsedTaxFields | null>(null);
   // Current step (1-based) within the Tax Situation Protocol flow (1 = W-2 Import … 7 = Review)
   const [taxCurrentStep, setTaxCurrentStep] = useState(1);
 
@@ -37,21 +46,15 @@ function App() {
     }
   }, [activeView, isSuperadmin]);
 
-  // Reset W-2 capture state when navigating away from tax-situation
+  // Reset tax intake state when navigating away from tax-situation
   useEffect(() => {
     if (activeView !== 'tax-situation') {
       setW2Data(null);
-      setW2StepDone(false);
+      setParsedFields(null);
+      setTaxIntakePath('selector');
       setTaxCurrentStep(1);
     }
   }, [activeView]);
-
-  // When W-2 step completes, advance to step 2 (Filing Basics)
-  useEffect(() => {
-    if (w2StepDone && taxCurrentStep === 1) {
-      setTaxCurrentStep(2);
-    }
-  }, [w2StepDone, taxCurrentStep]);
 
   if (loading) {
     return (
@@ -152,7 +155,9 @@ function App() {
             <TaxProgressIndicator
               currentStep={taxCurrentStep}
               completedSteps={
-                w2StepDone ? Array.from({ length: taxCurrentStep - 1 }, (_, i) => i + 1) : []
+                taxIntakePath === 'form'
+                  ? Array.from({ length: taxCurrentStep - 1 }, (_, i) => i + 1)
+                  : []
               }
             />
           )}
@@ -160,23 +165,37 @@ function App() {
           {/* Content — add bottom padding on mobile to account for bottom nav */}
           <div className="flex-1 overflow-hidden overflow-y-auto pb-16 sm:pb-0">
             {activeView === 'demo' && <DemoFlow onExit={() => setActiveView('tax-situation')} />}
-            {activeView === 'tax-situation' && !w2StepDone && (
-              <W2CaptureZone
-                onExtracted={(data) => {
-                  setW2Data(data);
-                  setW2StepDone(true);
-                }}
-                onSkip={() => {
-                  setW2Data(null);
-                  setW2StepDone(true);
-                }}
+            {activeView === 'tax-situation' && taxIntakePath === 'selector' && (
+              <IntakeSelector
+                onSelectAiWizard={() => setTaxIntakePath('ai-wizard')}
+                onSelectManual={() => setTaxIntakePath('form')}
               />
             )}
-            {activeView === 'tax-situation' && w2StepDone && (
+            {activeView === 'tax-situation' && taxIntakePath === 'ai-wizard' && (
+              <div className="max-w-3xl mx-auto px-4 py-6">
+                <W2CaptureZone
+                  onExtracted={(data) => {
+                    setW2Data(data);
+                    setParsedFields(null);
+                    setTaxIntakePath('form');
+                  }}
+                  onDescriptionParsed={(fields) => {
+                    setParsedFields(fields);
+                    setW2Data(null);
+                    setTaxIntakePath('form');
+                  }}
+                  onBack={() => setTaxIntakePath('selector')}
+                  taxObjectId="demo-tax-object-id"
+                  returnId="demo-return-id"
+                />
+              </div>
+            )}
+            {activeView === 'tax-situation' && taxIntakePath === 'form' && (
               <TaxSituationForm
                 taxObjectId="demo-tax-object-id"
                 returnId="demo-return-id"
                 w2Data={w2Data}
+                parsedFields={parsedFields}
                 onViewTierResults={() => setActiveView('tier-results')}
                 onStepChange={setTaxCurrentStep}
               />
