@@ -172,12 +172,27 @@ export async function handleAdminRequest(
   }
 
   // GET /api/admin/tax-activity — tax returns with associated user info
+  //
+  // Privacy guarantee: situation_data (containing W-2 wages, SSNs, and all
+  // financial/personal information) is NEVER included in this response.
+  // Only aggregated metadata is returned: filing status, return status,
+  // completeness_score (0–1 float derived from situation_data key presence),
+  // and updated_at.  The SELECT query deliberately omits situation_data; even
+  // if a future migration adds columns, the explicit projection prevents
+  // accidental disclosure.  See PRD §6.3 "No admin data access. No god mode."
   if (req.method === 'GET' && url.pathname === '/api/admin/tax-activity') {
     if (!isSuperadmin(user)) return json({ error: 'Forbidden' }, 403);
 
     // Tax returns store tax_object_id in properties. The parent tax_object
     // stores created_by_user_id. We join through the tax_object to resolve the
     // owning user's username.
+    //
+    // situation_data is intentionally excluded from the SELECT projection.
+    // completeness_score is derived server-side from the key count of
+    // situation_data without exposing its contents.  A non-null situation_data
+    // with ≥ 5 top-level keys is treated as "complete" (score = 1.0); fewer
+    // keys are scaled proportionally.  This gives the admin a progress signal
+    // with zero PII exposure.
     const returns = await sql<
       {
         id: string;
@@ -189,7 +204,9 @@ export async function handleAdminRequest(
         jurisdiction: string;
         return_type: string;
         filing_status: string;
+        situation_key_count: string;
         created_at: string;
+        updated_at: string;
       }[]
     >`
       SELECT
@@ -202,7 +219,16 @@ export async function handleAdminRequest(
         tr.properties->>'jurisdiction'                               AS jurisdiction,
         tr.properties->>'return_type'                                AS return_type,
         tr.properties->>'filing_status'                              AS filing_status,
-        tr.created_at
+        COALESCE(
+          jsonb_array_length(
+            to_jsonb(
+              ARRAY(SELECT jsonb_object_keys(tr.properties->'situation_data'))
+            )
+          )::text,
+          '0'
+        )                                                            AS situation_key_count,
+        tr.created_at,
+        tr.updated_at
       FROM entities tr
       LEFT JOIN entities tobj
         ON tobj.id = (tr.properties->>'tax_object_id')
@@ -214,7 +240,33 @@ export async function handleAdminRequest(
       ORDER BY tr.created_at DESC
     `;
 
-    return json({ tax_activity: returns });
+    // Map rows to admin-safe response objects.
+    // situation_data is never forwarded — only completeness_score is derived
+    // from the key count.  The completeness threshold is 5 top-level keys
+    // (filer identity, income_streams, deductions, credits, life_events).
+    const COMPLETENESS_THRESHOLD = 5;
+    const tax_activity = returns.map((r) => {
+      const keyCount = Number(r.situation_key_count);
+      const completeness_score =
+        keyCount === 0 ? 0 : Math.min(1, keyCount / COMPLETENESS_THRESHOLD);
+      return {
+        id: r.id,
+        tax_object_id: r.tax_object_id,
+        owner_id: r.owner_id,
+        username: r.username,
+        status: r.status,
+        tax_year: r.tax_year,
+        jurisdiction: r.jurisdiction,
+        return_type: r.return_type,
+        filing_status: r.filing_status,
+        completeness_score,
+        created_at: r.created_at,
+        updated_at: r.updated_at,
+        // situation_data deliberately omitted
+      };
+    });
+
+    return json({ tax_activity });
   }
 
   // GET /api/admin/task-queue — recent task queue entries (issue #88)

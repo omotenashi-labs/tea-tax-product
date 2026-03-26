@@ -41,7 +41,10 @@ interface TaxActivity {
   jurisdiction: string;
   return_type: string;
   filing_status: string;
+  /** 0–1 float — derived server-side from situation_data key count. situation_data itself is never sent to admin. */
+  completeness_score: number;
   created_at: string;
+  updated_at: string;
 }
 
 interface AuditResult {
@@ -170,6 +173,16 @@ function UsersTab() {
 
   return (
     <div className="p-6 space-y-4">
+      <div
+        role="note"
+        aria-label="Privacy policy"
+        className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-800"
+      >
+        <span className="shrink-0 mt-0.5" aria-hidden="true">
+          &#x1F512;
+        </span>
+        <span>Tax situation data is user-encrypted and not accessible from this panel.</span>
+      </div>
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-zinc-900">Users ({users.length})</h2>
         <input
@@ -320,6 +333,16 @@ function TaxActivityTab() {
 
   return (
     <div className="p-6 space-y-4">
+      <div
+        role="note"
+        aria-label="Privacy policy"
+        className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-800"
+      >
+        <span className="shrink-0 mt-0.5" aria-hidden="true">
+          &#x1F512;
+        </span>
+        <span>Tax situation data is user-encrypted and not accessible from this panel.</span>
+      </div>
       <h2 className="text-base font-semibold text-zinc-900">Tax Activity ({activity.length})</h2>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -328,26 +351,54 @@ function TaxActivityTab() {
               <th className="pb-2 pr-4 font-medium">User</th>
               <th className="pb-2 pr-4 font-medium">Year</th>
               <th className="pb-2 pr-4 font-medium">Status</th>
-              <th className="pb-2 pr-4 font-medium">Jurisdiction</th>
-              <th className="pb-2 font-medium">Created</th>
+              <th className="pb-2 pr-4 font-medium">Completeness</th>
+              <th className="pb-2 font-medium">Updated</th>
             </tr>
           </thead>
           <tbody>
-            {activity.map((a) => (
-              <tr key={a.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                <td className="py-2 pr-4 font-mono text-xs text-zinc-700">{a.username}</td>
-                <td className="py-2 pr-4 text-xs text-zinc-600">{a.tax_year ?? '—'}</td>
-                <td className="py-2 pr-4">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-zinc-100 text-zinc-600">
-                    {a.status}
-                  </span>
-                </td>
-                <td className="py-2 pr-4 text-xs text-zinc-500">{a.jurisdiction ?? '—'}</td>
-                <td className="py-2 text-xs text-zinc-400">
-                  {new Date(a.created_at).toLocaleString()}
-                </td>
-              </tr>
-            ))}
+            {activity.map((a) => {
+              const pct = Math.round((a.completeness_score ?? 0) * 100);
+              const statusColor =
+                a.status === 'filed'
+                  ? 'bg-green-100 text-green-700'
+                  : a.status === 'in_review'
+                    ? 'bg-blue-100 text-blue-700'
+                    : a.status === 'amended'
+                      ? 'bg-purple-100 text-purple-700'
+                      : 'bg-zinc-100 text-zinc-600';
+              return (
+                <tr key={a.id} className="border-b border-zinc-100 hover:bg-zinc-50">
+                  <td className="py-2 pr-4 font-mono text-xs text-zinc-700">{a.username}</td>
+                  <td className="py-2 pr-4 text-xs text-zinc-600">{a.tax_year ?? '—'}</td>
+                  <td className="py-2 pr-4">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusColor}`}
+                    >
+                      {a.status}
+                    </span>
+                  </td>
+                  <td className="py-2 pr-4 w-36">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-2 rounded-full bg-zinc-100 overflow-hidden">
+                        <div
+                          className={`h-2 rounded-full transition-all ${
+                            pct >= 80 ? 'bg-green-500' : pct >= 40 ? 'bg-amber-400' : 'bg-zinc-300'
+                          }`}
+                          style={{ width: `${pct}%` }}
+                          aria-label={`${pct}% complete`}
+                        />
+                      </div>
+                      <span className="text-xs text-zinc-500 w-8 text-right">{pct}%</span>
+                    </div>
+                  </td>
+                  <td className="py-2 text-xs text-zinc-400">
+                    {a.updated_at
+                      ? new Date(a.updated_at).toLocaleString()
+                      : new Date(a.created_at).toLocaleString()}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         {activity.length === 0 && (
