@@ -384,25 +384,6 @@ async function verifyTableGrant(
   return count >= 1 ? null : `${roleName} missing ${privilegeType} on ${tableName}`;
 }
 
-async function verifyColumnGrant(
-  db: ReturnType<typeof makePool>,
-  tableName: string,
-  columnName: string,
-  roleName: string,
-  privilegeType: string,
-): Promise<string | null> {
-  const [{ count }] = await db<{ count: number }[]>`
-    SELECT COUNT(*)::int AS count
-    FROM information_schema.column_privileges
-    WHERE table_schema = 'public'
-      AND table_name = ${tableName}
-      AND column_name = ${columnName}
-      AND grantee = ${roleName}
-      AND privilege_type = ${privilegeType}
-  `;
-  return count >= 1 ? null : `${roleName} missing ${privilegeType} on ${tableName}.${columnName}`;
-}
-
 async function verifyView(
   db: ReturnType<typeof makePool>,
   viewName: string,
