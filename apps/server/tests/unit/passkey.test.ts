@@ -98,10 +98,6 @@ describe('register/complete CSRF guard', () => {
   });
 
   test('returns 403 when X-CSRF-Token header is absent', () => {
-    const req = new Request('http://localhost/api/auth/passkey/register/complete', {
-      method: 'POST',
-      headers: { Cookie: `${COOKIE_NAME}=${VALID_TOKEN}` },
-    });
     const cookies: Record<string, string> = { [COOKIE_NAME]: VALID_TOKEN };
     // Remove header so it is absent
     const reqNoHeader = new Request('http://localhost/api/auth/passkey/register/complete', {
