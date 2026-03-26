@@ -35,7 +35,10 @@ async function main() {
   await migrate({ databaseUrl: pg.url });
   console.log('  Schema migrated.');
 
-  // 3. Spawn API server subprocess with all DB URLs set
+  // 3. Spawn API server subprocess with all DB URLs set.
+  //    Pipe stdout so we can detect the 'Listening on' ready signal before
+  //    starting Vite. This prevents Vite from proxying /api before the API
+  //    server has bound its port.
   const apiServer = Bun.spawn(['bun', 'run', '--hot', 'src/index.ts'], {
     cwd: join(REPO_ROOT, 'apps', 'server'),
     env: {
@@ -45,8 +48,51 @@ async function main() {
       ANALYTICS_DATABASE_URL: pg.url,
       PORT: String(API_PORT),
     },
-    stdout: 'inherit',
+    stdout: 'pipe',
     stderr: 'inherit',
+  });
+
+  // Wait for the API server to emit 'Listening on' before starting Vite.
+  // All output is forwarded to the terminal so no log lines are lost.
+  await new Promise<void>((resolve) => {
+    const reader = apiServer.stdout.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    const pump = async () => {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          // Stream ended before ready signal — resolve anyway so startup continues.
+          if (buffer) process.stdout.write(buffer);
+          resolve();
+          return;
+        }
+        const chunk = decoder.decode(value, { stream: true });
+        process.stdout.write(chunk);
+        buffer += chunk;
+        if (buffer.includes('Listening on')) {
+          resolve();
+          // Continue draining the stream in the background so output keeps
+          // flowing after the gate opens.
+          (async () => {
+            while (true) {
+              const { value: v, done: d } = await reader.read();
+              if (d) break;
+              process.stdout.write(decoder.decode(v, { stream: true }));
+            }
+          })();
+          return;
+        }
+        // Keep only the tail of the buffer to avoid unbounded growth.
+        if (buffer.length > 4096) buffer = buffer.slice(-4096);
+      }
+    };
+
+    pump().catch((err) => {
+      console.error('API server stdout pump error:', err);
+      resolve();
+    });
   });
 
   // 4. Create the HTTP server first so Vite can attach its WebSocket upgrade
