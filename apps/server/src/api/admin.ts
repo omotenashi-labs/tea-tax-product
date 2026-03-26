@@ -12,6 +12,7 @@
  * GET    /api/admin/registrations     — sign-up timeline ordered by created_at
  * GET    /api/admin/tax-activity      — tax returns grouped by user
  * GET    /api/admin/demo-status       — seeded persona health check
+ * GET    /api/admin/task-queue        — recent task queue entries (issue #88)
  *
  * All /api/admin/* routes return 403 for non-superadmin callers.
  * Superadmin is determined by `role === 'superadmin'` in the authenticated JWT.
@@ -214,6 +215,49 @@ export async function handleAdminRequest(
     `;
 
     return json({ tax_activity: returns });
+  }
+
+  // GET /api/admin/task-queue — recent task queue entries (issue #88)
+  if (req.method === 'GET' && url.pathname === '/api/admin/task-queue') {
+    if (!isSuperadmin(user)) return json({ error: 'Forbidden' }, 403);
+
+    const limit = Math.min(200, Math.max(1, Number(url.searchParams.get('limit') ?? '100')));
+
+    const tasks = await sql<
+      {
+        id: string;
+        idempotency_key: string;
+        agent_type: string;
+        job_type: string;
+        status: string;
+        created_by: string;
+        claimed_by: string | null;
+        priority: number;
+        attempt: number;
+        max_attempts: number;
+        created_at: string;
+        updated_at: string;
+      }[]
+    >`
+      SELECT
+        id,
+        idempotency_key,
+        agent_type,
+        job_type,
+        status,
+        created_by,
+        claimed_by,
+        priority,
+        attempt,
+        max_attempts,
+        created_at,
+        updated_at
+      FROM task_queue
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    `;
+
+    return json({ tasks, total: tasks.length });
   }
 
   // GET /api/admin/demo-status — seeded persona health check
