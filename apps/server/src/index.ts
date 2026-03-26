@@ -26,6 +26,7 @@ import { handleExtractW2Request } from './api/extract-w2';
 import { handleParseDescriptionRequest } from './api/parse-description';
 import { seedSuperuser } from './seed/superuser';
 import { seedDemoUsers } from './seed/demoUsers';
+import { seedDemoData } from './seed/seed-demo-data';
 import { getJwks } from './auth/jwt';
 
 // Starter behavior:
@@ -60,6 +61,8 @@ startCronScheduler();
 await seedSuperuser({ sql }).catch((err) => console.error('[seed] Superuser seeding failed:', err));
 // Seed demo personas (admin + tax_filer) for frictionless demo access.
 await seedDemoUsers({ sql }).catch((err) => console.error('[seed] Demo user seeding failed:', err));
+// Seed 100 demo users with realistic tax situations for admin panel demonstration.
+await seedDemoData({ sql }).catch((err) => console.error('[seed] Demo data seeding failed:', err));
 
 export interface AppState {
   sql: typeof sql;
