@@ -21,6 +21,63 @@ import { authenticateApiKey } from 'db/api-keys';
 // passkeys, dual attribution for consequential actions, separate audit writes,
 // and scoped sandbox credentials are all still future implementation work.
 
+// ---------------------------------------------------------------------------
+// Cookie configuration helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns true when the server is running in a deployed HTTPS context.
+ *
+ * Set SECURE_COOKIES=true in the deployment environment to enable the
+ * __Host- prefix and Secure flag on session cookies.  Local development
+ * leaves this unset (or sets it to false) so cookies work without TLS.
+ */
+export function isSecureContext(): boolean {
+  return process.env.SECURE_COOKIES === 'true';
+}
+
+/**
+ * The session cookie name for the current context.
+ *
+ * On deployed HTTPS (SECURE_COOKIES=true) the __Host- prefix is used, which
+ * requires Secure, Path=/, and no Domain attribute.  On local dev the plain
+ * name is used so browsers accept the cookie without TLS.
+ */
+export function authCookieName(): string {
+  return isSecureContext() ? '__Host-tea_tax_auth' : 'tea_tax_auth';
+}
+
+/**
+ * Build the Set-Cookie header value for the session auth cookie.
+ *
+ * On deployed HTTPS:
+ *   __Host-tea_tax_auth=<token>; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=604800
+ *
+ * On local dev:
+ *   tea_tax_auth=<token>; HttpOnly; Path=/; SameSite=Strict; Max-Age=604800
+ *
+ * The __Host- prefix mandates Secure, Path=/, and no Domain attribute.
+ * SameSite=Lax is used on HTTPS to avoid silently dropping the cookie on
+ * same-site top-level navigations while still blocking cross-site requests.
+ * SameSite=Strict is retained for dev because the cookie is not Secure there.
+ */
+export function authCookieHeader(token: string): string {
+  if (isSecureContext()) {
+    return `__Host-tea_tax_auth=${token}; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=604800`;
+  }
+  return `tea_tax_auth=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=604800`;
+}
+
+/**
+ * Build the Set-Cookie header value that clears the session auth cookie.
+ */
+export function clearAuthCookieHeader(): string {
+  if (isSecureContext()) {
+    return '__Host-tea_tax_auth=; HttpOnly; Secure; Path=/; SameSite=Lax; Max-Age=0';
+  }
+  return 'tea_tax_auth=; HttpOnly; Path=/; Max-Age=0';
+}
+
 // Helper to parse cookies from headers
 export function parseCookies(cookieHeader: string | null): Record<string, string> {
   const cookies: Record<string, string> = {};
@@ -40,7 +97,10 @@ export async function getAuthenticatedUser(
   req: Request,
 ): Promise<{ id: string; username: string; role?: string } | null> {
   const cookies = parseCookies(req.headers.get('Cookie'));
-  const token = cookies['tea_tax_auth'];
+  // Accept either the __Host- prefixed name (deployed HTTPS) or the plain name
+  // (local dev).  Checking both during this transition period avoids a hard
+  // cutover where existing sessions issued under the old name break immediately.
+  const token = cookies['__Host-tea_tax_auth'] ?? cookies['tea_tax_auth'];
 
   if (!token) return null;
 
@@ -204,21 +264,7 @@ export async function handleAuthRequest(
           'Content-Type': 'application/json',
         },
       });
-      // SameSite=Strict prevents the cookie from being sent on any cross-site
-      // request, including top-level navigations. This is the correct posture for
-      // a session-authentication cookie because it eliminates CSRF via cross-site
-      // top-level navigation flows that SameSite=Lax would otherwise allow.
-      //
-      // If OAuth or social-login redirect flows are added in the future, the
-      // redirect-landing endpoint must issue a *new* session cookie after
-      // validating the OAuth state parameter on the server side. The OAuth state
-      // callback itself should use a short-lived, purpose-specific cookie with
-      // SameSite=Lax scoped only to that flow — the primary session cookie must
-      // remain SameSite=Strict.
-      res.headers.append(
-        'Set-Cookie',
-        `tea_tax_auth=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=604800`,
-      );
+      res.headers.append('Set-Cookie', authCookieHeader(token));
       res.headers.append('Set-Cookie', csrfCookieHeader(csrfToken));
       return res;
     } catch (err) {
@@ -325,12 +371,7 @@ export async function handleAuthRequest(
           },
         },
       );
-      // SameSite=Strict — see the register endpoint comment above for the full
-      // rationale and guidance for future OAuth flows.
-      res.headers.append(
-        'Set-Cookie',
-        `tea_tax_auth=${token}; HttpOnly; Path=/; SameSite=Strict; Max-Age=604800`,
-      );
+      res.headers.append('Set-Cookie', authCookieHeader(token));
       res.headers.append('Set-Cookie', csrfCookieHeader(csrfToken));
       return res;
     } catch (err) {
@@ -396,7 +437,7 @@ export async function handleAuthRequest(
         'Content-Type': 'application/json',
       },
     });
-    res.headers.append('Set-Cookie', 'tea_tax_auth=; HttpOnly; Path=/; Max-Age=0');
+    res.headers.append('Set-Cookie', clearAuthCookieHeader());
     res.headers.append(
       'Set-Cookie',
       '__Host-csrf-token=; SameSite=Strict; Secure; Path=/; Max-Age=0',
