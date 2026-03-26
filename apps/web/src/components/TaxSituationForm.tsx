@@ -245,19 +245,19 @@ export interface TaxSituationFormProps {
 // ---------------------------------------------------------------------------
 
 const inputCls =
-  'w-full px-3 py-2 md:py-2 py-3 border border-zinc-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-shadow bg-white';
+  'w-full px-3 py-2 md:py-2 py-3 border border-surface-300 rounded text-sm focus:ring-2 focus:ring-accent-500 focus:border-accent-500 outline-none transition-shadow bg-white';
 
-const labelCls = 'block text-xs font-medium text-zinc-500 mb-1 uppercase tracking-wide';
+const labelCls = 'block text-xs font-medium text-surface-500 mb-1 uppercase tracking-wide';
 
-const sectionCls = 'space-y-4 p-5 bg-white rounded-xl border border-zinc-200';
+const sectionCls = 'space-y-4 p-5 bg-white rounded-md border border-surface-200';
 
-const sectionTitleCls = 'text-sm font-semibold text-zinc-900 mb-3';
+const sectionTitleCls = 'text-sm font-semibold text-surface-900 mb-3';
 
 const addBtnCls =
-  'mt-2 px-3 py-1.5 text-xs font-medium text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors';
+  'mt-2 px-3 py-1.5 text-xs font-medium text-accent-600 border border-accent-200 rounded hover:bg-accent-50 transition-colors';
 
 const removeBtnCls =
-  'px-2 py-1 text-xs font-medium text-red-500 border border-red-200 rounded-lg hover:bg-red-50 transition-colors shrink-0';
+  'px-2 py-1 text-xs font-medium text-red-500 border border-red-200 rounded hover:bg-red-50 transition-colors shrink-0';
 
 // ---------------------------------------------------------------------------
 // Component
@@ -687,7 +687,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
       aria-label="Tax situation completion form"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-zinc-900">Tax Situation</h2>
+        <h2 className="text-base font-semibold text-surface-900">Tax Situation</h2>
         {saveSuccess && (
           <span className="text-xs text-emerald-600 font-medium">Saved successfully</span>
         )}
@@ -713,7 +713,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
             {FILING_STATUS_OPTIONS.map((opt) => (
               <label
                 key={opt.value}
-                className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-zinc-50 transition-colors"
+                className="flex items-center gap-3 cursor-pointer p-2 rounded hover:bg-surface-50 transition-colors"
               >
                 <input
                   type="radio"
@@ -721,9 +721,9 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
                   value={opt.value}
                   checked={form.filingStatus === opt.value}
                   onChange={() => update('filingStatus', opt.value)}
-                  className="accent-indigo-600"
+                  className="accent-accent-600"
                 />
-                <span className="text-sm text-zinc-700">{opt.label}</span>
+                <span className="text-sm text-surface-700">{opt.label}</span>
               </label>
             ))}
           </div>
@@ -736,11 +736,11 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
             {form.dependents.map((dep, i) => (
               <div
                 key={i}
-                className="border border-zinc-200 rounded-lg p-3 space-y-2"
+                className="border border-surface-200 rounded-md p-3 space-y-2"
                 data-testid={`dependent-row-${i}`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium text-zinc-500">Dependent {i + 1}</span>
+                  <span className="text-xs font-medium text-surface-500">Dependent {i + 1}</span>
                   <button
                     type="button"
                     onClick={() => removeDependent(i)}
@@ -793,23 +793,23 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
                   </div>
                 </div>
                 <div className="flex gap-4 mt-1">
-                  <label className="flex items-center gap-2 text-xs text-zinc-600 cursor-pointer">
+                  <label className="flex items-center gap-2 text-xs text-surface-600 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={dep.qualifiesForChildTaxCredit}
                       onChange={(e) =>
                         updateDependent(i, { qualifiesForChildTaxCredit: e.target.checked })
                       }
-                      className="accent-indigo-600"
+                      className="accent-accent-600"
                     />
                     Child tax credit
                   </label>
-                  <label className="flex items-center gap-2 text-xs text-zinc-600 cursor-pointer">
+                  <label className="flex items-center gap-2 text-xs text-surface-600 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={dep.qualifiesForEIC}
                       onChange={(e) => updateDependent(i, { qualifiesForEIC: e.target.checked })}
-                      className="accent-indigo-600"
+                      className="accent-accent-600"
                     />
                     Earned income credit
                   </label>
@@ -834,11 +834,11 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
           {form.incomeStreams.map((stream, i) => (
             <div
               key={i}
-              className="border border-zinc-200 rounded-lg p-3 space-y-2"
+              className="border border-surface-200 rounded-md p-3 space-y-2"
               data-testid={`income-stream-row-${i}`}
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-zinc-500">
+                <span className="text-xs font-medium text-surface-500">
                   Income Source {i + 1}
                   {stream.type === 'w2' && ' (W-2)'}
                 </span>
@@ -920,10 +920,10 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
           <h3 id="section-document-capture" className={sectionTitleCls}>
             Document Capture
           </h3>
-          <p className="text-xs text-zinc-500 mb-3">
+          <p className="text-xs text-surface-500 mb-3">
             Take a photo of your W-2 or other tax document to attach it to this return.
           </p>
-          <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm cursor-pointer">
+          <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-accent-500 hover:bg-accent-600 text-white text-sm font-semibold rounded-md transition-colors shadow-sm cursor-pointer">
             <span>Take Photo</span>
             <input
               ref={photoInputRef}
@@ -951,10 +951,10 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
           <button
             type="button"
             onClick={() => update('deductionMode', 'standard')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+            className={`px-4 py-2 rounded text-sm font-medium border transition-colors ${
               form.deductionMode === 'standard'
-                ? 'bg-indigo-600 text-white border-indigo-600'
-                : 'bg-white text-zinc-600 border-zinc-300 hover:bg-zinc-50'
+                ? 'bg-accent-500 text-white border-accent-500'
+                : 'bg-white text-surface-600 border-surface-300 hover:bg-surface-50'
             }`}
             aria-pressed={form.deductionMode === 'standard'}
           >
@@ -963,10 +963,10 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
           <button
             type="button"
             onClick={() => update('deductionMode', 'itemized')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+            className={`px-4 py-2 rounded text-sm font-medium border transition-colors ${
               form.deductionMode === 'itemized'
-                ? 'bg-indigo-600 text-white border-indigo-600'
-                : 'bg-white text-zinc-600 border-zinc-300 hover:bg-zinc-50'
+                ? 'bg-accent-500 text-white border-accent-500'
+                : 'bg-white text-surface-600 border-surface-300 hover:bg-surface-50'
             }`}
             aria-pressed={form.deductionMode === 'itemized'}
           >
@@ -979,11 +979,11 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
             {form.itemizedDeductions.map((ded, i) => (
               <div
                 key={i}
-                className="border border-zinc-200 rounded-lg p-3 space-y-2"
+                className="border border-surface-200 rounded-md p-3 space-y-2"
                 data-testid={`deduction-row-${i}`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium text-zinc-500">Deduction {i + 1}</span>
+                  <span className="text-xs font-medium text-surface-500">Deduction {i + 1}</span>
                   <button
                     type="button"
                     onClick={() => removeItemizedDeduction(i)}
@@ -1033,7 +1033,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
         )}
 
         {form.deductionMode === 'standard' && (
-          <p className="text-xs text-zinc-500 mt-2">
+          <p className="text-xs text-surface-500 mt-2">
             You will claim the standard deduction for your filing status. Switch to itemized to
             enter individual deduction line items.
           </p>
@@ -1055,11 +1055,11 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
           {form.lifeEvents.map((evt, i) => (
             <div
               key={i}
-              className="border border-zinc-200 rounded-lg p-3 space-y-2"
+              className="border border-surface-200 rounded-md p-3 space-y-2"
               data-testid={`life-event-row-${i}`}
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-zinc-500">Life Event {i + 1}</span>
+                <span className="text-xs font-medium text-surface-500">Life Event {i + 1}</span>
                 <button
                   type="button"
                   onClick={() => removeLifeEvent(i)}
@@ -1339,7 +1339,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
         <button
           type="submit"
           disabled={saving}
-          className="px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50"
+          className="px-6 py-2.5 bg-accent-500 hover:bg-accent-600 text-white text-sm font-semibold rounded-md transition-colors shadow-sm disabled:opacity-50"
         >
           {saving ? 'Saving...' : 'Save Tax Situation'}
         </button>

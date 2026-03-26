@@ -55,8 +55,8 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-900"></div>
+      <div className="min-h-screen flex items-center justify-center bg-surface-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-surface-800"></div>
       </div>
     );
   }
@@ -66,32 +66,32 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen w-full bg-zinc-50 font-sans overflow-hidden text-zinc-900">
+    <div className="flex h-screen w-full bg-surface-50 font-sans overflow-hidden text-surface-800">
       {/* Left Sidebar - hidden on mobile, visible on sm+ */}
-      <nav className="hidden sm:flex w-16 shrink-0 border-r border-zinc-200 bg-white flex-col items-center py-6 justify-between z-10">
+      <nav className="hidden sm:flex w-16 shrink-0 border-r border-surface-200 bg-white flex-col items-center py-6 justify-between z-10">
         <div className="flex flex-col items-center gap-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500 to-brand-800 flex items-center justify-center shadow-sm">
             <span className="text-white font-black text-lg">T</span>
           </div>
 
           <div className="flex flex-col gap-4 mt-4 w-full px-2">
             <button
               onClick={() => setActiveView('demo')}
-              className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'demo' ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
+              className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === 'demo' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
               title="Tax Demo"
             >
               <Receipt size={20} strokeWidth={2.5} />
             </button>
             <button
               onClick={() => setActiveView('tax-situation')}
-              className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'tax-situation' ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
+              className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === 'tax-situation' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
               title="Tax Situation"
             >
               <FileText size={20} strokeWidth={2.5} />
             </button>
             <button
               onClick={() => setActiveView('tier-results')}
-              className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'tier-results' ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
+              className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'tier-results' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
               title="Tier Results"
               data-testid="tier-results-nav-item"
             >
@@ -99,7 +99,7 @@ function App() {
             </button>
             <button
               onClick={() => setActiveView('settings')}
-              className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'settings' ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
+              className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === 'settings' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
               title="Settings"
             >
               <Settings size={20} strokeWidth={2.5} />
@@ -107,7 +107,7 @@ function App() {
             {isSuperadmin && (
               <button
                 onClick={() => setActiveView('admin')}
-                className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'admin' ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
+                className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === 'admin' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
                 title="Admin"
                 data-testid="admin-nav-item"
               >
@@ -120,7 +120,7 @@ function App() {
         <div className="flex flex-col items-center gap-4">
           <button
             onClick={logout}
-            className="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-red-500 outline-none"
+            className="w-10 h-10 rounded-full bg-surface-100 border border-surface-200 flex items-center justify-center text-surface-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-red-500 outline-none"
           >
             <User size={18} />
           </button>
@@ -132,15 +132,15 @@ function App() {
         {/* Full-width Content Panel */}
         <div className="flex-1 flex flex-col bg-white">
           {/* Header */}
-          <header className="h-12 px-5 border-b border-zinc-200 flex items-center justify-between shrink-0 bg-white shadow-sm">
+          <header className="h-12 px-5 border-b border-surface-200 flex items-center justify-between shrink-0 bg-white shadow-sm">
             <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 ring-2 ring-indigo-100" />
-              <h1 className="text-sm font-semibold tracking-tight text-zinc-900">Tea Tax</h1>
+              <div className="w-2.5 h-2.5 rounded-full bg-accent-500 ring-2 ring-accent-400/20" />
+              <h1 className="text-sm font-semibold tracking-tight text-surface-800">Tea Tax</h1>
             </div>
             {/* Mobile logout button in header */}
             <button
               onClick={logout}
-              className="sm:hidden w-8 h-8 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+              className="sm:hidden w-8 h-8 rounded-full bg-surface-100 border border-surface-200 flex items-center justify-center text-surface-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
               aria-label="Log out"
             >
               <User size={16} />
@@ -195,12 +195,12 @@ function App() {
 
       {/* Bottom tab bar — visible only on mobile (hidden on sm+) */}
       <nav
-        className="sm:hidden fixed bottom-0 inset-x-0 z-20 bg-white border-t border-zinc-200 flex items-center justify-around h-16"
+        className="sm:hidden fixed bottom-0 inset-x-0 z-20 bg-white border-t border-surface-200 flex items-center justify-around h-16"
         aria-label="Bottom navigation"
       >
         <button
           onClick={() => setActiveView('demo')}
-          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'demo' ? 'text-indigo-600' : 'text-zinc-400'}`}
+          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'demo' ? 'text-accent-500' : 'text-surface-400'}`}
           aria-current={activeView === 'demo' ? 'page' : undefined}
         >
           <Receipt size={22} strokeWidth={2} />
@@ -208,7 +208,7 @@ function App() {
         </button>
         <button
           onClick={() => setActiveView('tax-situation')}
-          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'tax-situation' ? 'text-indigo-600' : 'text-zinc-400'}`}
+          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'tax-situation' ? 'text-accent-500' : 'text-surface-400'}`}
           aria-current={activeView === 'tax-situation' ? 'page' : undefined}
         >
           <FileText size={22} strokeWidth={2} />
@@ -216,7 +216,7 @@ function App() {
         </button>
         <button
           onClick={() => setActiveView('tier-results')}
-          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'tier-results' ? 'text-indigo-600' : 'text-zinc-400'}`}
+          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'tier-results' ? 'text-accent-500' : 'text-surface-400'}`}
           aria-current={activeView === 'tier-results' ? 'page' : undefined}
           data-testid="tier-results-nav-item-mobile"
         >
@@ -225,7 +225,7 @@ function App() {
         </button>
         <button
           onClick={() => setActiveView('settings')}
-          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'settings' ? 'text-indigo-600' : 'text-zinc-400'}`}
+          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'settings' ? 'text-accent-500' : 'text-surface-400'}`}
           aria-current={activeView === 'settings' ? 'page' : undefined}
         >
           <Settings size={22} strokeWidth={2} />
@@ -234,7 +234,7 @@ function App() {
         {isSuperadmin && (
           <button
             onClick={() => setActiveView('admin')}
-            className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'admin' ? 'text-indigo-600' : 'text-zinc-400'}`}
+            className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'admin' ? 'text-accent-500' : 'text-surface-400'}`}
             aria-current={activeView === 'admin' ? 'page' : undefined}
             data-testid="admin-nav-item-mobile"
           >

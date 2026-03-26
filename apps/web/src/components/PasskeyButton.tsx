@@ -40,7 +40,7 @@ export const RegisterPasskeyButton: React.FC<RegisterPasskeyButtonProps> = ({
   const [message, setMessage] = useState('');
 
   if (!browserSupportsWebAuthn()) {
-    return <p className="text-sm text-zinc-400">This browser does not support passkeys.</p>;
+    return <p className="text-sm text-surface-400">This browser does not support passkeys.</p>;
   }
 
   const handleRegister = async () => {
@@ -95,12 +95,12 @@ export const RegisterPasskeyButton: React.FC<RegisterPasskeyButtonProps> = ({
         type="button"
         onClick={handleRegister}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-zinc-300 rounded-lg text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-surface-300 rounded-md text-sm font-medium text-surface-700 hover:bg-surface-50 transition-colors disabled:opacity-50"
       >
         <PasskeyIcon />
         {loading ? 'Registering passkey…' : 'Add a passkey to this account'}
       </button>
-      {message && <p className="text-xs text-center text-zinc-500">{message}</p>}
+      {message && <p className="text-xs text-center text-surface-500">{message}</p>}
     </div>
   );
 };
@@ -173,7 +173,7 @@ export const PasskeyLoginButton: React.FC<PasskeyLoginButtonProps> = ({ onSucces
         type="button"
         onClick={handleLogin}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-zinc-300 rounded-lg text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors disabled:opacity-50"
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 border border-surface-300 rounded-md text-sm font-medium text-surface-700 hover:bg-surface-50 transition-colors disabled:opacity-50"
       >
         <PasskeyIcon />
         {loading ? 'Authenticating with passkey…' : 'Sign in with a passkey'}

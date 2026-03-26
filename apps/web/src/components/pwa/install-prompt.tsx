@@ -127,17 +127,17 @@ export function InstallPrompt() {
     return (
       <div
         role="banner"
-        className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-50 bg-white border border-zinc-200 rounded-2xl shadow-xl p-4 flex items-center gap-4"
+        className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:max-w-sm z-50 bg-white border border-surface-200 rounded-lg shadow-xl p-4 flex items-center gap-4"
       >
         <div
-          className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+          className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
           style={{ backgroundColor: '#243b53' }}
         >
           <span className="text-white font-black text-lg">TT</span>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-zinc-900">Install Tea Tax</p>
-          <p className="text-xs text-zinc-500 mt-0.5">
+          <p className="text-sm font-semibold text-surface-900">Install Tea Tax</p>
+          <p className="text-xs text-surface-500 mt-0.5">
             Add to your home screen for the best experience
           </p>
         </div>
@@ -168,23 +168,23 @@ export function InstallPrompt() {
         aria-label="Install Tea Tax on iOS"
         className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm p-4"
       >
-        <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 flex flex-col gap-4">
+        <div className="w-full max-w-sm bg-white rounded-lg shadow-2xl p-6 flex flex-col gap-4">
           {/* Header */}
           <div className="flex items-center gap-3">
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+              className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ backgroundColor: '#243b53' }}
             >
               <span className="text-white font-black text-lg">TT</span>
             </div>
             <div>
-              <p className="text-sm font-bold text-zinc-900">Install Tea Tax</p>
-              <p className="text-xs text-zinc-500">Add to your home screen</p>
+              <p className="text-sm font-bold text-surface-900">Install Tea Tax</p>
+              <p className="text-xs text-surface-500">Add to your home screen</p>
             </div>
           </div>
 
           {/* Step-by-step instructions */}
-          <ol className="flex flex-col gap-3 text-sm text-zinc-700">
+          <ol className="flex flex-col gap-3 text-sm text-surface-700">
             <li className="flex items-start gap-2">
               <span
                 className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold"
@@ -194,7 +194,7 @@ export function InstallPrompt() {
               </span>
               <span>
                 Tap the{' '}
-                <span className="inline-flex items-center gap-0.5 font-medium text-zinc-900">
+                <span className="inline-flex items-center gap-0.5 font-medium text-surface-900">
                   Share
                   {/* Share icon (Unicode fallback) */}
                   <svg
@@ -234,7 +234,9 @@ export function InstallPrompt() {
               </span>
               <span>
                 Tap{' '}
-                <span className="font-medium text-zinc-900">&ldquo;Add to Home Screen&rdquo;</span>{' '}
+                <span className="font-medium text-surface-900">
+                  &ldquo;Add to Home Screen&rdquo;
+                </span>{' '}
                 and confirm.
               </span>
             </li>
@@ -243,7 +245,7 @@ export function InstallPrompt() {
           {/* Dismiss button */}
           <button
             onClick={handleDismiss}
-            className="mt-1 self-center text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
+            className="mt-1 self-center text-xs text-surface-400 hover:text-surface-600 transition-colors"
           >
             Maybe later
           </button>

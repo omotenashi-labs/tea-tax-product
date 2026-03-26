@@ -153,10 +153,10 @@ export function CameraDemoCard() {
                   setPermissionStatus('idle');
                 }
               }}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
                 method === m
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                  ? 'bg-accent-500 text-white'
+                  : 'bg-surface-100 text-surface-600 hover:bg-surface-200'
               }`}
             >
               {m === 'file-input' ? 'File input' : 'Live preview'}
@@ -171,11 +171,11 @@ export function CameraDemoCard() {
           <img
             src={capturedUrl}
             alt="Captured photo"
-            className="w-full rounded-lg border border-zinc-200 object-cover max-h-48"
+            className="w-full rounded-md border border-surface-200 object-cover max-h-48"
           />
           <button
             onClick={handleReset}
-            className="self-start px-4 py-2 rounded-lg bg-zinc-100 text-zinc-700 text-sm font-medium hover:bg-zinc-200 transition-colors"
+            className="self-start px-4 py-2 rounded-md bg-surface-100 text-surface-700 text-sm font-medium hover:bg-surface-200 transition-colors"
           >
             Take another
           </button>
@@ -194,11 +194,11 @@ export function CameraDemoCard() {
           />
           <label
             htmlFor="camera-file-input"
-            className="self-start px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 cursor-pointer transition-colors"
+            className="self-start px-4 py-2 rounded-md bg-accent-500 text-white text-sm font-medium hover:bg-accent-600 cursor-pointer transition-colors"
           >
             Open camera
           </label>
-          <p className="text-xs text-zinc-400">Uses native camera app — no permission prompt.</p>
+          <p className="text-xs text-surface-400">Uses native camera app — no permission prompt.</p>
         </div>
       ) : (
         /* getUserMedia live preview */
@@ -206,13 +206,13 @@ export function CameraDemoCard() {
           {permissionStatus === 'idle' && (
             <button
               onClick={startLivePreview}
-              className="self-start px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+              className="self-start px-4 py-2 rounded-md bg-accent-500 text-white text-sm font-medium hover:bg-accent-600 transition-colors"
             >
               Start live preview
             </button>
           )}
           {permissionStatus === 'prompt' && (
-            <p className="text-xs text-zinc-400">Requesting camera permission…</p>
+            <p className="text-xs text-surface-400">Requesting camera permission…</p>
           )}
           {permissionStatus === 'granted' && stream && (
             <div className="flex flex-col gap-2">
@@ -221,11 +221,11 @@ export function CameraDemoCard() {
                 autoPlay
                 playsInline
                 muted
-                className="w-full rounded-lg border border-zinc-200 bg-black"
+                className="w-full rounded-md border border-surface-200 bg-black"
               />
               <button
                 onClick={captureFrame}
-                className="self-start px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors"
+                className="self-start px-4 py-2 rounded-md bg-accent-500 text-white text-sm font-medium hover:bg-accent-600 transition-colors"
               >
                 Capture
               </button>
