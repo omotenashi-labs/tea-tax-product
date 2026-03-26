@@ -59,7 +59,6 @@ export function TaxProgressIndicator({ currentStep, completedSteps }: TaxProgres
           const stepNum = idx + 1;
           const isCompleted = completedSet.has(stepNum);
           const isActive = stepNum === currentStep;
-          const isUpcoming = !isCompleted && !isActive;
           const isLast = stepNum === total;
 
           return (

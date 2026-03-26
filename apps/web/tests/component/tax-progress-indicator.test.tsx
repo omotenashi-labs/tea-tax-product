@@ -25,7 +25,6 @@ describe('TaxProgressIndicator', () => {
     const { baseElement } = render(<TaxProgressIndicator currentStep={1} completedSteps={[]} />);
 
     for (const label of TAX_STEPS) {
-      const el = baseElement.querySelector(`span[aria-hidden="true"]`);
       expect(baseElement.textContent).toContain(label);
     }
   });
