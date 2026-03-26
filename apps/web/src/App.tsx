@@ -23,6 +23,7 @@ import type { W2ExtractedData, ParsedTaxFields } from 'core';
 import { InstallPrompt } from './components/pwa/install-prompt';
 import { IntakeSelector } from './components/IntakeSelector';
 import type { AdminSection } from './components/AdminPanel';
+import { useTaxObject } from './hooks/use-tax-object';
 
 // Admin section nav items (superadmin-only global nav)
 const ADMIN_NAV_ITEMS: {
@@ -76,6 +77,15 @@ function App() {
   const { user, logout, loading } = useAuth();
   const isSuperadmin = user?.role === 'superadmin';
 
+  // Bootstrap real tax object and return IDs for filer users.
+  // Disabled for superadmins (who have no personal tax objects).
+  const {
+    taxObjectId,
+    returnId,
+    loading: taxObjectLoading,
+    error: taxObjectError,
+  } = useTaxObject(!!user && !isSuperadmin);
+
   // Role-aware default: superadmin lands on Users section; filers land on Tax Situation.
   const defaultView: ActiveView = isSuperadmin ? 'users' : 'tax-situation';
   const [activeView, setActiveView] = useState<ActiveView>(defaultView);
@@ -126,6 +136,26 @@ function App() {
 
   if (!user) {
     return <Login />;
+  }
+
+  // Defer filer views until real IDs are resolved; show spinner or error.
+  if (!isSuperadmin && taxObjectLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-surface-800"></div>
+      </div>
+    );
+  }
+
+  if (!isSuperadmin && taxObjectError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface-50">
+        <div className="text-center p-8">
+          <p className="text-red-600 font-medium mb-2">Unable to load your tax data</p>
+          <p className="text-surface-500 text-sm">{taxObjectError}</p>
+        </div>
+      </div>
+    );
   }
 
   // Determine active admin section (null when a filer view is active)
@@ -252,15 +282,15 @@ function App() {
                     setTaxIntakePath('form');
                   }}
                   onBack={() => setTaxIntakePath('selector')}
-                  taxObjectId="demo-tax-object-id"
-                  returnId="demo-return-id"
+                  taxObjectId={taxObjectId ?? ''}
+                  returnId={returnId ?? ''}
                 />
               </div>
             )}
             {!isSuperadmin && activeView === 'tax-situation' && taxIntakePath === 'form' && (
               <TaxSituationForm
-                taxObjectId="demo-tax-object-id"
-                returnId="demo-return-id"
+                taxObjectId={taxObjectId ?? ''}
+                returnId={returnId ?? ''}
                 w2Data={w2Data}
                 parsedFields={parsedFields}
                 onViewTierResults={() => setActiveView('tier-results')}
@@ -268,7 +298,7 @@ function App() {
               />
             )}
             {!isSuperadmin && activeView === 'tier-results' && (
-              <TierResultsView taxObjectId="demo-tax-object-id" returnId="demo-return-id" />
+              <TierResultsView taxObjectId={taxObjectId ?? ''} returnId={returnId ?? ''} />
             )}
             {!isSuperadmin && activeView === 'settings' && <SettingsView />}
 
