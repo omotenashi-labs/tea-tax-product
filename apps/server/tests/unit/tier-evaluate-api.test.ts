@@ -9,7 +9,7 @@
  *   - Routing (null for non-matching paths)
  *   - Auth (401 when not authenticated)
  *   - Ownership enforcement (404 for non-owner — no existence leak)
- *   - 422 when situation_data is absent
+ *   - 200 { evaluable: false } when situation_data is absent
  *   - Correct tier placements for W-2-only and freelance scenarios
  *   - No recommendation fields in the response
  *   - Each ProviderEvaluation has matchedTier, federalPrice, statePrice,
@@ -258,9 +258,9 @@ describe('handleTierEvaluateRequest()', () => {
     expect(result?.status).toBe(404);
   });
 
-  // --- 422 when situation_data absent ---
+  // --- 200 { evaluable: false } when situation_data absent ---
 
-  test('returns 422 when tax_return has no situation_data', async () => {
+  test('returns 200 { evaluable: false } when tax_return has no situation_data', async () => {
     const authModule = await import('../../src/api/auth');
     vi.spyOn(authModule, 'getAuthenticatedUser').mockResolvedValue({
       id: 'user-1',
@@ -272,9 +272,10 @@ describe('handleTierEvaluateRequest()', () => {
     const req = makeRequest('POST', TIER_EVAL_PATH, { cookie: 'tea_tax_auth=fake' });
     const url = new URL(req.url);
     const result = await handleTierEvaluateRequest(req, url, appState);
-    expect(result?.status).toBe(422);
+    expect(result?.status).toBe(200);
     const body = await result?.json();
-    expect(body.error).toBe('Unprocessable Entity');
+    expect(body.evaluable).toBe(false);
+    expect(body.reason).toBe('no-situation-data');
   });
 
   // --- Correct tier placements ---

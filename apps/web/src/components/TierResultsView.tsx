@@ -20,7 +20,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import type { TierEvaluationResult } from 'core';
+import type { TierEvaluateResponse, TierEvaluationResult } from 'core';
 import { TierComparisonTable } from './TierComparisonTable';
 import { RefreshCw } from 'lucide-react';
 import { getCsrfToken } from '../lib/csrf';
@@ -72,17 +72,18 @@ export function TierResultsView({ taxObjectId, returnId }: TierResultsViewProps)
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         const errBody = body as { error?: string; details?: string };
-        if (res.status === 422) {
-          throw new Error(
-            errBody.details ??
-              'No situation data found. Save your Tax Situation before evaluating.',
-          );
-        }
         throw new Error(errBody.error ?? `HTTP ${res.status}`);
       }
 
-      const data = (await res.json()) as TierEvaluationResult;
-      setResult(data);
+      const data = (await res.json()) as TierEvaluateResponse;
+
+      // The server returns { evaluable: false, reason: 'no-situation-data' } when
+      // situation_data is absent — distinguish this from an evaluation result.
+      if ('evaluable' in data && data.evaluable === false) {
+        throw new Error('No situation data found. Save your Tax Situation before evaluating.');
+      }
+
+      setResult(data as TierEvaluationResult);
       setLastEvaluatedAt(new Date());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Evaluation failed');

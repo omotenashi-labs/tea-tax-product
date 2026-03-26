@@ -28,7 +28,8 @@
  * Auth: getAuthenticatedUser(req) + ownership check on parent tax_object.
  * Returns 404 when the tax_object is not owned by the authenticated user,
  * or when the tax_return does not exist / does not belong to the tax_object.
- * Returns 422 when the tax return has no situation_data set.
+ * Returns 200 { evaluable: false, reason: 'no-situation-data' } when the tax
+ * return has no situation_data set, avoiding a red 422 console error.
  */
 
 import type { AppState } from '../index';
@@ -140,14 +141,7 @@ export async function handleTierEvaluateRequest(
   const situationData = taxReturn.properties.situation_data;
 
   if (situationData === undefined || situationData === null) {
-    return json(
-      {
-        error: 'Unprocessable Entity',
-        details:
-          'This tax return has no situation_data set. Patch the return with situation_data before evaluating.',
-      },
-      422,
-    );
+    return json({ evaluable: false, reason: 'no-situation-data' }, 200);
   }
 
   // -------------------------------------------------------------------------

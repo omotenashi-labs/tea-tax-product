@@ -344,10 +344,22 @@ export interface ProviderEvaluation {
   disqualifiedBy: string[]; // Conditions that eliminated higher/lower tiers
 }
 
+/** Returned when a tax return has no situation_data and cannot be evaluated. */
+export interface TierNotEvaluableResult {
+  evaluable: false;
+  reason: 'no-situation-data';
+}
+
 /** Result of evaluating a TaxSituation against all provider tier mapping rules. */
 export interface TierEvaluationResult {
   evaluations: ProviderEvaluation[];
 }
+
+/**
+ * Union of all possible responses from the tier-evaluate endpoint.
+ * Check `evaluable === false` to detect the not-ready state.
+ */
+export type TierEvaluateResponse = TierNotEvaluableResult | TierEvaluationResult;
 
 // ---------------------------------------------------------------------------
 // Top-Level Object
