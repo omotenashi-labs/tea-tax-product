@@ -5,6 +5,7 @@ import { Settings, User, Receipt, FileText, ShieldAlert, BarChart2 } from 'lucid
 import { DemoFlow } from './components/demo/demo-flow';
 import { TaxSituationForm } from './components/TaxSituationForm';
 import { W2CaptureZone } from './components/W2CaptureZone';
+import { TaxProgressIndicator } from './components/TaxProgressIndicator';
 import { SettingsView } from './components/SettingsView';
 import { AdminPanel } from './components/AdminPanel';
 import { TierResultsView } from './components/TierResultsView';
@@ -26,6 +27,8 @@ function App() {
   const [w2Data, setW2Data] = useState<W2ExtractedData | null>(null);
   // Whether the W2CaptureZone step has been completed (skipped or confirmed)
   const [w2StepDone, setW2StepDone] = useState(false);
+  // Current step (1-based) within the Tax Situation Protocol flow (1 = W-2 Import … 7 = Review)
+  const [taxCurrentStep, setTaxCurrentStep] = useState(1);
 
   // Redirect non-superadmin users away from the admin view if they somehow land there
   useEffect(() => {
@@ -39,8 +42,16 @@ function App() {
     if (activeView !== 'tax-situation') {
       setW2Data(null);
       setW2StepDone(false);
+      setTaxCurrentStep(1);
     }
   }, [activeView]);
+
+  // When W-2 step completes, advance to step 2 (Filing Basics)
+  useEffect(() => {
+    if (w2StepDone && taxCurrentStep === 1) {
+      setTaxCurrentStep(2);
+    }
+  }, [w2StepDone, taxCurrentStep]);
 
   if (loading) {
     return (
@@ -136,6 +147,16 @@ function App() {
             </button>
           </header>
 
+          {/* Tax Situation progress indicator — only shown in tax-situation view */}
+          {activeView === 'tax-situation' && (
+            <TaxProgressIndicator
+              currentStep={taxCurrentStep}
+              completedSteps={
+                w2StepDone ? Array.from({ length: taxCurrentStep - 1 }, (_, i) => i + 1) : []
+              }
+            />
+          )}
+
           {/* Content — add bottom padding on mobile to account for bottom nav */}
           <div className="flex-1 overflow-hidden overflow-y-auto pb-16 sm:pb-0">
             {activeView === 'demo' && <DemoFlow onExit={() => setActiveView('tax-situation')} />}
@@ -157,6 +178,7 @@ function App() {
                 returnId="demo-return-id"
                 w2Data={w2Data}
                 onViewTierResults={() => setActiveView('tier-results')}
+                onStepChange={setTaxCurrentStep}
               />
             )}
             {activeView === 'tier-results' && (
