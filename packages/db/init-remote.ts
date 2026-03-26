@@ -192,22 +192,8 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 
 async function configureAuditDatabase(auditAdmin: ReturnType<typeof makePool>): Promise<void> {
   await auditAdmin.unsafe(`
-CREATE TABLE IF NOT EXISTS audit_log (
-  id TEXT PRIMARY KEY,
-  action TEXT NOT NULL,
-  entity_type TEXT,
-  entity_id TEXT,
-  changes JSONB NOT NULL DEFAULT '{}'::jsonb,
-  status TEXT NOT NULL DEFAULT 'pending',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-CREATE INDEX IF NOT EXISTS idx_audit_log_created_at ON audit_log (created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_audit_log_action ON audit_log (action);
-CREATE INDEX IF NOT EXISTS idx_audit_log_entity ON audit_log (entity_type, entity_id);
-CREATE INDEX IF NOT EXISTS idx_audit_log_status ON audit_log (status);
 GRANT USAGE ON SCHEMA public TO ${quoteIdentifier(ROLE_NAMES.audit)};
-GRANT INSERT, SELECT ON TABLE audit_log TO ${quoteIdentifier(ROLE_NAMES.audit)};
-GRANT UPDATE(status) ON TABLE audit_log TO ${quoteIdentifier(ROLE_NAMES.audit)};
+GRANT INSERT, SELECT ON TABLE audit_events TO ${quoteIdentifier(ROLE_NAMES.audit)};
 `);
 }
 
@@ -398,25 +384,6 @@ async function verifyTableGrant(
   return count >= 1 ? null : `${roleName} missing ${privilegeType} on ${tableName}`;
 }
 
-async function verifyColumnGrant(
-  db: ReturnType<typeof makePool>,
-  tableName: string,
-  columnName: string,
-  roleName: string,
-  privilegeType: string,
-): Promise<string | null> {
-  const [{ count }] = await db<{ count: number }[]>`
-    SELECT COUNT(*)::int AS count
-    FROM information_schema.column_privileges
-    WHERE table_schema = 'public'
-      AND table_name = ${tableName}
-      AND column_name = ${columnName}
-      AND grantee = ${roleName}
-      AND privilege_type = ${privilegeType}
-  `;
-  return count >= 1 ? null : `${roleName} missing ${privilegeType} on ${tableName}.${columnName}`;
-}
-
 async function verifyView(
   db: ReturnType<typeof makePool>,
   viewName: string,
@@ -512,12 +479,11 @@ async function verifyInitRemote(
     verifyDatabaseConnect(admin, config.databases.app, ROLE_NAMES.app),
     verifyDatabaseConnect(admin, config.databases.audit, ROLE_NAMES.audit),
     verifyDatabaseConnect(admin, config.databases.analytics, ROLE_NAMES.analytics),
-    verifyTable(auditAdmin, 'audit_log'),
+    verifyTable(auditAdmin, 'audit_events'),
     verifyTable(analyticsAdmin, 'analytics_events'),
     verifyTable(analyticsAdmin, 'audit_replica'),
-    verifyTableGrant(auditAdmin, 'audit_log', ROLE_NAMES.audit, 'INSERT'),
-    verifyTableGrant(auditAdmin, 'audit_log', ROLE_NAMES.audit, 'SELECT'),
-    verifyColumnGrant(auditAdmin, 'audit_log', 'status', ROLE_NAMES.audit, 'UPDATE'),
+    verifyTableGrant(auditAdmin, 'audit_events', ROLE_NAMES.audit, 'INSERT'),
+    verifyTableGrant(auditAdmin, 'audit_events', ROLE_NAMES.audit, 'SELECT'),
     verifyTableGrant(analyticsAdmin, 'analytics_events', ROLE_NAMES.analytics, 'INSERT'),
     verifyTableGrant(analyticsAdmin, 'analytics_events', ROLE_NAMES.analytics, 'SELECT'),
     verifyTableGrant(analyticsAdmin, 'audit_replica', ROLE_NAMES.analytics, 'INSERT'),
@@ -582,6 +548,20 @@ async function migrateAppSchema(pool: ReturnType<typeof makePool>): Promise<void
   console.log('[init-remote] App schema applied.');
 }
 
+async function migrateAuditSchema(pool: ReturnType<typeof makePool>): Promise<void> {
+  console.log('[init-remote] Applying audit database schema...');
+  const schemaSql = readFileSync(
+    fileURLToPath(new URL('./audit-schema.sql', import.meta.url)),
+    'utf-8',
+  );
+  const cleanSql = schemaSql.replace(/--.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
+  const statements = splitSqlStatements(cleanSql).filter((s) => s.length > 0);
+  for (const statement of statements) {
+    await pool.unsafe(statement);
+  }
+  console.log('[init-remote] Audit schema applied.');
+}
+
 export async function runInitRemote(env: NodeJS.ProcessEnv = process.env): Promise<void> {
   const config = loadInitRemoteConfig(env);
   const admin = makePool(config.adminDatabaseUrl);
@@ -607,7 +587,6 @@ export async function runInitRemote(env: NodeJS.ProcessEnv = process.env): Promi
     analyticsAdmin = makePool(dbUrl(config.adminDatabaseUrl, config.databases.analytics));
 
     await configureAppDatabase(appAdmin);
-    await configureAuditDatabase(auditAdmin);
     await configureAnalyticsDatabase(analyticsAdmin);
 
     // Apply the app database schema using the app_rw role so that app_rw owns
@@ -628,6 +607,11 @@ export async function runInitRemote(env: NodeJS.ProcessEnv = process.env): Promi
     } finally {
       await appRw.end({ timeout: 5 });
     }
+
+    // Apply audit-schema.sql to the audit database so audit_events exists before
+    // configureAuditDatabase() issues grants on it.
+    await migrateAuditSchema(auditAdmin);
+    await configureAuditDatabase(auditAdmin);
 
     // Provision agent_worker base role and per-type agent roles
     await ensureAgentBaseRole(admin);
