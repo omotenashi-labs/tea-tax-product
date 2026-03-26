@@ -4,13 +4,17 @@
  * Provider tier comparison table — the culminating visual of the demo.
  *
  * Layout:
- * - Desktop (≥1024px): full comparison table — Provider | Tier | Federal | +State | Qualifying Factors
+ * - Desktop (≥1024px): full comparison table — Provider | Tier | Federal | +State | Qualifying Factors | Why no cheaper tier
  * - Tablet (768px–1023px): horizontal-scroll table
  * - Mobile (<768px): stacked provider cards — one card per provider
  *
  * Visual treatment: §6.4.5, §6.4.11 of docs/implementation-plan.md.
  *
- * CRITICAL: No recommendation badge, no ranking, no highlighting of "best" option.
+ * The cheapest qualified provider (lowest combined federal+state price) is
+ * visually highlighted with a green border. When multiple providers tie, all
+ * tied providers are highlighted.
+ *
+ * CRITICAL: No recommendation badge, no ranking language, no "best" label.
  * This is evaluation only — never recommendation. (CEO interview constraint, PRD §7.)
  */
 
@@ -62,25 +66,62 @@ function formatPrice(price: number | null): { text: string; free: boolean } {
 }
 
 // ---------------------------------------------------------------------------
+// Cheapest-qualified highlight logic
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns the set of providerIds that are tied for the lowest total cost
+ * (federal + state) among providers that have a matched tier.
+ *
+ * Providers without a matched tier (matchedTier === null) are excluded.
+ * null prices are treated as 0 for cost comparison (free/included).
+ *
+ * This function does NOT label these providers as "recommended" — it only
+ * identifies them for visual distinction as the lowest-cost qualified options.
+ */
+export function cheapestProviderIds(evaluations: ProviderEvaluation[]): Set<string> {
+  const qualified = evaluations.filter((e) => e.matchedTier !== null);
+  if (qualified.length === 0) return new Set();
+
+  const totalCost = (e: ProviderEvaluation): number => (e.federalPrice ?? 0) + (e.statePrice ?? 0);
+
+  const minCost = Math.min(...qualified.map(totalCost));
+  return new Set(qualified.filter((e) => totalCost(e) === minCost).map((e) => e.providerId));
+}
+
+// ---------------------------------------------------------------------------
 // Desktop / Tablet table row
 // ---------------------------------------------------------------------------
 
 interface TierTableRowProps {
   evaluation: ProviderEvaluation;
+  isCheapest: boolean;
 }
 
-function TierTableRow({ evaluation }: TierTableRowProps) {
+function TierTableRow({ evaluation, isCheapest }: TierTableRowProps) {
   const federal = formatPrice(evaluation.federalPrice);
   const state = formatPrice(evaluation.statePrice);
 
   return (
     <tr
       data-testid={`tier-row-${evaluation.providerId}`}
-      className="border-b border-surface-100 hover:bg-surface-50 transition-colors"
+      data-cheapest={isCheapest ? 'true' : undefined}
+      className={`border-b border-surface-100 transition-colors ${
+        isCheapest ? 'bg-signal-success/5 hover:bg-signal-success/10' : 'hover:bg-surface-50'
+      }`}
     >
-      {/* Provider */}
+      {/* Provider — with cheapest indicator dot */}
       <td className="py-3 px-4 text-sm font-semibold text-surface-800 whitespace-nowrap">
-        {evaluation.providerName}
+        <div className="flex items-center gap-2">
+          {isCheapest && (
+            <span
+              data-testid={`cheapest-dot-${evaluation.providerId}`}
+              className="w-2 h-2 rounded-full bg-signal-success shrink-0"
+              aria-label="Lowest qualified cost"
+            />
+          )}
+          {evaluation.providerName}
+        </div>
       </td>
 
       {/* Tier badge */}
@@ -137,6 +178,21 @@ function TierTableRow({ evaluation }: TierTableRowProps) {
           )}
         </div>
       </td>
+
+      {/* Disqualifying conditions — why cheaper tiers weren't matched */}
+      <td className="py-3 px-4">
+        <div className="space-y-0.5">
+          {evaluation.disqualifiedBy.length > 0 ? (
+            evaluation.disqualifiedBy.map((cond, idx) => (
+              <p key={idx} className="text-xs text-signal-caution leading-snug">
+                {cond}
+              </p>
+            ))
+          ) : (
+            <span className="text-xs text-surface-400 italic">—</span>
+          )}
+        </div>
+      </td>
     </tr>
   );
 }
@@ -147,20 +203,33 @@ function TierTableRow({ evaluation }: TierTableRowProps) {
 
 interface TierCardProps {
   evaluation: ProviderEvaluation;
+  isCheapest: boolean;
 }
 
-function TierCard({ evaluation }: TierCardProps) {
+function TierCard({ evaluation, isCheapest }: TierCardProps) {
   const federal = formatPrice(evaluation.federalPrice);
   const state = formatPrice(evaluation.statePrice);
 
   return (
     <div
       data-testid={`tier-card-${evaluation.providerId}`}
-      className="bg-white shadow-card rounded-lg p-4 space-y-2"
+      data-cheapest={isCheapest ? 'true' : undefined}
+      className={`rounded-lg p-4 space-y-2 shadow-card ${
+        isCheapest ? 'bg-white border-2 border-signal-success' : 'bg-white'
+      }`}
     >
       {/* Header row: provider name + tier badge */}
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-semibold text-surface-800">{evaluation.providerName}</span>
+        <div className="flex items-center gap-2">
+          {isCheapest && (
+            <span
+              data-testid={`cheapest-dot-card-${evaluation.providerId}`}
+              className="w-2 h-2 rounded-full bg-signal-success shrink-0"
+              aria-label="Lowest qualified cost"
+            />
+          )}
+          <span className="text-sm font-semibold text-surface-800">{evaluation.providerName}</span>
+        </div>
         {evaluation.matchedTier ? (
           <span
             data-testid={`tier-badge-card-${evaluation.providerId}`}
@@ -204,8 +273,25 @@ function TierCard({ evaluation }: TierCardProps) {
       {/* Qualifying factors */}
       {evaluation.matchedConditions.length > 0 && (
         <div className="space-y-0.5 pt-0.5 border-t border-surface-100">
+          <p className="text-[10px] font-semibold text-surface-400 uppercase tracking-wide mb-0.5">
+            Qualifies because
+          </p>
           {evaluation.matchedConditions.map((cond, idx) => (
             <p key={idx} className="text-xs text-surface-500 leading-snug">
+              {cond}
+            </p>
+          ))}
+        </div>
+      )}
+
+      {/* Disqualifying conditions */}
+      {evaluation.disqualifiedBy.length > 0 && (
+        <div className="space-y-0.5 pt-0.5 border-t border-surface-100">
+          <p className="text-[10px] font-semibold text-surface-400 uppercase tracking-wide mb-0.5">
+            Why no cheaper tier
+          </p>
+          {evaluation.disqualifiedBy.map((cond, idx) => (
+            <p key={idx} className="text-xs text-signal-caution leading-snug">
               {cond}
             </p>
           ))}
@@ -229,11 +315,13 @@ export interface TierComparisonTableProps {
 /**
  * Provider tier comparison table.
  *
- * - Desktop/tablet (≥768px): scrollable comparison table with 5-column layout.
+ * - Desktop/tablet (≥768px): scrollable comparison table with 6-column layout.
  *   Tablet gets overflow-x-auto for horizontal scroll.
  * - Mobile (<768px): stacked cards — one card per provider.
  *
- * No recommendation badge or ranking. Evaluation only.
+ * The cheapest qualified option (lowest federal+state total) is visually
+ * distinguished with a green indicator. No recommendation language is used.
+ * Evaluation only.
  */
 export function TierComparisonTable({ result, loading }: TierComparisonTableProps) {
   if (loading || !result) {
@@ -257,16 +345,29 @@ export function TierComparisonTable({ result, loading }: TierComparisonTableProp
   }
 
   const evaluations = result.evaluations;
+  const cheapestIds = cheapestProviderIds(evaluations);
 
   return (
     <div data-testid="tier-comparison-table" className="space-y-4">
       {/* Section heading */}
-      <h2 className="text-sm font-semibold text-surface-800">Provider Tier Placement</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-surface-800">Provider Tier Placement</h2>
+        {cheapestIds.size > 0 && (
+          <div className="flex items-center gap-1.5 text-xs text-surface-500">
+            <span className="w-2 h-2 rounded-full bg-signal-success shrink-0" />
+            <span>Lowest qualified cost</span>
+          </div>
+        )}
+      </div>
 
       {/* Mobile: stacked cards (<768px) */}
       <div className="flex flex-col gap-3 md:hidden" data-testid="tier-cards-mobile">
         {evaluations.map((ev) => (
-          <TierCard key={ev.providerId} evaluation={ev} />
+          <TierCard
+            key={ev.providerId}
+            evaluation={ev}
+            isCheapest={cheapestIds.has(ev.providerId)}
+          />
         ))}
       </div>
 
@@ -276,7 +377,7 @@ export function TierComparisonTable({ result, loading }: TierComparisonTableProp
         data-testid="tier-table-desktop"
       >
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px]">
+          <table className="w-full min-w-[800px]">
             <thead>
               <tr className="bg-surface-50 border-b border-surface-200/60">
                 <th className="text-left py-3 px-4 text-[11px] font-semibold text-surface-400 uppercase tracking-widest">
@@ -294,16 +395,23 @@ export function TierComparisonTable({ result, loading }: TierComparisonTableProp
                 <th className="text-left py-3 px-4 text-[11px] font-semibold text-surface-400 uppercase tracking-widest">
                   Qualifying Factors
                 </th>
+                <th className="text-left py-3 px-4 text-[11px] font-semibold text-surface-400 uppercase tracking-widest">
+                  Why no cheaper tier
+                </th>
               </tr>
             </thead>
             <tbody>
               {evaluations.map((ev) => (
-                <TierTableRow key={ev.providerId} evaluation={ev} />
+                <TierTableRow
+                  key={ev.providerId}
+                  evaluation={ev}
+                  isCheapest={cheapestIds.has(ev.providerId)}
+                />
               ))}
             </tbody>
             <tfoot>
               <tr className="bg-surface-50 border-t border-surface-200">
-                <td colSpan={5} className="py-2 px-4 text-xs text-surface-400">
+                <td colSpan={6} className="py-2 px-4 text-xs text-surface-400">
                   Tier placements are based on publicly available 2025 pricing. This is evaluation
                   only — not a recommendation.
                 </td>
