@@ -77,8 +77,8 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col justify-center items-center font-sans">
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-zinc-200 w-full max-w-md">
+    <div className="min-h-screen bg-zinc-50 flex flex-col justify-center items-center font-sans px-4">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-zinc-200 w-full max-w-md">
         <h1 className="text-3xl font-bold text-zinc-900 mb-2 text-center">Tea Tax</h1>
         <p className="text-zinc-500 text-center mb-8">
           {isRegister ? 'Create an account' : 'Sign in to your account'}
@@ -139,7 +139,7 @@ export const Login: React.FC = () => {
               <p className="text-xs text-zinc-400 text-center font-medium uppercase tracking-wider">
                 Demo access
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 {DEMO_USERS.map(({ label, username: demoUser, password: demoPass }) => (
                   <button
                     key={demoUser}
