@@ -20,6 +20,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { RegisterPasskeyButton } from './PasskeyButton';
 import { useAuth } from '../context/AuthContext';
 import { getCsrfToken } from '../lib/csrf';
+import { Check, X } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -121,10 +122,10 @@ function Toast({ message, onDismiss }: ToastProps) {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-zinc-900 text-white px-4 py-3 rounded-lg shadow-lg text-sm font-medium animate-in fade-in slide-in-from-bottom-2">
-      <span className="text-green-400">✓</span>
+      <Check size={16} strokeWidth={2} className="text-green-400 shrink-0" />
       {message}
       <button onClick={onDismiss} className="ml-2 text-zinc-400 hover:text-white transition-colors">
-        ✕
+        <X size={16} strokeWidth={2} />
       </button>
     </div>
   );

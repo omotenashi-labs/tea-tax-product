@@ -26,6 +26,7 @@
 import React, { useRef, useState } from 'react';
 import type { W2ExtractedData, ParsedTaxFields } from 'core';
 import { DescribeIntakePath } from './DescribeIntakePath';
+import { Receipt, Paperclip, Camera, PenLine, AlertTriangle } from 'lucide-react';
 
 interface W2CaptureZoneProps {
   onExtracted: (data: W2ExtractedData) => void;
@@ -259,7 +260,7 @@ export function W2CaptureZone({
             onClick={handleDemoW2}
             className="flex items-center gap-3 w-full px-4 py-3 rounded bg-accent-500 hover:bg-accent-600 text-white font-medium text-sm transition-colors text-left"
           >
-            <span className="text-lg">🧾</span>
+            <Receipt size={20} strokeWidth={1.5} className="shrink-0" />
             <span>
               <span className="block font-semibold">Use demo W-2</span>
               <span className="text-xs font-normal opacity-80">
@@ -281,7 +282,7 @@ export function W2CaptureZone({
             htmlFor="w2-file-input"
             className="flex items-center gap-3 w-full px-4 py-3 rounded border border-surface-200 hover:border-surface-300 hover:bg-surface-50 text-surface-700 font-medium text-sm cursor-pointer transition-colors"
           >
-            <span className="text-lg">📎</span>
+            <Paperclip size={20} strokeWidth={1.5} className="shrink-0" />
             <span>Upload an image of your W-2</span>
           </label>
 
@@ -299,7 +300,7 @@ export function W2CaptureZone({
             htmlFor="w2-camera-input"
             className="flex items-center gap-3 w-full px-4 py-3 rounded border border-surface-200 hover:border-surface-300 hover:bg-surface-50 text-surface-700 font-medium text-sm cursor-pointer transition-colors md:hidden"
           >
-            <span className="text-lg">📷</span>
+            <Camera size={20} strokeWidth={1.5} className="shrink-0" />
             <span>Take a photo of your W-2</span>
           </label>
 
@@ -310,7 +311,7 @@ export function W2CaptureZone({
               onClick={() => setShowDescribePath(true)}
               className="flex items-center gap-3 w-full px-4 py-3 rounded border border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50 text-indigo-700 font-medium text-sm cursor-pointer transition-colors text-left"
             >
-              <span className="text-lg">✍️</span>
+              <PenLine size={20} strokeWidth={1.5} className="shrink-0" />
               <span>
                 <span className="block font-semibold">Describe your situation</span>
                 <span className="text-xs font-normal opacity-70">
@@ -415,7 +416,10 @@ export function W2CaptureZone({
             {result.warnings.length > 0 && (
               <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2 space-y-0.5">
                 {result.warnings.map((w, i) => (
-                  <div key={i}>⚠ {w}</div>
+                  <div key={i} className="flex items-start gap-1.5">
+                    <AlertTriangle size={12} strokeWidth={1.5} className="mt-0.5 shrink-0" />
+                    <span>{w}</span>
+                  </div>
                 ))}
               </div>
             )}

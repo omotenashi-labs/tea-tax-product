@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { Sparkles, FileText } from 'lucide-react';
 
 interface IntakeSelectorProps {
   onSelectAiWizard: () => void;
@@ -33,7 +34,7 @@ export function IntakeSelector({ onSelectAiWizard, onSelectManual }: IntakeSelec
           onClick={onSelectAiWizard}
           className="flex items-start gap-4 w-full px-5 py-4 rounded-xl border-2 border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50 text-left transition-colors group"
         >
-          <span className="text-2xl mt-0.5 shrink-0">✨</span>
+          <Sparkles size={24} strokeWidth={1.5} className="mt-0.5 shrink-0 text-indigo-500" />
           <span>
             <span className="block font-semibold text-zinc-900 text-sm group-hover:text-indigo-700">
               AI-assisted wizard
@@ -51,7 +52,7 @@ export function IntakeSelector({ onSelectAiWizard, onSelectManual }: IntakeSelec
           onClick={onSelectManual}
           className="flex items-start gap-4 w-full px-5 py-4 rounded-xl border-2 border-zinc-200 hover:border-zinc-400 hover:bg-zinc-50 text-left transition-colors group"
         >
-          <span className="text-2xl mt-0.5 shrink-0">📝</span>
+          <FileText size={24} strokeWidth={1.5} className="mt-0.5 shrink-0 text-zinc-500" />
           <span>
             <span className="block font-semibold text-zinc-900 text-sm group-hover:text-zinc-700">
               Manual form
