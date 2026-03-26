@@ -4,11 +4,12 @@
  * Demo UI — Tax Situation Completion Form.
  *
  * Sections:
- *   1. Filing Basics  — filing status radio + dependents add/remove
- *   2. Income         — income streams (W-2 pre-populated + add/remove)
- *   3. Deductions     — standard vs. itemized toggle + line items
- *   4. Life Events    — add/remove with type selector + date
- *   5. State Residency — primary state dropdown + additional states
+ *   1. Filing Basics       — filing status radio + dependents add/remove
+ *   2. Income              — income streams (W-2 pre-populated + add/remove)
+ *   3. Deductions          — standard vs. itemized toggle + line items
+ *   4. Life Events         — add/remove with type selector + date; notes for marriage/home_purchase
+ *   5. Prior Year Context  — estimated AGI, prior provider, prior filing method
+ *   6. State Residency     — primary state dropdown + additional states
  *
  * Saves via PATCH /api/tax-objects/:taxObjectId/returns/:returnId.
  * Form state: React useState only (no form library per UX rules).
@@ -27,6 +28,7 @@ import type {
   DeductionType,
   LifeEvent,
   LifeEventType,
+  PriorYearContext,
   StateCode,
   W2ExtractedData,
   ParsedTaxFields,
@@ -79,6 +81,16 @@ const LIFE_EVENT_TYPES: { value: LifeEventType; label: string }[] = [
   { value: 'job_change', label: 'Job Change' },
   { value: 'retirement', label: 'Retirement' },
   { value: 'other', label: 'Other' },
+];
+
+const PRIOR_FILING_METHOD_OPTIONS: {
+  value: PriorYearContext['filingMethod'];
+  label: string;
+}[] = [
+  { value: 'self_prepared', label: 'Self-prepared' },
+  { value: 'tax_professional', label: 'Tax professional' },
+  { value: 'volunteer', label: 'Volunteer (VITA/TCE)' },
+  { value: 'unknown', label: 'Unknown / First time filer' },
 ];
 
 const US_STATES: { value: StateCode; label: string }[] = [
@@ -175,6 +187,14 @@ function emptyLifeEvent(): LifeEvent {
   };
 }
 
+function emptyPriorYearContext(): PriorYearContext {
+  return {
+    estimatedAGI: null,
+    filingMethod: 'unknown',
+    provider: null,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Form state type (partial TaxSituation fields we edit)
 // ---------------------------------------------------------------------------
@@ -186,6 +206,7 @@ interface FormState {
   deductionMode: 'standard' | 'itemized';
   itemizedDeductions: Deduction[];
   lifeEvents: LifeEvent[];
+  priorYearContext: PriorYearContext;
   primaryState: StateCode;
   additionalStates: StateCode[];
 }
@@ -281,6 +302,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
       deductionMode: hasStandard || itemized.length === 0 ? 'standard' : 'itemized',
       itemizedDeductions: itemized,
       lifeEvents: initialSituation?.lifeEvents ?? [],
+      priorYearContext: initialSituation?.priorYearContext ?? emptyPriorYearContext(),
       primaryState: initialSituation?.stateResidency?.primary ?? 'CA',
       additionalStates: initialSituation?.stateResidency?.additional ?? [],
     };
@@ -461,6 +483,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
       incomeStreams: form.incomeStreams,
       deductions,
       lifeEvents: form.lifeEvents,
+      priorYearContext: form.priorYearContext,
       stateResidency: {
         primary: form.primaryState,
         additional: form.additionalStates,
@@ -966,10 +989,118 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
         <button type="button" onClick={addLifeEvent} className={addBtnCls}>
           + Add Life Event
         </button>
+
+        {/* Validation notes for tax-relevant life events */}
+        {form.lifeEvents.some((e) => e.type === 'marriage' || e.type === 'home_purchase') && (
+          <div
+            className="mt-3 space-y-2"
+            data-testid="life-event-validation-notes"
+            aria-live="polite"
+          >
+            {form.lifeEvents.some((e) => e.type === 'marriage') && (
+              <div
+                className="border-l-[3px] border-blue-400 bg-blue-50 px-4 py-2.5 space-y-0.5"
+                data-testid="life-event-note-marriage"
+              >
+                <p className="text-sm text-zinc-700 leading-snug">
+                  <span className="font-medium">Marriage:</span> Your filing status options may
+                  change. Consider reviewing whether Married Filing Jointly or Separately is more
+                  advantageous.
+                </p>
+              </div>
+            )}
+            {form.lifeEvents.some((e) => e.type === 'home_purchase') && (
+              <div
+                className="border-l-[3px] border-blue-400 bg-blue-50 px-4 py-2.5 space-y-0.5"
+                data-testid="life-event-note-home-purchase"
+              >
+                <p className="text-sm text-zinc-700 leading-snug">
+                  <span className="font-medium">Home Purchase:</span> You may be eligible to deduct
+                  mortgage interest and real estate taxes. Consider switching to itemized
+                  deductions.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Section 5: State Residency                                          */}
+      {/* Section 5: Prior Year Context                                       */}
+      {/* ------------------------------------------------------------------ */}
+      <section className={sectionCls} aria-labelledby="section-prior-year">
+        <h3 id="section-prior-year" className={sectionTitleCls}>
+          Prior Year Context
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Estimated Prior Year AGI ($)</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              className={inputCls}
+              value={form.priorYearContext.estimatedAGI ?? ''}
+              placeholder="e.g. 75000"
+              onChange={(e) =>
+                update('priorYearContext', {
+                  ...form.priorYearContext,
+                  estimatedAGI: e.target.value === '' ? null : parseFloat(e.target.value) || 0,
+                })
+              }
+              data-testid="prior-year-agi"
+            />
+          </div>
+
+          <div>
+            <label className={labelCls}>Prior Tax Provider</label>
+            <input
+              type="text"
+              className={inputCls}
+              value={form.priorYearContext.provider ?? ''}
+              placeholder="e.g. TurboTax, H&R Block"
+              onChange={(e) =>
+                update('priorYearContext', {
+                  ...form.priorYearContext,
+                  provider: e.target.value === '' ? null : e.target.value,
+                })
+              }
+              data-testid="prior-year-provider"
+            />
+          </div>
+        </div>
+
+        <fieldset className="mt-2">
+          <legend className={labelCls}>Prior Year Filing Method</legend>
+          <div className="grid grid-cols-1 gap-2 mt-1">
+            {PRIOR_FILING_METHOD_OPTIONS.map((opt) => (
+              <label
+                key={opt.value}
+                className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-zinc-50 transition-colors"
+              >
+                <input
+                  type="radio"
+                  name="priorFilingMethod"
+                  value={opt.value}
+                  checked={form.priorYearContext.filingMethod === opt.value}
+                  onChange={() =>
+                    update('priorYearContext', {
+                      ...form.priorYearContext,
+                      filingMethod: opt.value,
+                    })
+                  }
+                  className="accent-indigo-600"
+                />
+                <span className="text-sm text-zinc-700">{opt.label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Section 6: State Residency                                          */}
       {/* ------------------------------------------------------------------ */}
       <section className={sectionCls} aria-labelledby="section-state-residency">
         <h3 id="section-state-residency" className={sectionTitleCls}>
