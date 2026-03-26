@@ -18,8 +18,8 @@ function App() {
   const isSuperadmin = user?.role === 'superadmin';
 
   // Core Layout State
-  // Role-aware default: superadmin can be directed to 'admin' in the future (#81).
-  const defaultView = isSuperadmin ? 'tax-situation' : 'tax-situation';
+  // Role-aware default: superadmin lands on Admin panel; all other roles land on Tax Situation.
+  const defaultView = isSuperadmin ? 'admin' : 'tax-situation';
   const [activeView, setActiveView] = useState<
     'demo' | 'tax-situation' | 'tier-results' | 'settings' | 'admin'
   >(defaultView as 'demo' | 'tax-situation' | 'tier-results' | 'settings' | 'admin');
