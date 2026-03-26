@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS revoked_tokens (
 -- The token is encrypted at rest in the column; workers receive it only
 -- through the claim API response.
 CREATE TABLE IF NOT EXISTS task_queue (
-    id TEXT PRIMARY KEY,
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
     idempotency_key TEXT UNIQUE NOT NULL,
     agent_type TEXT NOT NULL,
     job_type TEXT NOT NULL,
