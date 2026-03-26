@@ -4,9 +4,9 @@
  *
  * POST /api/extract/w2
  *   Accepts a multipart/form-data upload containing a W-2 image (JPEG, PNG,
- *   or PDF). Sends the image to Claude vision via @anthropic-ai/sdk for
- *   structured field extraction. Returns W2ExtractionResponse with per-field
- *   confidence scores and warnings for low-confidence fields.
+ *   or PDF). Sends the image to the claude CLI subprocess via Bun.spawn with
+ *   --print for structured field extraction. Returns W2ExtractionResponse with
+ *   per-field confidence scores and warnings for low-confidence fields.
  *
  *   Privacy: raw images are NOT persisted (DATA-P-005 data minimization).
  *   Only user-confirmed extracted data is later saved by the client.
@@ -18,6 +18,9 @@ import type { AppState } from '../index';
 import { getCorsHeaders, getAuthenticatedUser } from './auth';
 import { makeJson } from '../lib/response';
 import type { W2ExtractedData, W2ExtractionResponse } from 'core';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { writeFile, unlink } from 'fs/promises';
 
 /** Accepted MIME types for W-2 uploads. */
 const ACCEPTED_TYPES = new Set(['image/jpeg', 'image/png', 'application/pdf']);
@@ -85,7 +88,7 @@ Rules:
 - For numeric fields, return numbers not strings.
 - Field confidence of 1.0 means you can read the value clearly; 0.0 means it is illegible.`;
 
-/** Calls Claude vision API to extract W-2 data from an image. */
+/** Calls the claude CLI subprocess to extract W-2 data from an image. */
 export async function extractW2WithClaude(
   imageData: string,
   mediaType: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp',
@@ -93,41 +96,56 @@ export async function extractW2WithClaude(
   data: W2ExtractedData;
   fieldConfidence: Record<string, number>;
 }> {
-  // Lazily import @anthropic-ai/sdk so the module can be mocked in tests without
-  // requiring the package to be installed in the test environment.
-  const Anthropic = (await import('@anthropic-ai/sdk')).default;
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  // SDK-based implementation (preserved for future restoration):
+  // const Anthropic = (await import('@anthropic-ai/sdk')).default;
+  // const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  // const message = await client.messages.create({
+  //   model: 'claude-opus-4-5',
+  //   max_tokens: 1024,
+  //   messages: [{ role: 'user', content: [{ type: 'image', source: { type: 'base64', media_type: mediaType, data: imageData } }, { type: 'text', text: EXTRACTION_PROMPT }] }],
+  // });
 
-  const message = await client.messages.create({
-    model: 'claude-opus-4-5',
-    max_tokens: 1024,
-    messages: [
+  // Write image to a temp file so the claude CLI can read it via file path in the prompt.
+  const ext = mediaType === 'image/png' ? 'png' : 'jpg';
+  const tmpPath = join(
+    tmpdir(),
+    `w2-extract-${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`,
+  );
+  await writeFile(tmpPath, Buffer.from(imageData, 'base64'));
+
+  let stdout: string;
+  try {
+    const prompt = `${EXTRACTION_PROMPT}\n\nThe W-2 image file is located at: ${tmpPath}\nPlease read that file and extract the W-2 data.`;
+
+    const proc = Bun.spawn(
+      ['claude', '--print', '--dangerously-skip-permissions', '--allowedTools', 'Read'],
       {
-        role: 'user',
-        content: [
-          {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: mediaType,
-              data: imageData,
-            },
-          },
-          {
-            type: 'text',
-            text: EXTRACTION_PROMPT,
-          },
-        ],
+        stdin: new TextEncoder().encode(prompt),
+        stdout: 'pipe',
+        stderr: 'pipe',
       },
-    ],
-  });
+    );
 
-  const textContent = message.content.find((c) => c.type === 'text');
-  if (!textContent || textContent.type !== 'text') {
-    throw new Error('Claude did not return text content');
+    const [stdoutText, stderrText] = await Promise.all([
+      new Response(proc.stdout).text(),
+      new Response(proc.stderr).text(),
+    ]);
+    await proc.exited;
+
+    if (proc.exitCode !== 0) {
+      throw new Error(`claude CLI exited with code ${proc.exitCode}: ${stderrText}`);
+    }
+    stdout = stdoutText;
+  } finally {
+    await unlink(tmpPath).catch(() => {});
   }
 
-  const parsed = JSON.parse(textContent.text) as {
+  // Extract JSON from stdout — strip any surrounding markdown fences if present.
+  const jsonText = stdout
+    .replace(/^```(?:json)?\s*/m, '')
+    .replace(/\s*```\s*$/m, '')
+    .trim();
+  const parsed = JSON.parse(jsonText) as {
     data: W2ExtractedData;
     fieldConfidence: Record<string, number>;
   };

@@ -83,33 +83,46 @@ Rules:
 - Do NOT invent income amounts or life events not mentioned.`;
 
 /**
- * Calls claude-haiku-4-5 to extract TaxSituation fields from a free-text description.
+ * Calls the claude CLI subprocess to extract TaxSituation fields from a free-text description.
  * Exported for injection in tests.
  */
 export async function parseDescriptionWithClaude(description: string): Promise<{
   fields: ParsedTaxFields;
 }> {
-  // Lazily import @anthropic-ai/sdk so the module can be mocked in tests.
-  const Anthropic = (await import('@anthropic-ai/sdk')).default;
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  // SDK-based implementation (preserved for future restoration):
+  // const Anthropic = (await import('@anthropic-ai/sdk')).default;
+  // const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  // const message = await client.messages.create({
+  //   model: 'claude-haiku-4-5',
+  //   max_tokens: 1024,
+  //   messages: [{ role: 'user', content: `${PARSE_PROMPT}\n\nUser description:\n${description}` }],
+  // });
 
-  const message = await client.messages.create({
-    model: 'claude-haiku-4-5',
-    max_tokens: 1024,
-    messages: [
-      {
-        role: 'user',
-        content: `${PARSE_PROMPT}\n\nUser description:\n${description}`,
-      },
-    ],
+  const prompt = `${PARSE_PROMPT}\n\nUser description:\n${description}`;
+
+  const proc = Bun.spawn(['claude', '--print', '--dangerously-skip-permissions', '--tools', ''], {
+    stdin: new TextEncoder().encode(prompt),
+    stdout: 'pipe',
+    stderr: 'pipe',
   });
 
-  const textContent = message.content.find((c) => c.type === 'text');
-  if (!textContent || textContent.type !== 'text') {
-    throw new Error('Claude did not return text content');
+  const [stdoutText, stderrText] = await Promise.all([
+    new Response(proc.stdout).text(),
+    new Response(proc.stderr).text(),
+  ]);
+  await proc.exited;
+
+  if (proc.exitCode !== 0) {
+    throw new Error(`claude CLI exited with code ${proc.exitCode}: ${stderrText}`);
   }
 
-  const raw = JSON.parse(textContent.text) as {
+  // Extract JSON from stdout — strip any surrounding markdown fences if present.
+  const jsonText = stdoutText
+    .replace(/^```(?:json)?\s*/m, '')
+    .replace(/\s*```\s*$/m, '')
+    .trim();
+
+  const raw = JSON.parse(jsonText) as {
     filingStatus: FilingStatus | null;
     incomeStreams: Array<{ type: IncomeStreamType; source: string; amount: number }> | null;
     lifeEvents: Array<{ type: LifeEventType; date: string; details?: string }> | null;
