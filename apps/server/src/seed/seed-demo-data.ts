@@ -580,9 +580,7 @@ interface BuildSituationOptions {
 }
 
 function buildSituation(opts: BuildSituationOptions): Record<string, unknown> {
-  const { userId, taxObjectId, taxYear, filingStatus, category, index, hasValidationError } = opts;
-
-  const firstName = FIRST_NAMES[index % FIRST_NAMES.length];
+  const { taxObjectId, taxYear, filingStatus, category, index, hasValidationError } = opts;
   const lastName = LAST_NAMES[index % LAST_NAMES.length];
   const state = STATES[index % STATES.length] as string;
   const now = new Date().toISOString();
