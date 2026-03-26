@@ -11,6 +11,7 @@
 import React from 'react';
 import { render } from 'vitest-browser-react';
 import { describe, test, expect } from 'vitest';
+import { Camera, Mic, Lock, HelpCircle } from 'lucide-react';
 import { DemoCard } from '../../src/components/pwa/demo-card';
 
 describe('DemoCard', () => {
@@ -19,7 +20,7 @@ describe('DemoCard', () => {
       <DemoCard
         title="CaptureCard"
         description="Take a photo with the device camera"
-        icon={<span data-testid="icon">📷</span>}
+        icon={<Camera size={20} data-testid="icon" />}
         featureAvailable={true}
         permissionState="granted"
       >
@@ -39,7 +40,7 @@ describe('DemoCard', () => {
       <DemoCard
         title="MicrophoneCard"
         description="Record audio"
-        icon={<span>🎙</span>}
+        icon={<Mic size={20} />}
         featureAvailable={false}
         platformNotes="Not supported in this browser"
       >
@@ -59,7 +60,7 @@ describe('DemoCard', () => {
       <DemoCard
         title="DeniedCard"
         description="Permission test"
-        icon={<span>🔒</span>}
+        icon={<Lock size={20} />}
         featureAvailable={true}
         permissionState="denied"
       >
@@ -78,7 +79,7 @@ describe('DemoCard', () => {
       <DemoCard
         title="PromptCard"
         description="Needs permission"
-        icon={<span>❓</span>}
+        icon={<HelpCircle size={20} />}
         featureAvailable={true}
         permissionState="prompt"
       >

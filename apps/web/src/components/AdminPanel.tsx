@@ -14,6 +14,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { getCsrfToken } from '../lib/csrf';
+import { Check, X } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -459,10 +460,8 @@ function AuditLogTab() {
             result.valid ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
           }`}
         >
-          <span
-            className={`text-xl select-none ${result.valid ? 'text-green-500' : 'text-red-500'}`}
-          >
-            {result.valid ? '✓' : '✗'}
+          <span className={`select-none ${result.valid ? 'text-green-500' : 'text-red-500'}`}>
+            {result.valid ? <Check size={20} strokeWidth={2} /> : <X size={20} strokeWidth={2} />}
           </span>
           <div>
             <p

@@ -21,6 +21,7 @@
 import React, { useState } from 'react';
 import type { ParsedTaxFields } from 'core';
 import { getCsrfToken } from '../lib/csrf';
+import { AlertTriangle } from 'lucide-react';
 
 interface DescribeIntakePathProps {
   taxObjectId: string;
@@ -150,7 +151,7 @@ export function DescribeIntakePath({
     <div className="space-y-4">
       {/* Disclaimer banner */}
       <div className="flex items-start gap-2 px-3 py-2 rounded bg-amber-50 border border-amber-200 text-xs text-amber-800">
-        <span className="mt-0.5 shrink-0">⚠</span>
+        <AlertTriangle size={14} strokeWidth={1.5} className="mt-0.5 shrink-0" />
         <span>
           <strong>AI prototype</strong> — review all fields before confirming. This is not tax
           advice.
@@ -331,7 +332,10 @@ export function DescribeIntakePath({
           {result.warnings.length > 0 && (
             <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2 space-y-0.5">
               {result.warnings.map((w, i) => (
-                <div key={i}>⚠ {w}</div>
+                <div key={i} className="flex items-start gap-1.5">
+                  <AlertTriangle size={12} strokeWidth={1.5} className="mt-0.5 shrink-0" />
+                  <span>{w}</span>
+                </div>
               ))}
             </div>
           )}

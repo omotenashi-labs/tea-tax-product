@@ -13,7 +13,7 @@
 import React from 'react';
 import { render } from 'vitest-browser-react';
 import { describe, test, expect } from 'vitest';
-import { Settings } from 'lucide-react';
+import { Settings, Check } from 'lucide-react';
 import { Sidebar } from '../../src/components/Sidebar';
 
 describe('Sidebar', () => {
@@ -44,7 +44,7 @@ describe('Sidebar', () => {
   test('renders provided nav items as buttons', async () => {
     const navItems = [
       { id: 'upload', label: 'Upload', icon: <span>↑</span> },
-      { id: 'results', label: 'Results', icon: <span>✓</span> },
+      { id: 'results', label: 'Results', icon: <Check size={16} /> },
     ];
 
     const screen = render(<Sidebar navItems={navItems} />);
@@ -56,7 +56,7 @@ describe('Sidebar', () => {
   test('active nav item receives bg-brand-900 class', async () => {
     const navItems = [
       { id: 'upload', label: 'Upload', icon: <Settings size={16} /> },
-      { id: 'results', label: 'Results', icon: <span>✓</span> },
+      { id: 'results', label: 'Results', icon: <Check size={16} /> },
     ];
 
     const screen = render(<Sidebar navItems={navItems} activeItemId="upload" />);
