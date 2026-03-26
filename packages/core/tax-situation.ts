@@ -295,6 +295,42 @@ export interface W2ExtractionResponse {
   error?: string;
 }
 
+/**
+ * Partial TaxSituation fields extracted from a free-text description.
+ * All fields are optional — Claude extracts only what is mentioned.
+ */
+export interface ParsedTaxFields {
+  filingStatus?: FilingStatus;
+  incomeStreams?: Array<{
+    type: IncomeStreamType;
+    source: string;
+    amount: number;
+  }>;
+  lifeEvents?: Array<{
+    type: LifeEventType;
+    date: string;
+    details?: string;
+  }>;
+  stateResidency?: {
+    primary: StateCode;
+    additional: StateCode[];
+  };
+  /** Per-field confidence scores (0.0–1.0). */
+  fieldConfidence: Record<string, number>;
+}
+
+/** Response from the parse-description endpoint. */
+export interface ParseDescriptionResponse {
+  success: boolean;
+  /** Extracted fields with confidence scores. */
+  fields: ParsedTaxFields | null;
+  /** Overall confidence across all extracted fields (0.0–1.0). */
+  confidence: number;
+  /** Human-readable warnings for low-confidence fields. */
+  warnings: string[];
+  error?: string;
+}
+
 /** Per-provider tier placement result. */
 export interface ProviderEvaluation {
   providerId: string;

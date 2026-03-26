@@ -23,6 +23,7 @@ import { handleTaxObjectsRequest } from './api/tax-objects';
 import { handleTaxReturnsRequest } from './api/tax-returns';
 import { handleTierEvaluateRequest } from './api/tier-evaluate';
 import { handleExtractW2Request } from './api/extract-w2';
+import { handleParseDescriptionRequest } from './api/parse-description';
 import { seedSuperuser } from './seed/superuser';
 import { seedDemoUsers } from './seed/demoUsers';
 import { getJwks } from './auth/jwt';
@@ -210,6 +211,12 @@ export default {
       // Tax-returns routes are nested under /api/tax-objects/:id/returns.
       // Check them before the parent tax-objects handler to avoid early exit.
       if (url.pathname.includes('/returns')) {
+        // parse-description is nested under returns — check it before the generic returns handler.
+        if (url.pathname.endsWith('/parse-description')) {
+          const parseRes = await handleParseDescriptionRequest(req, url, appState);
+          if (parseRes) return withTrace(parseRes);
+        }
+
         const taxReturnsRes = await handleTaxReturnsRequest(req, url, appState);
         if (taxReturnsRes) return withTrace(taxReturnsRes);
       }

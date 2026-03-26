@@ -29,7 +29,9 @@ import type {
   LifeEventType,
   StateCode,
   W2ExtractedData,
+  ParsedTaxFields,
 } from 'core';
+import { W2CaptureZone } from './W2CaptureZone';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -288,6 +290,61 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  /**
+   * Intake phase — shown before the main form when no initial data is loaded.
+   * 'capture' shows the W2CaptureZone (which now includes the text intake path).
+   * 'form' shows the Tax Situation form directly.
+   */
+  const [intakePhase, setIntakePhase] = useState<'capture' | 'form'>(
+    initialSituation ? 'form' : 'capture',
+  );
+
+  /**
+   * Merge fields from a text-description parse result into form state.
+   * Called when the user confirms after reviewing AI-extracted fields.
+   */
+  function applyParsedFields(fields: ParsedTaxFields) {
+    setForm((prev) => {
+      const next = { ...prev };
+
+      if (fields.filingStatus) {
+        next.filingStatus = fields.filingStatus;
+      }
+
+      if (fields.incomeStreams && fields.incomeStreams.length > 0) {
+        const newStreams: IncomeStream[] = fields.incomeStreams.map((s) => ({
+          type: s.type,
+          source: s.source,
+          amount: s.amount,
+          documentation: [],
+        }));
+        // Merge: keep existing streams, append new ones that aren't duplicated.
+        const existingTypes = new Set(prev.incomeStreams.map((s) => `${s.type}|${s.source}`));
+        const toAdd = newStreams.filter((s) => !existingTypes.has(`${s.type}|${s.source}`));
+        next.incomeStreams = [...prev.incomeStreams, ...toAdd];
+      }
+
+      if (fields.lifeEvents && fields.lifeEvents.length > 0) {
+        const newEvents: LifeEvent[] = fields.lifeEvents.map((e) => ({
+          type: e.type,
+          date: e.date,
+          details: e.details ?? '',
+        }));
+        next.lifeEvents = [...prev.lifeEvents, ...newEvents];
+      }
+
+      if (fields.stateResidency?.primary) {
+        next.primaryState = fields.stateResidency.primary;
+        if (fields.stateResidency.additional.length > 0) {
+          next.additionalStates = fields.stateResidency.additional;
+        }
+      }
+
+      return next;
+    });
+    setIntakePhase('form');
+  }
+
   const isMobileOrPwa = useMobileOrPwa();
   const photoInputRef = useRef<HTMLInputElement>(null);
 
@@ -446,6 +503,47 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
   // -------------------------------------------------------------------------
   // Render
   // -------------------------------------------------------------------------
+  // Intake phase: show W2CaptureZone (which includes text intake path)
+  // -------------------------------------------------------------------------
+  if (intakePhase === 'capture') {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-6">
+        <W2CaptureZone
+          onExtracted={(data) => {
+            // Pre-populate form via the w2Data path — update incomeStreams then go to form.
+            setForm((prev) => {
+              const existingStreams = prev.incomeStreams.filter((s) => s.type !== 'w2');
+              const w2Stream: IncomeStream = {
+                type: 'w2',
+                source: data.employerName ?? '',
+                amount: data.wages ?? 0,
+                employerEIN: data.employerEIN,
+                documentation: [],
+                w2Data: {
+                  wages: data.wages,
+                  federalTaxWithheld: data.federalTaxWithheld,
+                  socialSecurityWages: data.socialSecurityWages,
+                  socialSecurityTaxWithheld: data.socialSecurityTaxWithheld,
+                  medicareWages: data.medicareWages,
+                  medicareTaxWithheld: data.medicareTaxWithheld,
+                  stateName: data.stateName,
+                  stateWages: data.stateWages,
+                  stateTaxWithheld: data.stateTaxWithheld,
+                },
+              };
+              return { ...prev, incomeStreams: [w2Stream, ...existingStreams] };
+            });
+            setIntakePhase('form');
+          }}
+          onDescriptionParsed={applyParsedFields}
+          onSkip={() => setIntakePhase('form')}
+          taxObjectId={taxObjectId}
+          returnId={returnId}
+        />
+      </div>
+    );
+  }
+
   return (
     <form
       onSubmit={handleSave}
