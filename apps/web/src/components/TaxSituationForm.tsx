@@ -226,6 +226,8 @@ export interface TaxSituationFormProps {
   w2Data?: W2ExtractedData | null;
   /** Callback on successful save. */
   onSaved?: (situation: Partial<TaxSituation>) => void;
+  /** Optional callback to navigate to the Tier Results view. */
+  onViewTierResults?: () => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -257,6 +259,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
   initialSituation,
   w2Data,
   onSaved,
+  onViewTierResults,
 }) => {
   // -------------------------------------------------------------------------
   // Derive initial form state (merge initial situation + w2 data)
@@ -1159,9 +1162,21 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Save button                                                         */}
+      {/* Save button + View Tier Results                                     */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex justify-end pt-2">
+      <div className="flex items-center justify-between pt-2 flex-wrap gap-3">
+        {onViewTierResults ? (
+          <button
+            type="button"
+            onClick={onViewTierResults}
+            className="px-4 py-2 text-sm font-semibold text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
+            data-testid="view-tier-results-button"
+          >
+            View Tier Results →
+          </button>
+        ) : (
+          <span />
+        )}
         <button
           type="submit"
           disabled={saving}

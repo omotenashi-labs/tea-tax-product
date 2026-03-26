@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Login } from './components/Login';
-import { Settings, User, Receipt, FileText, ShieldAlert } from 'lucide-react';
+import { Settings, User, Receipt, FileText, ShieldAlert, BarChart2 } from 'lucide-react';
 import { DemoFlow } from './components/demo/demo-flow';
 import { TaxSituationForm } from './components/TaxSituationForm';
 import { W2CaptureZone } from './components/W2CaptureZone';
 import { SettingsView } from './components/SettingsView';
 import { AdminPanel } from './components/AdminPanel';
+import { TierResultsView } from './components/TierResultsView';
 import type { W2ExtractedData } from 'core';
 import { InstallPrompt } from './components/pwa/install-prompt';
 
@@ -17,9 +18,9 @@ function App() {
   // Core Layout State
   // Role-aware default: superadmin can be directed to 'admin' in the future (#81).
   const defaultView = isSuperadmin ? 'tax-situation' : 'tax-situation';
-  const [activeView, setActiveView] = useState<'demo' | 'tax-situation' | 'settings' | 'admin'>(
-    defaultView as 'demo' | 'tax-situation' | 'settings' | 'admin',
-  );
+  const [activeView, setActiveView] = useState<
+    'demo' | 'tax-situation' | 'tier-results' | 'settings' | 'admin'
+  >(defaultView as 'demo' | 'tax-situation' | 'tier-results' | 'settings' | 'admin');
 
   // W-2 extraction state: null = not yet extracted, data = confirmed extraction
   const [w2Data, setW2Data] = useState<W2ExtractedData | null>(null);
@@ -76,6 +77,14 @@ function App() {
               title="Tax Situation"
             >
               <FileText size={20} strokeWidth={2.5} />
+            </button>
+            <button
+              onClick={() => setActiveView('tier-results')}
+              className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'tier-results' ? 'bg-indigo-50 text-indigo-600' : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'}`}
+              title="Tier Results"
+              data-testid="tier-results-nav-item"
+            >
+              <BarChart2 size={20} strokeWidth={2.5} />
             </button>
             <button
               onClick={() => setActiveView('settings')}
@@ -147,7 +156,11 @@ function App() {
                 taxObjectId="demo-tax-object-id"
                 returnId="demo-return-id"
                 w2Data={w2Data}
+                onViewTierResults={() => setActiveView('tier-results')}
               />
+            )}
+            {activeView === 'tier-results' && (
+              <TierResultsView taxObjectId="demo-tax-object-id" returnId="demo-return-id" />
             )}
             {activeView === 'settings' && <SettingsView />}
             {activeView === 'admin' && isSuperadmin && <AdminPanel />}
@@ -178,6 +191,15 @@ function App() {
         >
           <FileText size={22} strokeWidth={2} />
           <span>Tax</span>
+        </button>
+        <button
+          onClick={() => setActiveView('tier-results')}
+          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'tier-results' ? 'text-indigo-600' : 'text-zinc-400'}`}
+          aria-current={activeView === 'tier-results' ? 'page' : undefined}
+          data-testid="tier-results-nav-item-mobile"
+        >
+          <BarChart2 size={22} strokeWidth={2} />
+          <span>Tiers</span>
         </button>
         <button
           onClick={() => setActiveView('settings')}
