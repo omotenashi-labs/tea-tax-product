@@ -137,7 +137,7 @@ export async function handleAuditRequest(
 
     const total = parseInt(countRows[0]?.count ?? '0', 10);
 
-    const normalizedEvents = events.map((e) => ({
+    const normalizedEvents = events.map((e: AuditEventRow) => ({
       ...e,
       ts: typeof e.ts === 'string' ? e.ts : (e.ts as Date).toISOString(),
     }));
