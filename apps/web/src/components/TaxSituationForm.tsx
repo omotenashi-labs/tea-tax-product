@@ -234,6 +234,10 @@ export interface TaxSituationFormProps {
    * within this form; step 1 (W-2 Import) is managed by the parent.
    */
   onStepChange?: (step: number) => void;
+  /** Filing year for the return — used in the export file name. Defaults to current year. */
+  filingYear?: number;
+  /** Return status — included in the exported JSON. */
+  returnStatus?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -267,6 +271,8 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
   onSaved,
   onViewTierResults,
   onStepChange,
+  filingYear,
+  returnStatus,
 }) => {
   // -------------------------------------------------------------------------
   // Derive initial form state (merge initial situation + w2 data)
@@ -321,6 +327,51 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [showJsonPanel, setShowJsonPanel] = useState(false);
+
+  // Derive the year for export: prop > initialSituation.filingYear > current year
+  const exportYear = filingYear ?? initialSituation?.filingYear ?? new Date().getFullYear();
+
+  /** Build the exportable TaxSituation payload from current form state. */
+  function buildExportPayload() {
+    const deductions: Deduction[] =
+      form.deductionMode === 'standard'
+        ? [{ type: 'standard', amount: 0, documentation: [] }]
+        : form.itemizedDeductions;
+
+    return {
+      filingYear: exportYear,
+      filingStatus: form.filingStatus,
+      returnStatus: returnStatus ?? 'open',
+      dependents: form.dependents,
+      incomeStreams: form.incomeStreams,
+      deductions,
+      lifeEvents: form.lifeEvents,
+      priorYearContext: form.priorYearContext,
+      stateResidency: {
+        primary: form.primaryState,
+        additional: form.additionalStates,
+      },
+      confidenceScores:
+        (initialSituation as Partial<TaxSituation> & { confidenceScores?: unknown })
+          ?.confidenceScores ?? null,
+    };
+  }
+
+  /** Trigger a browser download of the formatted JSON. */
+  function handleDownload() {
+    const payload = buildExportPayload();
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tea-tax-situation-${exportYear}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
   /**
    * Intake phase — shown before the main form when no initial data is loaded.
@@ -1231,6 +1282,43 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
           </button>
         </div>
       </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Export controls: Download + View JSON toggle                        */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="flex flex-wrap items-center gap-3 pt-2">
+        <button
+          type="button"
+          onClick={handleDownload}
+          className="px-4 py-2 text-sm font-medium text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50 transition-colors"
+          aria-label="Download my Tax Situation"
+        >
+          Download my Tax Situation
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowJsonPanel((v) => !v)}
+          className="px-4 py-2 text-sm font-medium text-zinc-600 border border-zinc-300 rounded-lg hover:bg-zinc-50 transition-colors"
+          aria-expanded={showJsonPanel}
+          aria-controls="json-panel"
+        >
+          {showJsonPanel ? 'Hide JSON' : 'View JSON'}
+        </button>
+      </div>
+
+      {/* Inline JSON panel */}
+      {showJsonPanel && (
+        <div
+          id="json-panel"
+          role="region"
+          aria-label="Tax Situation JSON"
+          className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 overflow-auto max-h-96"
+        >
+          <pre className="text-xs text-zinc-700 whitespace-pre-wrap break-all">
+            {JSON.stringify(buildExportPayload(), null, 2)}
+          </pre>
+        </div>
+      )}
 
       {/* ------------------------------------------------------------------ */}
       {/* Save button + View Tier Results / Review sentinel (step 7)         */}
