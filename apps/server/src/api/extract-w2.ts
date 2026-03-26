@@ -113,8 +113,7 @@ export async function extractW2WithClaude(
   );
   await writeFile(tmpPath, Buffer.from(imageData, 'base64'));
 
-  let stdout = '';
-  let stderr = '';
+  let stdout: string;
   try {
     const prompt = `${EXTRACTION_PROMPT}\n\nThe W-2 image file is located at: ${tmpPath}\nPlease read that file and extract the W-2 data.`;
 
@@ -127,17 +126,16 @@ export async function extractW2WithClaude(
       },
     );
 
-    const [stdoutBuf, stderrBuf] = await Promise.all([
+    const [stdoutText, stderrText] = await Promise.all([
       new Response(proc.stdout).text(),
       new Response(proc.stderr).text(),
     ]);
     await proc.exited;
-    stdout = stdoutBuf;
-    stderr = stderrBuf;
 
     if (proc.exitCode !== 0) {
-      throw new Error(`claude CLI exited with code ${proc.exitCode}: ${stderr}`);
+      throw new Error(`claude CLI exited with code ${proc.exitCode}: ${stderrText}`);
     }
+    stdout = stdoutText;
   } finally {
     await unlink(tmpPath).catch(() => {});
   }
