@@ -29,8 +29,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(async (res) => {
         if (res.ok) {
           const data = await res.json();
-          if (data.user) setUser(data.user);
-        } else if (res.status !== 401) {
+          // /api/auth/me returns 200 { user: null } when unauthenticated and
+          // 200 { user: {...} } when authenticated — check data.user directly.
+          if (data.user !== null && data.user !== undefined) setUser(data.user);
+        } else {
           console.warn(`Auth check failed with status: ${res.status}`);
         }
       })
