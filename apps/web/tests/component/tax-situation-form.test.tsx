@@ -8,11 +8,13 @@
  *  - Add/remove row buttons work for array fields
  *  - Form renders in single-column at 375px mobile viewport
  *  - Take Photo button visible on touch/PWA, hidden on desktop
+ *  - Download my Tax Situation button triggers a JSON file download
+ *  - View JSON toggle shows/hides formatted JSON inline
  */
 
 import React from 'react';
 import { render } from 'vitest-browser-react';
-import { describe, test, expect, afterEach } from 'vitest';
+import { describe, test, expect, afterEach, vi } from 'vitest';
 import { TaxSituationForm } from '../../src/components/TaxSituationForm';
 import type { W2ExtractedData } from 'core';
 
@@ -331,6 +333,111 @@ describe('TaxSituationForm', () => {
       await expect
         .element(screen.getByRole('heading', { name: 'Document Capture' }))
         .toBeInTheDocument();
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // JSON export — Download button and View JSON toggle
+  // -------------------------------------------------------------------------
+  describe('JSON export', () => {
+    test('renders Download my Tax Situation button', async () => {
+      const screen = renderForm();
+
+      await expect
+        .element(screen.getByRole('button', { name: 'Download my Tax Situation' }))
+        .toBeInTheDocument();
+    });
+
+    test('renders View JSON toggle button', async () => {
+      const screen = renderForm();
+
+      await expect.element(screen.getByRole('button', { name: 'View JSON' })).toBeInTheDocument();
+    });
+
+    test('View JSON toggle shows inline JSON panel', async () => {
+      const screen = renderForm();
+
+      // Panel not visible initially
+      expect(screen.baseElement.querySelector('#json-panel')).toBeNull();
+
+      // Click View JSON
+      await screen.getByRole('button', { name: 'View JSON' }).click();
+
+      // Panel is now visible
+      const panel = screen.baseElement.querySelector('#json-panel');
+      expect(panel).toBeTruthy();
+    });
+
+    test('View JSON toggle hides the panel when clicked again', async () => {
+      const screen = renderForm();
+
+      await screen.getByRole('button', { name: 'View JSON' }).click();
+      expect(screen.baseElement.querySelector('#json-panel')).toBeTruthy();
+
+      await screen.getByRole('button', { name: 'Hide JSON' }).click();
+      expect(screen.baseElement.querySelector('#json-panel')).toBeNull();
+    });
+
+    test('inline JSON panel contains filingStatus field', async () => {
+      const screen = renderForm({
+        initialSituation: { filingStatus: 'single' },
+        filingYear: 2024,
+      });
+
+      await screen.getByRole('button', { name: 'View JSON' }).click();
+
+      const panel = screen.baseElement.querySelector('#json-panel');
+      expect(panel?.textContent).toContain('filingStatus');
+      expect(panel?.textContent).toContain('single');
+    });
+
+    test('inline JSON panel contains filingYear from prop', async () => {
+      const screen = renderForm({
+        initialSituation: {},
+        filingYear: 2024,
+      });
+
+      await screen.getByRole('button', { name: 'View JSON' }).click();
+
+      const panel = screen.baseElement.querySelector('#json-panel');
+      expect(panel?.textContent).toContain('filingYear');
+      expect(panel?.textContent).toContain('2024');
+    });
+
+    test('Download button triggers file download with correct filename', async () => {
+      // Stub browser download mechanics
+      const revokeObjectURL = vi.fn();
+      const createObjectURL = vi.fn(() => 'blob:mock-url');
+      const originalCreate = URL.createObjectURL;
+      const originalRevoke = URL.revokeObjectURL;
+      URL.createObjectURL = createObjectURL;
+      URL.revokeObjectURL = revokeObjectURL;
+
+      const clickedHrefs: string[] = [];
+      const origCreateElement = document.createElement.bind(document);
+      const createElementSpy = vi
+        .spyOn(document, 'createElement')
+        .mockImplementation((tag: string) => {
+          const el = origCreateElement(tag);
+          if (tag === 'a') {
+            vi.spyOn(el as HTMLAnchorElement, 'click').mockImplementation(() => {
+              clickedHrefs.push((el as HTMLAnchorElement).download);
+            });
+          }
+          return el;
+        });
+
+      const screen = renderForm({ filingYear: 2024 });
+
+      await screen.getByRole('button', { name: 'Download my Tax Situation' }).click();
+
+      expect(createObjectURL).toHaveBeenCalledOnce();
+      // The download attribute should contain the correct year
+      expect(clickedHrefs.some((name) => name.includes('2024'))).toBe(true);
+
+      createElementSpy.mockRestore();
+      URL.createObjectURL = originalCreate;
+      URL.revokeObjectURL = originalRevoke;
     });
   });
 
