@@ -5,7 +5,7 @@ import { Settings, User, Receipt, FileText, ShieldAlert } from 'lucide-react';
 import { DemoFlow } from './components/demo/demo-flow';
 import { TaxSituationForm } from './components/TaxSituationForm';
 import { W2CaptureZone } from './components/W2CaptureZone';
-import { RegisterPasskeyButton } from './components/PasskeyButton';
+import { SettingsView } from './components/SettingsView';
 import { AdminPanel } from './components/AdminPanel';
 import type { W2ExtractedData } from 'core';
 import { InstallPrompt } from './components/pwa/install-prompt';
@@ -149,12 +149,7 @@ function App() {
                 w2Data={w2Data}
               />
             )}
-            {activeView === 'settings' && (
-              <div className="p-6 sm:p-8 max-w-sm space-y-4">
-                <h2 className="text-sm font-semibold text-zinc-700">Security</h2>
-                <RegisterPasskeyButton userId={user.id} />
-              </div>
-            )}
+            {activeView === 'settings' && <SettingsView />}
             {activeView === 'admin' && isSuperadmin && <AdminPanel />}
             {activeView === 'admin' && !isSuperadmin && (
               <div className="p-8 text-red-500 text-sm">Access denied.</div>
