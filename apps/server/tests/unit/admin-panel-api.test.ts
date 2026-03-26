@@ -179,7 +179,9 @@ describe('handleAdminRequest() — superadmin panel routes', () => {
         jurisdiction: 'federal',
         return_type: '1040',
         filing_status: 'single',
+        situation_key_count: '3',
         created_at: '2024-01-01',
+        updated_at: '2024-01-02',
       },
     ];
     const appState = makeAppState(fakeActivity);
@@ -190,6 +192,85 @@ describe('handleAdminRequest() — superadmin panel routes', () => {
     const body = await res!.json();
     expect(body.tax_activity).toHaveLength(1);
     expect(body.tax_activity[0].username).toBe('alice');
+  });
+
+  test('GET /api/admin/tax-activity response never contains situation_data', async () => {
+    // Privacy enforcement: situation_data must be absent from every response
+    // object regardless of what is stored in the database.
+    // PRD §6.3: "No admin data access. No god mode."
+    mockVerifyJwt.mockResolvedValue({ id: 'admin-1', username: 'admin', role: 'superadmin' });
+    const fakeActivity = [
+      {
+        id: 'tr1',
+        tax_object_id: 'to1',
+        owner_id: 'u1',
+        username: 'alice',
+        status: 'filed',
+        tax_year: '2023',
+        jurisdiction: 'federal',
+        return_type: '1040',
+        filing_status: 'single',
+        // situation_key_count is derived server-side; the raw blob is never forwarded
+        situation_key_count: '5',
+        created_at: '2024-01-01',
+        updated_at: '2024-01-10',
+      },
+    ];
+    const appState = makeAppState(fakeActivity);
+    const req = makeReq('GET', '/api/admin/tax-activity');
+    const url = new URL(req.url);
+    const res = await handleAdminRequest(req, url, appState);
+    expect(res!.status).toBe(200);
+    const body = await res!.json();
+    const record = body.tax_activity[0];
+    // situation_data must not appear in the response
+    expect(record).not.toHaveProperty('situation_data');
+    // PII fields (wages, income, ssn) must not appear
+    expect(record).not.toHaveProperty('wages');
+    expect(record).not.toHaveProperty('income');
+    expect(record).not.toHaveProperty('ssn');
+  });
+
+  test('GET /api/admin/tax-activity includes completeness_score derived from key count', async () => {
+    mockVerifyJwt.mockResolvedValue({ id: 'admin-1', username: 'admin', role: 'superadmin' });
+    const fakeActivity = [
+      {
+        id: 'tr1',
+        tax_object_id: 'to1',
+        owner_id: 'u1',
+        username: 'alice',
+        status: 'draft',
+        tax_year: '2023',
+        jurisdiction: 'federal',
+        return_type: '1040',
+        filing_status: 'single',
+        situation_key_count: '5', // threshold is 5 → score = 1.0
+        created_at: '2024-01-01',
+        updated_at: '2024-01-10',
+      },
+      {
+        id: 'tr2',
+        tax_object_id: 'to2',
+        owner_id: 'u2',
+        username: 'bob',
+        status: 'draft',
+        tax_year: '2023',
+        jurisdiction: 'federal',
+        return_type: '1040',
+        filing_status: 'single',
+        situation_key_count: '0', // no situation_data → score = 0
+        created_at: '2024-01-02',
+        updated_at: '2024-01-02',
+      },
+    ];
+    const appState = makeAppState(fakeActivity);
+    const req = makeReq('GET', '/api/admin/tax-activity');
+    const url = new URL(req.url);
+    const res = await handleAdminRequest(req, url, appState);
+    expect(res!.status).toBe(200);
+    const body = await res!.json();
+    expect(body.tax_activity[0].completeness_score).toBe(1);
+    expect(body.tax_activity[1].completeness_score).toBe(0);
   });
 
   // ── GET /api/admin/demo-status ─────────────────────────────────────────────
