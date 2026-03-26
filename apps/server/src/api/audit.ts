@@ -1,18 +1,26 @@
 /**
- * Audit API — superuser-only audit log verification endpoint.
+ * Audit API — superadmin-only audit log verification endpoint.
  *
  * GET /api/audit/verify
  *   Reads all rows in insertion order, recomputes each hash from the chain,
  *   and returns { valid: true } or { valid: false, firstInvalidId: '<uuid>' }.
  *
- * Superuser is determined by the SUPERUSER_ID environment variable.
- * If it is not set, this endpoint returns 403 to all callers.
+ * Access is guarded by the same isSuperadmin role check used by all other
+ * /api/admin/* routes (user.role === 'superadmin' in the authenticated JWT).
+ * The SUPERUSER_ID environment variable is not required.
  */
 
 import type { AppState } from '../index';
 import { getCorsHeaders, getAuthenticatedUser } from './auth';
 import { computeAuditHash } from 'core';
-import { isSuperuser, makeJson } from '../lib/response';
+import { makeJson } from '../lib/response';
+
+/**
+ * Returns true when the authenticated user has the superadmin role.
+ */
+function isSuperadmin(user: { role?: string }): boolean {
+  return user.role === 'superadmin';
+}
 
 const DEFAULT_GENESIS_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
 
@@ -31,11 +39,11 @@ export async function handleAuditRequest(
   const { auditSql } = appState;
   const json = makeJson(corsHeaders);
 
-  // GET /api/audit/verify — superuser only
+  // GET /api/audit/verify — superadmin only
   if (req.method === 'GET' && url.pathname === '/api/audit/verify') {
     const user = await getAuthenticatedUser(req);
     if (!user) return json({ error: 'Unauthorized' }, 401);
-    if (!isSuperuser(user.id)) return json({ error: 'Forbidden' }, 403);
+    if (!isSuperadmin(user)) return json({ error: 'Forbidden' }, 403);
 
     interface AuditRow {
       id: string;
