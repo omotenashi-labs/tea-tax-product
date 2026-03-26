@@ -16,7 +16,7 @@
  * Layout: two-column grid on desktop (md+), single-column on mobile.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useMobileOrPwa } from '../hooks/use-mobile-or-pwa';
 import type {
   TaxSituation,
@@ -228,6 +228,12 @@ export interface TaxSituationFormProps {
   onSaved?: (situation: Partial<TaxSituation>) => void;
   /** Optional callback to navigate to the Tier Results view. */
   onViewTierResults?: () => void;
+  /**
+   * Called whenever the active protocol step changes (1-based index matching
+   * TaxProgressIndicator.TAX_STEPS). Steps 2-7 are driven by scroll position
+   * within this form; step 1 (W-2 Import) is managed by the parent.
+   */
+  onStepChange?: (step: number) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -260,6 +266,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
   w2Data,
   onSaved,
   onViewTierResults,
+  onStepChange,
 }) => {
   // -------------------------------------------------------------------------
   // Derive initial form state (merge initial situation + w2 data)
@@ -372,6 +379,58 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
 
   const isMobileOrPwa = useMobileOrPwa();
   const photoInputRef = useRef<HTMLInputElement>(null);
+
+  // -------------------------------------------------------------------------
+  // Scroll-based step tracking (drives TaxProgressIndicator via onStepChange)
+  // Maps section IDs to protocol step numbers (steps 2-7).
+  // -------------------------------------------------------------------------
+  useEffect(() => {
+    if (!onStepChange) return;
+
+    const sectionStepMap: Record<string, number> = {
+      'section-filing-basics': 2,
+      'section-income': 3,
+      'section-deductions': 4,
+      'section-life-events': 5,
+      'section-prior-year': 5,
+      'section-state-residency': 6,
+      'section-review': 7,
+    };
+
+    const sectionIds = Object.keys(sectionStepMap);
+
+    // Track intersection ratios to determine which section is most visible.
+    const ratios: Record<string, number> = {};
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          ratios[entry.target.id] = entry.intersectionRatio;
+        }
+        // Pick the section with the highest visibility ratio.
+        let bestId = '';
+        let bestRatio = 0;
+        for (const id of sectionIds) {
+          const r = ratios[id] ?? 0;
+          if (r > bestRatio) {
+            bestRatio = r;
+            bestId = id;
+          }
+        }
+        if (bestId) {
+          onStepChange(sectionStepMap[bestId]);
+        }
+      },
+      { threshold: [0, 0.1, 0.25, 0.5, 0.75, 1.0] },
+    );
+
+    for (const id of sectionIds) {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    }
+
+    return () => observer.disconnect();
+  }, [onStepChange]);
 
   // -------------------------------------------------------------------------
   // Generic field updater
@@ -587,7 +646,11 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
       {/* ------------------------------------------------------------------ */}
       {/* Section 1: Filing Basics                                            */}
       {/* ------------------------------------------------------------------ */}
-      <section className={sectionCls} aria-labelledby="section-filing-basics">
+      <section
+        id="section-filing-basics"
+        className={sectionCls}
+        aria-labelledby="section-filing-basics"
+      >
         <h3 id="section-filing-basics" className={sectionTitleCls}>
           Filing Basics
         </h3>
@@ -712,7 +775,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
       {/* ------------------------------------------------------------------ */}
       {/* Section 2: Income                                                   */}
       {/* ------------------------------------------------------------------ */}
-      <section className={sectionCls} aria-labelledby="section-income">
+      <section id="section-income" className={sectionCls} aria-labelledby="section-income">
         <h3 id="section-income" className={sectionTitleCls}>
           Income
         </h3>
@@ -827,7 +890,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
       {/* ------------------------------------------------------------------ */}
       {/* Section 3: Deductions                                               */}
       {/* ------------------------------------------------------------------ */}
-      <section className={sectionCls} aria-labelledby="section-deductions">
+      <section id="section-deductions" className={sectionCls} aria-labelledby="section-deductions">
         <h3 id="section-deductions" className={sectionTitleCls}>
           Deductions
         </h3>
@@ -929,7 +992,11 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
       {/* ------------------------------------------------------------------ */}
       {/* Section 4: Life Events                                              */}
       {/* ------------------------------------------------------------------ */}
-      <section className={sectionCls} aria-labelledby="section-life-events">
+      <section
+        id="section-life-events"
+        className={sectionCls}
+        aria-labelledby="section-life-events"
+      >
         <h3 id="section-life-events" className={sectionTitleCls}>
           Life Events
         </h3>
@@ -1031,7 +1098,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
       {/* ------------------------------------------------------------------ */}
       {/* Section 5: Prior Year Context                                       */}
       {/* ------------------------------------------------------------------ */}
-      <section className={sectionCls} aria-labelledby="section-prior-year">
+      <section id="section-prior-year" className={sectionCls} aria-labelledby="section-prior-year">
         <h3 id="section-prior-year" className={sectionTitleCls}>
           Prior Year Context
         </h3>
@@ -1105,7 +1172,11 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
       {/* ------------------------------------------------------------------ */}
       {/* Section 6: State Residency                                          */}
       {/* ------------------------------------------------------------------ */}
-      <section className={sectionCls} aria-labelledby="section-state-residency">
+      <section
+        id="section-state-residency"
+        className={sectionCls}
+        aria-labelledby="section-state-residency"
+      >
         <h3 id="section-state-residency" className={sectionTitleCls}>
           State Residency
         </h3>
@@ -1162,9 +1233,9 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
       </section>
 
       {/* ------------------------------------------------------------------ */}
-      {/* Save button + View Tier Results                                     */}
+      {/* Save button + View Tier Results / Review sentinel (step 7)         */}
       {/* ------------------------------------------------------------------ */}
-      <div className="flex items-center justify-between pt-2 flex-wrap gap-3">
+      <div id="section-review" className="flex items-center justify-between pt-2 flex-wrap gap-3">
         {onViewTierResults ? (
           <button
             type="button"
@@ -1180,7 +1251,7 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
         <button
           type="submit"
           disabled={saving}
-          className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50"
+          className="px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm disabled:opacity-50"
         >
           {saving ? 'Saving...' : 'Save Tax Situation'}
         </button>
