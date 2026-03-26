@@ -19,6 +19,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { RegisterPasskeyButton } from './PasskeyButton';
 import { useAuth } from '../context/AuthContext';
+import { getCsrfToken } from '../lib/csrf';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -171,6 +172,7 @@ function ProfileTab({ userId, username, onShowToast }: ProfileTabProps) {
       const res = await fetch(`/api/auth/passkey/credentials/${credId}`, {
         method: 'DELETE',
         credentials: 'include',
+        headers: { 'X-CSRF-Token': getCsrfToken() },
       });
       if (res.ok) {
         setCredentials((prev) => prev.filter((c) => c.id !== credId));
@@ -312,7 +314,7 @@ function PreferencesTab({ userId, onShowToast }: PreferencesTabProps) {
         const res = await fetch(`/api/users/${userId}`, {
           method: 'PATCH',
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
           body: JSON.stringify({ [key]: value }),
         });
         if (res.ok) {

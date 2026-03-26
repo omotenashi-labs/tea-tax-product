@@ -23,6 +23,7 @@ import React, { useState, useCallback } from 'react';
 import type { TierEvaluationResult } from 'core';
 import { TierComparisonTable } from './TierComparisonTable';
 import { RefreshCw } from 'lucide-react';
+import { getCsrfToken } from '../lib/csrf';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -59,17 +60,12 @@ export function TierResultsView({ taxObjectId, returnId }: TierResultsViewProps)
     setError(null);
 
     try {
-      // Fetch CSRF token first
-      const csrfRes = await fetch('/api/auth/csrf', { credentials: 'include' });
-      const csrfData = csrfRes.ok ? await csrfRes.json() : null;
-      const csrfToken: string = (csrfData as { token?: string } | null)?.token ?? '';
-
       const res = await fetch(`/api/tax-objects/${taxObjectId}/returns/${returnId}/tier-evaluate`, {
         method: 'POST',
         credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': csrfToken,
+          'X-CSRF-Token': getCsrfToken(),
         },
       });
 

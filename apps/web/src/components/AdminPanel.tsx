@@ -13,6 +13,7 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
+import { getCsrfToken } from '../lib/csrf';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -137,7 +138,7 @@ function UsersTab() {
       const res = await fetch(`/api/admin/users/${id}`, {
         method: 'PATCH',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
         body: JSON.stringify({ role }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -152,7 +153,7 @@ function UsersTab() {
       const res = await fetch(`/api/admin/users/${id}`, {
         method: 'PATCH',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
         body: JSON.stringify({ active }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
