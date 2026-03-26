@@ -155,7 +155,9 @@ function App() {
             <TaxProgressIndicator
               currentStep={taxCurrentStep}
               completedSteps={
-                taxIntakePath === 'form' ? Array.from({ length: taxCurrentStep - 1 }, (_, i) => i + 1) : []
+                taxIntakePath === 'form'
+                  ? Array.from({ length: taxCurrentStep - 1 }, (_, i) => i + 1)
+                  : []
               }
             />
           )}
