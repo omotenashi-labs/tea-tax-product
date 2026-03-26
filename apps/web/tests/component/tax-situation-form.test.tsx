@@ -7,13 +7,43 @@
  *  - Form renders all sections with correct field types
  *  - Add/remove row buttons work for array fields
  *  - Form renders in single-column at 375px mobile viewport
+ *  - Take Photo button visible on touch/PWA, hidden on desktop
  */
 
 import React from 'react';
 import { render } from 'vitest-browser-react';
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, afterEach } from 'vitest';
 import { TaxSituationForm } from '../../src/components/TaxSituationForm';
 import type { W2ExtractedData } from 'core';
+
+// ---------------------------------------------------------------------------
+// matchMedia mock helpers for mobile/PWA tests
+// ---------------------------------------------------------------------------
+
+function mockMatchMedia(matches: Record<string, boolean>) {
+  const original = window.matchMedia;
+
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => {
+      const isMatch = matches[query] ?? false;
+      return {
+        matches: isMatch,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      };
+    },
+  });
+
+  return () => {
+    Object.defineProperty(window, 'matchMedia', { writable: true, value: original });
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -236,6 +266,67 @@ describe('TaxSituationForm', () => {
 
     // The row should display "W-2" label
     await expect.element(screen.getByText('Income Source 1 (W-2)')).toBeInTheDocument();
+  });
+
+  // -------------------------------------------------------------------------
+  // Take Photo button — mobile / PWA conditional rendering
+  // -------------------------------------------------------------------------
+  describe('Take Photo button', () => {
+    let restoreMatchMedia: (() => void) | null = null;
+
+    afterEach(() => {
+      restoreMatchMedia?.();
+      restoreMatchMedia = null;
+    });
+
+    test('does NOT render Take Photo input on desktop (no coarse pointer, no standalone)', async () => {
+      restoreMatchMedia = mockMatchMedia({
+        '(pointer: coarse)': false,
+        '(display-mode: standalone)': false,
+      });
+
+      const screen = renderForm();
+      const photoInput = screen.baseElement.querySelector('[data-testid="take-photo-input"]');
+      expect(photoInput).toBeNull();
+    });
+
+    test('renders Take Photo input when pointer is coarse (touch device)', async () => {
+      restoreMatchMedia = mockMatchMedia({
+        '(pointer: coarse)': true,
+        '(display-mode: standalone)': false,
+      });
+
+      const screen = renderForm();
+      const photoInput = screen.baseElement.querySelector('[data-testid="take-photo-input"]');
+      expect(photoInput).toBeTruthy();
+      expect(photoInput?.getAttribute('type')).toBe('file');
+      expect(photoInput?.getAttribute('accept')).toBe('image/*');
+      expect(photoInput?.getAttribute('capture')).toBe('environment');
+    });
+
+    test('renders Take Photo input in standalone PWA mode', async () => {
+      restoreMatchMedia = mockMatchMedia({
+        '(pointer: coarse)': false,
+        '(display-mode: standalone)': true,
+      });
+
+      const screen = renderForm();
+      const photoInput = screen.baseElement.querySelector('[data-testid="take-photo-input"]');
+      expect(photoInput).toBeTruthy();
+      expect(photoInput?.getAttribute('capture')).toBe('environment');
+    });
+
+    test('renders Document Capture section heading on mobile', async () => {
+      restoreMatchMedia = mockMatchMedia({
+        '(pointer: coarse)': true,
+        '(display-mode: standalone)': false,
+      });
+
+      const screen = renderForm();
+      await expect
+        .element(screen.getByRole('heading', { name: 'Document Capture' }))
+        .toBeInTheDocument();
+    });
   });
 
   // -------------------------------------------------------------------------

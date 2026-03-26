@@ -15,7 +15,8 @@
  * Layout: two-column grid on desktop (md+), single-column on mobile.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { useMobileOrPwa } from '../hooks/use-mobile-or-pwa';
 import type {
   TaxSituation,
   FilingStatus,
@@ -286,6 +287,9 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const isMobileOrPwa = useMobileOrPwa();
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   // -------------------------------------------------------------------------
   // Generic field updater
@@ -669,6 +673,32 @@ export const TaxSituationForm: React.FC<TaxSituationFormProps> = ({
           + Add Income Source
         </button>
       </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* Take Photo (mobile / PWA only)                                      */}
+      {/* ------------------------------------------------------------------ */}
+      {isMobileOrPwa && (
+        <section className={sectionCls} aria-labelledby="section-document-capture">
+          <h3 id="section-document-capture" className={sectionTitleCls}>
+            Document Capture
+          </h3>
+          <p className="text-xs text-zinc-500 mb-3">
+            Take a photo of your W-2 or other tax document to attach it to this return.
+          </p>
+          <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm cursor-pointer">
+            <span>Take Photo</span>
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="sr-only"
+              aria-label="Take photo of tax document"
+              data-testid="take-photo-input"
+            />
+          </label>
+        </section>
+      )}
 
       {/* ------------------------------------------------------------------ */}
       {/* Section 3: Deductions                                               */}
