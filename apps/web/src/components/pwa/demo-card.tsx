@@ -85,26 +85,26 @@ export function DemoCard({
 }: DemoCardProps) {
   return (
     <div
-      className={`rounded-2xl border bg-white shadow-sm p-6 flex flex-col gap-4 transition-opacity ${
+      className={`rounded-lg border bg-white shadow-sm p-6 flex flex-col gap-4 transition-opacity ${
         featureAvailable ? 'opacity-100' : 'opacity-60'
       }`}
       aria-disabled={!featureAvailable}
     >
       {/* Card header */}
       <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-accent-50 text-accent-600 flex items-center justify-center">
           {icon}
         </div>
         <div className="flex-1 min-w-0">
-          <h2 className="text-base font-semibold text-zinc-900 leading-tight">{title}</h2>
-          <p className="text-sm text-zinc-500 mt-0.5">{description}</p>
+          <h2 className="text-base font-semibold text-surface-900 leading-tight">{title}</h2>
+          <p className="text-sm text-surface-500 mt-0.5">{description}</p>
         </div>
       </div>
 
       {/* Unavailable state */}
       {!featureAvailable && (
-        <div className="rounded-lg bg-zinc-50 border border-zinc-200 px-4 py-3 text-sm text-zinc-500">
-          <span className="font-medium text-zinc-700">Not available</span>
+        <div className="rounded-md bg-surface-50 border border-surface-200 px-4 py-3 text-sm text-surface-500">
+          <span className="font-medium text-surface-700">Not available</span>
           {platformNotes ? ` — ${platformNotes}` : ' on this platform.'}
         </div>
       )}
@@ -120,13 +120,13 @@ export function DemoCard({
       {/* Permission prompt */}
       {featureAvailable && permissionState === 'prompt' && (
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-surface-500">
             This feature requires your permission before it can be used.
           </p>
           <button
             type="button"
             onClick={onRequestPermission}
-            className="self-start px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors"
+            className="self-start px-4 py-2 rounded-md bg-accent-500 text-white text-sm font-medium hover:bg-accent-600 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:ring-offset-2 transition-colors"
           >
             Grant permission
           </button>

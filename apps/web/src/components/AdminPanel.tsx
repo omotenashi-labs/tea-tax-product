@@ -96,8 +96,8 @@ function TabButton({
       className={[
         'px-4 py-2 text-sm font-medium border-b-2 transition-colors',
         active
-          ? 'border-indigo-600 text-indigo-600'
-          : 'border-transparent text-zinc-500 hover:text-zinc-700 hover:border-zinc-300',
+          ? 'border-accent-500 text-accent-500'
+          : 'border-transparent text-surface-500 hover:text-surface-700 hover:border-surface-300',
       ].join(' ')}
     >
       {label}
@@ -168,7 +168,7 @@ function UsersTab() {
       u.role.toLowerCase().includes(search.toLowerCase()),
   );
 
-  if (loading) return <div className="p-6 text-zinc-400 text-sm">Loading users...</div>;
+  if (loading) return <div className="p-6 text-surface-400 text-sm">Loading users...</div>;
   if (error) return <div className="p-6 text-red-500 text-sm">Error: {error}</div>;
 
   return (
@@ -184,20 +184,20 @@ function UsersTab() {
         <span>Tax situation data is user-encrypted and not accessible from this panel.</span>
       </div>
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-zinc-900">Users ({users.length})</h2>
+        <h2 className="text-base font-semibold text-surface-900">Users ({users.length})</h2>
         <input
           type="text"
           placeholder="Search by username or role..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="text-sm border border-zinc-200 rounded px-3 py-1.5 w-64 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+          className="text-sm border border-surface-200 rounded px-3 py-1.5 w-64 focus:outline-none focus:ring-2 focus:ring-accent-500"
         />
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 text-left text-zinc-500">
+            <tr className="border-b border-surface-200 text-left text-surface-500">
               <th className="pb-2 pr-4 font-medium">Username</th>
               <th className="pb-2 pr-4 font-medium">Role</th>
               <th className="pb-2 pr-4 font-medium">Status</th>
@@ -207,13 +207,13 @@ function UsersTab() {
           </thead>
           <tbody>
             {filtered.map((u) => (
-              <tr key={u.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                <td className="py-2 pr-4 font-mono text-xs text-zinc-700">{u.username}</td>
+              <tr key={u.id} className="border-b border-surface-100 hover:bg-surface-50">
+                <td className="py-2 pr-4 font-mono text-xs text-surface-700">{u.username}</td>
                 <td className="py-2 pr-4">
                   <select
                     value={u.role}
                     onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                    className="text-xs border border-zinc-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-indigo-300"
+                    className="text-xs border border-surface-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-accent-500"
                   >
                     <option value="tax_filer">tax_filer</option>
                     <option value="superadmin">superadmin</option>
@@ -228,7 +228,7 @@ function UsersTab() {
                     {u.active ? 'Active' : 'Inactive'}
                   </span>
                 </td>
-                <td className="py-2 pr-4 text-xs text-zinc-400">
+                <td className="py-2 pr-4 text-xs text-surface-400">
                   {new Date(u.created_at).toLocaleDateString()}
                 </td>
                 <td className="py-2">
@@ -248,7 +248,7 @@ function UsersTab() {
           </tbody>
         </table>
         {filtered.length === 0 && (
-          <p className="text-zinc-400 text-sm py-4 text-center">No users found.</p>
+          <p className="text-surface-400 text-sm py-4 text-center">No users found.</p>
         )}
       </div>
     </div>
@@ -273,18 +273,18 @@ function RegistrationsTab() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="p-6 text-zinc-400 text-sm">Loading...</div>;
+  if (loading) return <div className="p-6 text-surface-400 text-sm">Loading...</div>;
   if (error) return <div className="p-6 text-red-500 text-sm">Error: {error}</div>;
 
   return (
     <div className="p-6 space-y-4">
-      <h2 className="text-base font-semibold text-zinc-900">
+      <h2 className="text-base font-semibold text-surface-900">
         Registrations ({registrations.length})
       </h2>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 text-left text-zinc-500">
+            <tr className="border-b border-surface-200 text-left text-surface-500">
               <th className="pb-2 pr-4 font-medium">Username</th>
               <th className="pb-2 pr-4 font-medium">Role</th>
               <th className="pb-2 font-medium">Registered</th>
@@ -292,10 +292,10 @@ function RegistrationsTab() {
           </thead>
           <tbody>
             {registrations.map((r) => (
-              <tr key={r.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                <td className="py-2 pr-4 font-mono text-xs text-zinc-700">{r.username}</td>
-                <td className="py-2 pr-4 text-xs text-zinc-500">{r.role}</td>
-                <td className="py-2 text-xs text-zinc-400">
+              <tr key={r.id} className="border-b border-surface-100 hover:bg-surface-50">
+                <td className="py-2 pr-4 font-mono text-xs text-surface-700">{r.username}</td>
+                <td className="py-2 pr-4 text-xs text-surface-500">{r.role}</td>
+                <td className="py-2 text-xs text-surface-400">
                   {new Date(r.created_at).toLocaleString()}
                 </td>
               </tr>
@@ -303,7 +303,7 @@ function RegistrationsTab() {
           </tbody>
         </table>
         {registrations.length === 0 && (
-          <p className="text-zinc-400 text-sm py-4 text-center">No registrations found.</p>
+          <p className="text-surface-400 text-sm py-4 text-center">No registrations found.</p>
         )}
       </div>
     </div>
@@ -328,7 +328,7 @@ function TaxActivityTab() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="p-6 text-zinc-400 text-sm">Loading...</div>;
+  if (loading) return <div className="p-6 text-surface-400 text-sm">Loading...</div>;
   if (error) return <div className="p-6 text-red-500 text-sm">Error: {error}</div>;
 
   return (
@@ -343,11 +343,11 @@ function TaxActivityTab() {
         </span>
         <span>Tax situation data is user-encrypted and not accessible from this panel.</span>
       </div>
-      <h2 className="text-base font-semibold text-zinc-900">Tax Activity ({activity.length})</h2>
+      <h2 className="text-base font-semibold text-surface-900">Tax Activity ({activity.length})</h2>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 text-left text-zinc-500">
+            <tr className="border-b border-surface-200 text-left text-surface-500">
               <th className="pb-2 pr-4 font-medium">User</th>
               <th className="pb-2 pr-4 font-medium">Year</th>
               <th className="pb-2 pr-4 font-medium">Status</th>
@@ -365,11 +365,11 @@ function TaxActivityTab() {
                     ? 'bg-blue-100 text-blue-700'
                     : a.status === 'amended'
                       ? 'bg-purple-100 text-purple-700'
-                      : 'bg-zinc-100 text-zinc-600';
+                      : 'bg-surface-100 text-surface-600';
               return (
-                <tr key={a.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                  <td className="py-2 pr-4 font-mono text-xs text-zinc-700">{a.username}</td>
-                  <td className="py-2 pr-4 text-xs text-zinc-600">{a.tax_year ?? '—'}</td>
+                <tr key={a.id} className="border-b border-surface-100 hover:bg-surface-50">
+                  <td className="py-2 pr-4 font-mono text-xs text-surface-700">{a.username}</td>
+                  <td className="py-2 pr-4 text-xs text-surface-600">{a.tax_year ?? '—'}</td>
                   <td className="py-2 pr-4">
                     <span
                       className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${statusColor}`}
@@ -379,19 +379,23 @@ function TaxActivityTab() {
                   </td>
                   <td className="py-2 pr-4 w-36">
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 h-2 rounded-full bg-zinc-100 overflow-hidden">
+                      <div className="flex-1 h-2 rounded-full bg-surface-100 overflow-hidden">
                         <div
                           className={`h-2 rounded-full transition-all ${
-                            pct >= 80 ? 'bg-green-500' : pct >= 40 ? 'bg-amber-400' : 'bg-zinc-300'
+                            pct >= 80
+                              ? 'bg-green-500'
+                              : pct >= 40
+                                ? 'bg-amber-400'
+                                : 'bg-surface-300'
                           }`}
                           style={{ width: `${pct}%` }}
                           aria-label={`${pct}% complete`}
                         />
                       </div>
-                      <span className="text-xs text-zinc-500 w-8 text-right">{pct}%</span>
+                      <span className="text-xs text-surface-500 w-8 text-right">{pct}%</span>
                     </div>
                   </td>
-                  <td className="py-2 text-xs text-zinc-400">
+                  <td className="py-2 text-xs text-surface-400">
                     {a.updated_at
                       ? new Date(a.updated_at).toLocaleString()
                       : new Date(a.created_at).toLocaleString()}
@@ -402,7 +406,7 @@ function TaxActivityTab() {
           </tbody>
         </table>
         {activity.length === 0 && (
-          <p className="text-zinc-400 text-sm py-4 text-center">No tax returns found.</p>
+          <p className="text-surface-400 text-sm py-4 text-center">No tax returns found.</p>
         )}
       </div>
     </div>
@@ -433,16 +437,16 @@ function AuditLogTab() {
     runVerify();
   }, [runVerify]);
 
-  if (loading) return <div className="p-6 text-zinc-400 text-sm">Verifying audit chain...</div>;
+  if (loading) return <div className="p-6 text-surface-400 text-sm">Verifying audit chain...</div>;
   if (error) return <div className="p-6 text-red-500 text-sm">Error: {error}</div>;
 
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-zinc-900">Audit Log</h2>
+        <h2 className="text-base font-semibold text-surface-900">Audit Log</h2>
         <button
           onClick={runVerify}
-          className="text-sm px-3 py-1.5 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+          className="text-sm px-3 py-1.5 rounded bg-accent-50 text-accent-600 hover:bg-accent-100 transition-colors"
         >
           Re-verify
         </button>
@@ -495,12 +499,12 @@ function DemoStatusTab() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="p-6 text-zinc-400 text-sm">Loading...</div>;
+  if (loading) return <div className="p-6 text-surface-400 text-sm">Loading...</div>;
   if (error) return <div className="p-6 text-red-500 text-sm">Error: {error}</div>;
 
   return (
     <div className="p-6 space-y-4">
-      <h2 className="text-base font-semibold text-zinc-900">Demo Persona Health</h2>
+      <h2 className="text-base font-semibold text-surface-900">Demo Persona Health</h2>
       <div className="space-y-3">
         {personas.map((p) => (
           <div
@@ -516,8 +520,8 @@ function DemoStatusTab() {
                 {p.healthy ? '●' : '○'}
               </span>
               <div>
-                <p className="text-sm font-medium text-zinc-900 font-mono">{p.username}</p>
-                <p className="text-xs text-zinc-500">{p.role ?? 'role unknown'}</p>
+                <p className="text-sm font-medium text-surface-900 font-mono">{p.username}</p>
+                <p className="text-xs text-surface-500">{p.role ?? 'role unknown'}</p>
               </div>
             </div>
             <span
@@ -541,10 +545,10 @@ const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-yellow-50 text-yellow-700',
   claimed: 'bg-blue-50 text-blue-700',
   running: 'bg-blue-100 text-blue-800',
-  submitting: 'bg-indigo-50 text-indigo-700',
+  submitting: 'bg-accent-50 text-accent-700',
   completed: 'bg-green-50 text-green-700',
   failed: 'bg-red-50 text-red-700',
-  dead: 'bg-zinc-100 text-zinc-500',
+  dead: 'bg-surface-100 text-surface-500',
 };
 
 function TaskQueueTab() {
@@ -579,7 +583,7 @@ function TaskQueueTab() {
     return () => clearInterval(interval);
   }, [fetchTasks]);
 
-  if (loading) return <div className="p-6 text-zinc-400 text-sm">Loading task queue...</div>;
+  if (loading) return <div className="p-6 text-surface-400 text-sm">Loading task queue...</div>;
   if (error) return <div className="p-6 text-red-500 text-sm">Error: {error}</div>;
 
   const CRON_JOB_TYPES = [
@@ -596,12 +600,12 @@ function TaskQueueTab() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-zinc-900">
+        <h2 className="text-base font-semibold text-surface-900">
           Task Queue ({tasks.length} tasks — auto-refreshing every 5s)
         </h2>
         <button
           onClick={() => void fetchTasks()}
-          className="text-sm px-3 py-1.5 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+          className="text-sm px-3 py-1.5 rounded bg-accent-50 text-accent-600 hover:bg-accent-100 transition-colors"
         >
           Refresh now
         </button>
@@ -609,16 +613,16 @@ function TaskQueueTab() {
 
       {/* Cron jobs section */}
       <div>
-        <h3 className="text-sm font-medium text-zinc-600 mb-3">Scheduled Cron Jobs</h3>
+        <h3 className="text-sm font-medium text-surface-600 mb-3">Scheduled Cron Jobs</h3>
         {cronTasks.length === 0 ? (
-          <p className="text-zinc-400 text-sm">
+          <p className="text-surface-400 text-sm">
             No cron jobs yet — server may still be starting up.
           </p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-200 text-left text-zinc-500">
+                <tr className="border-b border-surface-200 text-left text-surface-500">
                   <th className="pb-2 pr-4 font-medium">Job type</th>
                   <th className="pb-2 pr-4 font-medium">Status</th>
                   <th className="pb-2 pr-4 font-medium">Agent</th>
@@ -629,23 +633,23 @@ function TaskQueueTab() {
               </thead>
               <tbody>
                 {cronTasks.map((t) => (
-                  <tr key={t.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                    <td className="py-2 pr-4 font-mono text-xs text-zinc-800">{t.job_type}</td>
+                  <tr key={t.id} className="border-b border-surface-100 hover:bg-surface-50">
+                    <td className="py-2 pr-4 font-mono text-xs text-surface-800">{t.job_type}</td>
                     <td className="py-2 pr-4">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[t.status] ?? 'bg-zinc-100 text-zinc-600'}`}
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[t.status] ?? 'bg-surface-100 text-surface-600'}`}
                       >
                         {t.status}
                       </span>
                     </td>
-                    <td className="py-2 pr-4 text-xs text-zinc-500">{t.agent_type}</td>
-                    <td className="py-2 pr-4 text-xs text-zinc-500">
+                    <td className="py-2 pr-4 text-xs text-surface-500">{t.agent_type}</td>
+                    <td className="py-2 pr-4 text-xs text-surface-500">
                       {t.attempt}/{t.max_attempts}
                     </td>
-                    <td className="py-2 pr-4 text-xs text-zinc-400">
+                    <td className="py-2 pr-4 text-xs text-surface-400">
                       {new Date(t.created_at).toLocaleTimeString()}
                     </td>
-                    <td className="py-2 text-xs text-zinc-400">
+                    <td className="py-2 text-xs text-surface-400">
                       {new Date(t.updated_at).toLocaleTimeString()}
                     </td>
                   </tr>
@@ -659,13 +663,13 @@ function TaskQueueTab() {
       {/* Other tasks section */}
       {otherTasks.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-zinc-600 mb-3">
+          <h3 className="text-sm font-medium text-surface-600 mb-3">
             Other Tasks ({otherTasks.length})
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-zinc-200 text-left text-zinc-500">
+                <tr className="border-b border-surface-200 text-left text-surface-500">
                   <th className="pb-2 pr-4 font-medium">Job type</th>
                   <th className="pb-2 pr-4 font-medium">Status</th>
                   <th className="pb-2 pr-4 font-medium">Agent</th>
@@ -674,17 +678,17 @@ function TaskQueueTab() {
               </thead>
               <tbody>
                 {otherTasks.map((t) => (
-                  <tr key={t.id} className="border-b border-zinc-100 hover:bg-zinc-50">
-                    <td className="py-2 pr-4 font-mono text-xs text-zinc-800">{t.job_type}</td>
+                  <tr key={t.id} className="border-b border-surface-100 hover:bg-surface-50">
+                    <td className="py-2 pr-4 font-mono text-xs text-surface-800">{t.job_type}</td>
                     <td className="py-2 pr-4">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[t.status] ?? 'bg-zinc-100 text-zinc-600'}`}
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[t.status] ?? 'bg-surface-100 text-surface-600'}`}
                       >
                         {t.status}
                       </span>
                     </td>
-                    <td className="py-2 pr-4 text-xs text-zinc-500">{t.agent_type}</td>
-                    <td className="py-2 text-xs text-zinc-400">
+                    <td className="py-2 pr-4 text-xs text-surface-500">{t.agent_type}</td>
+                    <td className="py-2 text-xs text-surface-400">
                       {new Date(t.created_at).toLocaleString()}
                     </td>
                   </tr>
@@ -715,7 +719,7 @@ export function AdminPanel() {
   return (
     <div className="flex flex-col h-full">
       {/* Tab bar */}
-      <div className="border-b border-zinc-200 px-6 flex gap-1 bg-white shrink-0">
+      <div className="border-b border-surface-200 px-6 flex gap-1 bg-white shrink-0">
         {TABS.map((t) => (
           <TabButton
             key={t.id}
