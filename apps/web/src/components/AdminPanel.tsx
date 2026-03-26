@@ -1,11 +1,12 @@
 /**
  * @file AdminPanel.tsx
- * Superadmin panel with five tabs:
+ * Superadmin panel with six tabs:
  *   1. Users       — list, search, deactivate/reactivate, role change
  *   2. Registrations — sign-up timeline
  *   3. Tax Activity  — tax returns by user with status
  *   4. Audit Log     — audit chain verification result
  *   5. Demo Status   — seeded persona health
+ *   6. Task Queue    — recurring cron jobs cycling pending → completed (issue #88)
  *
  * Only rendered when the authenticated user's role is 'superadmin'.
  * Non-superadmin users are not shown this component (App.tsx guards routing).
@@ -54,9 +55,24 @@ interface DemoPersona {
   role: string | null;
 }
 
+interface TaskQueueRow {
+  id: string;
+  idempotency_key: string;
+  agent_type: string;
+  job_type: string;
+  status: string;
+  created_by: string;
+  claimed_by: string | null;
+  priority: number;
+  attempt: number;
+  max_attempts: number;
+  created_at: string;
+  updated_at: string;
+}
+
 // ─── Tab types ────────────────────────────────────────────────────────────────
 
-type Tab = 'users' | 'registrations' | 'tax-activity' | 'audit' | 'demo-status';
+type Tab = 'users' | 'registrations' | 'tax-activity' | 'audit' | 'demo-status' | 'task-queue';
 
 // ─── Small helpers ─────────────────────────────────────────────────────────────
 
@@ -467,6 +483,170 @@ function DemoStatusTab() {
   );
 }
 
+// ─── Task Queue tab ───────────────────────────────────────────────────────────
+
+/** Status badge colour map */
+const STATUS_COLORS: Record<string, string> = {
+  pending: 'bg-yellow-50 text-yellow-700',
+  claimed: 'bg-blue-50 text-blue-700',
+  running: 'bg-blue-100 text-blue-800',
+  submitting: 'bg-indigo-50 text-indigo-700',
+  completed: 'bg-green-50 text-green-700',
+  failed: 'bg-red-50 text-red-700',
+  dead: 'bg-zinc-100 text-zinc-500',
+};
+
+function TaskQueueTab() {
+  const [tasks, setTasks] = useState<TaskQueueRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchTasks = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/task-queue?limit=100', { credentials: 'include' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setTasks(data.tasks ?? []);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load task queue');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Initial load
+  useEffect(() => {
+    void fetchTasks();
+  }, [fetchTasks]);
+
+  // Auto-refresh every 5 seconds (acceptance criteria: auto-refresh without manual reload)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      void fetchTasks();
+    }, 5_000);
+    return () => clearInterval(interval);
+  }, [fetchTasks]);
+
+  if (loading) return <div className="p-6 text-zinc-400 text-sm">Loading task queue...</div>;
+  if (error) return <div className="p-6 text-red-500 text-sm">Error: {error}</div>;
+
+  const CRON_JOB_TYPES = [
+    'validation-sweep',
+    'tier-cache-refresh',
+    'stale-return-scan',
+    'audit-digest',
+    'demo-health-check',
+  ];
+
+  const cronTasks = tasks.filter((t) => CRON_JOB_TYPES.includes(t.job_type));
+  const otherTasks = tasks.filter((t) => !CRON_JOB_TYPES.includes(t.job_type));
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-semibold text-zinc-900">
+          Task Queue ({tasks.length} tasks — auto-refreshing every 5s)
+        </h2>
+        <button
+          onClick={() => void fetchTasks()}
+          className="text-sm px-3 py-1.5 rounded bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors"
+        >
+          Refresh now
+        </button>
+      </div>
+
+      {/* Cron jobs section */}
+      <div>
+        <h3 className="text-sm font-medium text-zinc-600 mb-3">Scheduled Cron Jobs</h3>
+        {cronTasks.length === 0 ? (
+          <p className="text-zinc-400 text-sm">
+            No cron jobs yet — server may still be starting up.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-zinc-200 text-left text-zinc-500">
+                  <th className="pb-2 pr-4 font-medium">Job type</th>
+                  <th className="pb-2 pr-4 font-medium">Status</th>
+                  <th className="pb-2 pr-4 font-medium">Agent</th>
+                  <th className="pb-2 pr-4 font-medium">Attempt</th>
+                  <th className="pb-2 pr-4 font-medium">Created</th>
+                  <th className="pb-2 font-medium">Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cronTasks.map((t) => (
+                  <tr key={t.id} className="border-b border-zinc-100 hover:bg-zinc-50">
+                    <td className="py-2 pr-4 font-mono text-xs text-zinc-800">{t.job_type}</td>
+                    <td className="py-2 pr-4">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[t.status] ?? 'bg-zinc-100 text-zinc-600'}`}
+                      >
+                        {t.status}
+                      </span>
+                    </td>
+                    <td className="py-2 pr-4 text-xs text-zinc-500">{t.agent_type}</td>
+                    <td className="py-2 pr-4 text-xs text-zinc-500">
+                      {t.attempt}/{t.max_attempts}
+                    </td>
+                    <td className="py-2 pr-4 text-xs text-zinc-400">
+                      {new Date(t.created_at).toLocaleTimeString()}
+                    </td>
+                    <td className="py-2 text-xs text-zinc-400">
+                      {new Date(t.updated_at).toLocaleTimeString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Other tasks section */}
+      {otherTasks.length > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-zinc-600 mb-3">
+            Other Tasks ({otherTasks.length})
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-zinc-200 text-left text-zinc-500">
+                  <th className="pb-2 pr-4 font-medium">Job type</th>
+                  <th className="pb-2 pr-4 font-medium">Status</th>
+                  <th className="pb-2 pr-4 font-medium">Agent</th>
+                  <th className="pb-2 font-medium">Created</th>
+                </tr>
+              </thead>
+              <tbody>
+                {otherTasks.map((t) => (
+                  <tr key={t.id} className="border-b border-zinc-100 hover:bg-zinc-50">
+                    <td className="py-2 pr-4 font-mono text-xs text-zinc-800">{t.job_type}</td>
+                    <td className="py-2 pr-4">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${STATUS_COLORS[t.status] ?? 'bg-zinc-100 text-zinc-600'}`}
+                      >
+                        {t.status}
+                      </span>
+                    </td>
+                    <td className="py-2 pr-4 text-xs text-zinc-500">{t.agent_type}</td>
+                    <td className="py-2 text-xs text-zinc-400">
+                      {new Date(t.created_at).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main AdminPanel ──────────────────────────────────────────────────────────
 
 export function AdminPanel() {
@@ -478,6 +658,7 @@ export function AdminPanel() {
     { id: 'tax-activity', label: 'Tax Activity' },
     { id: 'audit', label: 'Audit Log' },
     { id: 'demo-status', label: 'Demo Status' },
+    { id: 'task-queue', label: 'Task Queue' },
   ];
 
   return (
@@ -502,6 +683,7 @@ export function AdminPanel() {
         {activeTab === 'tax-activity' && <TaxActivityTab />}
         {activeTab === 'audit' && <AuditLogTab />}
         {activeTab === 'demo-status' && <DemoStatusTab />}
+        {activeTab === 'task-queue' && <TaskQueueTab />}
       </div>
     </div>
   );
