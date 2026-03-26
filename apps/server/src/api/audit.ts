@@ -1,9 +1,14 @@
 /**
- * Audit API — superadmin-only audit log verification endpoint.
+ * Audit API — superadmin-only audit log endpoints.
  *
  * GET /api/audit/verify
  *   Reads all rows in insertion order, recomputes each hash from the chain,
  *   and returns { valid: true } or { valid: false, firstInvalidId: '<uuid>' }.
+ *
+ * GET /api/audit/events
+ *   Returns a paginated list of audit_events rows ordered by ts DESC.
+ *   Query params: page (1-based, default 1), pageSize (default 50).
+ *   Response: { events: [...], total: N, page: N, pageSize: 50 }
  *
  * Access is guarded by the same isSuperadmin role check used by all other
  * /api/admin/* routes (user.role === 'superadmin' in the authenticated JWT).
@@ -93,6 +98,51 @@ export async function handleAuditRequest(
     }
 
     return json({ valid: true });
+  }
+
+  // GET /api/audit/events — superadmin only, paginated
+  if (req.method === 'GET' && url.pathname === '/api/audit/events') {
+    const user = await getAuthenticatedUser(req);
+    if (!user) return json({ error: 'Unauthorized' }, 401);
+    if (!isSuperadmin(user)) return json({ error: 'Forbidden' }, 403);
+
+    const PAGE_SIZE = 50;
+    const page = Math.max(1, parseInt(url.searchParams.get('page') ?? '1', 10) || 1);
+    const offset = (page - 1) * PAGE_SIZE;
+
+    interface AuditEventRow {
+      id: string;
+      actor_id: string;
+      action: string;
+      entity_type: string;
+      entity_id: string;
+      before: Record<string, unknown> | null;
+      after: Record<string, unknown> | null;
+      ts: string | Date;
+    }
+
+    interface CountRow {
+      count: string;
+    }
+
+    const [countRows, events] = await Promise.all([
+      auditSql<CountRow[]>`SELECT COUNT(*)::text AS count FROM audit_events`,
+      auditSql<AuditEventRow[]>`
+        SELECT id, actor_id, action, entity_type, entity_id, before, after, ts
+        FROM audit_events
+        ORDER BY ts DESC, id DESC
+        LIMIT ${PAGE_SIZE} OFFSET ${offset}
+      `,
+    ]);
+
+    const total = parseInt(countRows[0]?.count ?? '0', 10);
+
+    const normalizedEvents = events.map((e: AuditEventRow) => ({
+      ...e,
+      ts: typeof e.ts === 'string' ? e.ts : (e.ts as Date).toISOString(),
+    }));
+
+    return json({ events: normalizedEvents, total, page, pageSize: PAGE_SIZE });
   }
 
   return null;

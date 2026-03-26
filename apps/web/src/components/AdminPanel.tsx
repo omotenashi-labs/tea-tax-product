@@ -55,6 +55,24 @@ interface AuditResult {
   firstInvalidId?: string;
 }
 
+interface AuditEvent {
+  id: string;
+  actor_id: string;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  before: Record<string, unknown> | null;
+  after: Record<string, unknown> | null;
+  ts: string;
+}
+
+interface AuditEventsResponse {
+  events: AuditEvent[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
 interface DemoPersona {
   username: string;
   healthy: boolean;
@@ -428,66 +446,217 @@ function TaxActivityTab() {
 
 // ─── Audit Log tab ─────────────────────────────────────────────────────────────
 
+/**
+ * Expandable row for audit events that have before/after JSONB data.
+ * Collapsed by default; clicking the toggle reveals a formatted JSON diff.
+ */
+function AuditEventRow({ event }: { event: AuditEvent }) {
+  const [expanded, setExpanded] = useState(false);
+  const hasDiff = event.before !== null || event.after !== null;
+
+  return (
+    <>
+      <tr className="border-b border-surface-100 hover:bg-surface-50">
+        <td className="py-2 pr-4 text-xs text-surface-500 whitespace-nowrap">
+          {new Date(event.ts).toLocaleString()}
+        </td>
+        <td className="py-2 pr-4 font-mono text-xs text-surface-700 max-w-[10rem] truncate">
+          {event.actor_id}
+        </td>
+        <td className="py-2 pr-4 text-xs text-surface-700">{event.action}</td>
+        <td className="py-2 pr-4 text-xs text-surface-500">{event.entity_type}</td>
+        <td className="py-2 pr-4 font-mono text-xs text-surface-500 max-w-[8rem] truncate">
+          {event.entity_id}
+        </td>
+        <td className="py-2 text-xs">
+          {hasDiff && (
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              aria-expanded={expanded}
+              aria-label={expanded ? 'Collapse diff' : 'Expand diff'}
+              className="text-accent-600 hover:text-accent-800 underline underline-offset-2"
+            >
+              {expanded ? 'Hide' : 'Diff'}
+            </button>
+          )}
+        </td>
+      </tr>
+      {expanded && hasDiff && (
+        <tr className="border-b border-surface-100 bg-surface-50">
+          <td colSpan={6} className="py-3 px-4">
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <p className="font-medium text-surface-600 mb-1">Before</p>
+                <pre className="bg-surface-100 rounded p-2 overflow-auto max-h-40 text-surface-700 text-[11px]">
+                  {event.before !== null ? JSON.stringify(event.before, null, 2) : '(null)'}
+                </pre>
+              </div>
+              <div>
+                <p className="font-medium text-surface-600 mb-1">After</p>
+                <pre className="bg-surface-100 rounded p-2 overflow-auto max-h-40 text-surface-700 text-[11px]">
+                  {event.after !== null ? JSON.stringify(event.after, null, 2) : '(null)'}
+                </pre>
+              </div>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
+}
+
 function AuditLogTab() {
   const [result, setResult] = useState<AuditResult | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [verifyLoading, setVerifyLoading] = useState(true);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
+
+  const [eventsData, setEventsData] = useState<AuditEventsResponse | null>(null);
+  const [eventsLoading, setEventsLoading] = useState(true);
+  const [eventsError, setEventsError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
   const runVerify = useCallback(() => {
-    setLoading(true);
-    setError(null);
+    setVerifyLoading(true);
+    setVerifyError(null);
     fetch('/api/audit/verify', { credentials: 'include' })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
       })
       .then((d) => setResult(d as AuditResult))
-      .catch((e) => setError(e instanceof Error ? e.message : 'Failed to verify'))
-      .finally(() => setLoading(false));
+      .catch((e) => setVerifyError(e instanceof Error ? e.message : 'Failed to verify'))
+      .finally(() => setVerifyLoading(false));
+  }, []);
+
+  const fetchEvents = useCallback((targetPage: number) => {
+    setEventsLoading(true);
+    setEventsError(null);
+    fetch(`/api/audit/events?page=${targetPage}`, { credentials: 'include' })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then((d) => setEventsData(d as AuditEventsResponse))
+      .catch((e) => setEventsError(e instanceof Error ? e.message : 'Failed to load events'))
+      .finally(() => setEventsLoading(false));
   }, []);
 
   useEffect(() => {
     runVerify();
   }, [runVerify]);
 
-  if (loading) return <div className="p-6 text-surface-400 text-sm">Verifying audit chain...</div>;
-  if (error) return <div className="p-6 text-red-500 text-sm">Error: {error}</div>;
+  useEffect(() => {
+    fetchEvents(page);
+  }, [fetchEvents, page]);
+
+  const totalPages = eventsData ? Math.ceil(eventsData.total / eventsData.pageSize) : 0;
+  const showPagination = eventsData !== null && eventsData.total > eventsData.pageSize;
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-surface-900">Audit Log</h2>
-        <button
-          onClick={runVerify}
-          className="text-sm px-3 py-1.5 rounded bg-accent-50 text-accent-600 hover:bg-accent-100 transition-colors"
-        >
-          Re-verify
-        </button>
+    <div className="p-6 space-y-6">
+      {/* ── Chain verification badge ── */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-surface-900">Audit Log</h2>
+          <button
+            onClick={runVerify}
+            className="text-sm px-3 py-1.5 rounded bg-accent-50 text-accent-600 hover:bg-accent-100 transition-colors"
+          >
+            Re-verify
+          </button>
+        </div>
+
+        {verifyLoading && <div className="text-surface-400 text-sm">Verifying audit chain...</div>}
+        {verifyError && (
+          <div className="text-red-500 text-sm">Verification error: {verifyError}</div>
+        )}
+        {!verifyLoading && !verifyError && result && (
+          <div
+            className={`rounded-lg p-4 flex items-start gap-3 ${
+              result.valid
+                ? 'bg-green-50 border border-green-200'
+                : 'bg-red-50 border border-red-200'
+            }`}
+          >
+            <span className={`select-none ${result.valid ? 'text-green-500' : 'text-red-500'}`}>
+              {result.valid ? <Check size={20} strokeWidth={2} /> : <X size={20} strokeWidth={2} />}
+            </span>
+            <div>
+              <p
+                className={`text-sm font-medium ${result.valid ? 'text-green-800' : 'text-red-800'}`}
+              >
+                {result.valid ? 'Audit chain is valid' : 'Audit chain integrity failure'}
+              </p>
+              {!result.valid && result.firstInvalidId && (
+                <p className="text-xs text-red-600 mt-1">
+                  First invalid record ID:{' '}
+                  <code className="font-mono">{result.firstInvalidId}</code>
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {result && (
-        <div
-          className={`rounded-lg p-4 flex items-start gap-3 ${
-            result.valid ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-          }`}
-        >
-          <span className={`select-none ${result.valid ? 'text-green-500' : 'text-red-500'}`}>
-            {result.valid ? <Check size={20} strokeWidth={2} /> : <X size={20} strokeWidth={2} />}
-          </span>
-          <div>
-            <p
-              className={`text-sm font-medium ${result.valid ? 'text-green-800' : 'text-red-800'}`}
-            >
-              {result.valid ? 'Audit chain is valid' : 'Audit chain integrity failure'}
-            </p>
-            {!result.valid && result.firstInvalidId && (
-              <p className="text-xs text-red-600 mt-1">
-                First invalid record ID: <code className="font-mono">{result.firstInvalidId}</code>
-              </p>
+      {/* ── Event list ── */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-medium text-surface-700">Audit Events</h3>
+
+        {eventsLoading && <div className="text-surface-400 text-sm">Loading audit events...</div>}
+        {eventsError && <div className="text-red-500 text-sm">Error: {eventsError}</div>}
+        {!eventsLoading && !eventsError && eventsData && (
+          <>
+            {eventsData.events.length === 0 ? (
+              <p className="text-surface-400 text-sm py-4 text-center">No audit events found.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-surface-200 text-left text-surface-500">
+                      <th className="pb-2 pr-4 font-medium">Timestamp</th>
+                      <th className="pb-2 pr-4 font-medium">Actor</th>
+                      <th className="pb-2 pr-4 font-medium">Action</th>
+                      <th className="pb-2 pr-4 font-medium">Entity Type</th>
+                      <th className="pb-2 pr-4 font-medium">Entity ID</th>
+                      <th className="pb-2 font-medium">Diff</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {eventsData.events.map((event) => (
+                      <AuditEventRow key={event.id} event={event} />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
-          </div>
-        </div>
-      )}
+
+            {/* Pagination controls */}
+            {showPagination && (
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-xs text-surface-400">
+                  Page {page} of {totalPages} ({eventsData.total} total events)
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    className="text-xs px-3 py-1.5 rounded border border-surface-200 text-surface-600 hover:bg-surface-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    className="text-xs px-3 py-1.5 rounded border border-surface-200 text-surface-600 hover:bg-surface-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
