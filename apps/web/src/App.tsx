@@ -1,7 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Login } from './components/Login';
-import { Settings, User, FileText, ShieldAlert, BarChart2 } from 'lucide-react';
+import {
+  Settings,
+  User,
+  FileText,
+  BarChart2,
+  Users,
+  ClipboardList,
+  Activity,
+  Shield,
+  MonitorPlay,
+  ListTodo,
+} from 'lucide-react';
 import { TaxSituationForm } from './components/TaxSituationForm';
 import { W2CaptureZone } from './components/W2CaptureZone';
 import { TaxProgressIndicator } from './components/TaxProgressIndicator';
@@ -11,17 +22,63 @@ import { TierResultsView } from './components/TierResultsView';
 import type { W2ExtractedData, ParsedTaxFields } from 'core';
 import { InstallPrompt } from './components/pwa/install-prompt';
 import { IntakeSelector } from './components/IntakeSelector';
+import type { AdminSection } from './components/AdminPanel';
+
+// Admin section nav items (superadmin-only global nav)
+const ADMIN_NAV_ITEMS: {
+  id: AdminSection;
+  label: string;
+  icon: React.ReactNode;
+  iconMobile: React.ReactNode;
+}[] = [
+  {
+    id: 'users',
+    label: 'Users',
+    icon: <Users size={20} strokeWidth={2.5} />,
+    iconMobile: <Users size={22} strokeWidth={2} />,
+  },
+  {
+    id: 'registrations',
+    label: 'Registrations',
+    icon: <ClipboardList size={20} strokeWidth={2.5} />,
+    iconMobile: <ClipboardList size={22} strokeWidth={2} />,
+  },
+  {
+    id: 'tax-activity',
+    label: 'Tax Activity',
+    icon: <Activity size={20} strokeWidth={2.5} />,
+    iconMobile: <Activity size={22} strokeWidth={2} />,
+  },
+  {
+    id: 'audit',
+    label: 'Audit Log',
+    icon: <Shield size={20} strokeWidth={2.5} />,
+    iconMobile: <Shield size={22} strokeWidth={2} />,
+  },
+  {
+    id: 'demo-status',
+    label: 'Demo Status',
+    icon: <MonitorPlay size={20} strokeWidth={2.5} />,
+    iconMobile: <MonitorPlay size={22} strokeWidth={2} />,
+  },
+  {
+    id: 'task-queue',
+    label: 'Task Queue',
+    icon: <ListTodo size={20} strokeWidth={2.5} />,
+    iconMobile: <ListTodo size={22} strokeWidth={2} />,
+  },
+];
+
+type FilerView = 'tax-situation' | 'tier-results' | 'settings';
+type ActiveView = FilerView | AdminSection;
 
 function App() {
   const { user, logout, loading } = useAuth();
   const isSuperadmin = user?.role === 'superadmin';
 
-  // Core Layout State
-  // Role-aware default: superadmin lands on Admin panel; all other roles land on Tax Situation.
-  const defaultView = isSuperadmin ? 'admin' : 'tax-situation';
-  const [activeView, setActiveView] = useState<
-    'tax-situation' | 'tier-results' | 'settings' | 'admin'
-  >(defaultView as 'tax-situation' | 'tier-results' | 'settings' | 'admin');
+  // Role-aware default: superadmin lands on Users section; filers land on Tax Situation.
+  const defaultView: ActiveView = isSuperadmin ? 'users' : 'tax-situation';
+  const [activeView, setActiveView] = useState<ActiveView>(defaultView);
 
   /**
    * Tax-situation intake state machine.
@@ -38,9 +95,13 @@ function App() {
   // Current step (1-based) within the tax intake form flow (1 = W-2 Import … 7 = Review)
   const [taxCurrentStep, setTaxCurrentStep] = useState(1);
 
-  // Redirect non-superadmin users away from the admin view if they somehow land there
+  // Guard: redirect superadmin away from filer views, redirect filer away from admin sections
   useEffect(() => {
-    if (activeView === 'admin' && !isSuperadmin) {
+    const filerViews: string[] = ['tax-situation', 'tier-results', 'settings'];
+    const adminSections: string[] = ADMIN_NAV_ITEMS.map((item) => item.id);
+    if (isSuperadmin && filerViews.includes(activeView)) {
+      setActiveView('users');
+    } else if (!isSuperadmin && adminSections.includes(activeView)) {
       setActiveView('tax-situation');
     }
   }, [activeView, isSuperadmin]);
@@ -67,6 +128,12 @@ function App() {
     return <Login />;
   }
 
+  // Determine active admin section (null when a filer view is active)
+  const adminSectionIds = ADMIN_NAV_ITEMS.map((item) => item.id as string);
+  const activeAdminSection = adminSectionIds.includes(activeView)
+    ? (activeView as AdminSection)
+    : null;
+
   return (
     <div className="flex h-screen w-full bg-surface-50 font-sans overflow-hidden text-surface-800">
       {/* Left Sidebar - hidden on mobile, visible on sm+ */}
@@ -77,37 +144,45 @@ function App() {
           </div>
 
           <div className="flex flex-col gap-4 mt-4 w-full px-2">
-            <button
-              onClick={() => setActiveView('tax-situation')}
-              className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === 'tax-situation' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
-              title="Tax Situation"
-            >
-              <FileText size={20} strokeWidth={2.5} />
-            </button>
-            <button
-              onClick={() => setActiveView('tier-results')}
-              className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'tier-results' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
-              title="Tier Results"
-              data-testid="tier-results-nav-item"
-            >
-              <BarChart2 size={20} strokeWidth={2.5} />
-            </button>
-            <button
-              onClick={() => setActiveView('settings')}
-              className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === 'settings' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
-              title="Settings"
-            >
-              <Settings size={20} strokeWidth={2.5} />
-            </button>
-            {isSuperadmin && (
-              <button
-                onClick={() => setActiveView('admin')}
-                className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === 'admin' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
-                title="Admin"
-                data-testid="admin-nav-item"
-              >
-                <ShieldAlert size={20} strokeWidth={2.5} />
-              </button>
+            {isSuperadmin ? (
+              // Superadmin: show only the six admin section icons
+              ADMIN_NAV_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveView(item.id)}
+                  className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === item.id ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
+                  title={item.label}
+                  data-testid={`admin-nav-${item.id}`}
+                >
+                  {item.icon}
+                </button>
+              ))
+            ) : (
+              // Filer: show tax-situation, tier-results, settings
+              <>
+                <button
+                  onClick={() => setActiveView('tax-situation')}
+                  className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === 'tax-situation' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
+                  title="Tax Situation"
+                >
+                  <FileText size={20} strokeWidth={2.5} />
+                </button>
+                <button
+                  onClick={() => setActiveView('tier-results')}
+                  className={`p-3 rounded-xl flex items-center justify-center transition-all ${activeView === 'tier-results' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
+                  title="Tier Results"
+                  data-testid="tier-results-nav-item"
+                >
+                  <BarChart2 size={20} strokeWidth={2.5} />
+                </button>
+                <button
+                  onClick={() => setActiveView('settings')}
+                  className={`p-3 rounded-lg flex items-center justify-center transition-all ${activeView === 'settings' ? 'bg-accent-500/10 text-accent-500' : 'text-surface-400 hover:bg-surface-100 hover:text-surface-600'}`}
+                  title="Settings"
+                >
+                  <Settings size={20} strokeWidth={2.5} />
+                </button>
+              </>
             )}
           </div>
         </div>
@@ -156,13 +231,14 @@ function App() {
 
           {/* Content — add bottom padding on mobile to account for bottom nav */}
           <div className="flex-1 overflow-hidden overflow-y-auto pb-16 sm:pb-0">
-            {activeView === 'tax-situation' && taxIntakePath === 'selector' && (
+            {/* Filer-only views: guarded against superadmin access */}
+            {!isSuperadmin && activeView === 'tax-situation' && taxIntakePath === 'selector' && (
               <IntakeSelector
                 onSelectAiWizard={() => setTaxIntakePath('ai-wizard')}
                 onSelectManual={() => setTaxIntakePath('form')}
               />
             )}
-            {activeView === 'tax-situation' && taxIntakePath === 'ai-wizard' && (
+            {!isSuperadmin && activeView === 'tax-situation' && taxIntakePath === 'ai-wizard' && (
               <div className="max-w-3xl mx-auto px-4 py-6">
                 <W2CaptureZone
                   onExtracted={(data) => {
@@ -181,7 +257,7 @@ function App() {
                 />
               </div>
             )}
-            {activeView === 'tax-situation' && taxIntakePath === 'form' && (
+            {!isSuperadmin && activeView === 'tax-situation' && taxIntakePath === 'form' && (
               <TaxSituationForm
                 taxObjectId="demo-tax-object-id"
                 returnId="demo-return-id"
@@ -191,13 +267,14 @@ function App() {
                 onStepChange={setTaxCurrentStep}
               />
             )}
-            {activeView === 'tier-results' && (
+            {!isSuperadmin && activeView === 'tier-results' && (
               <TierResultsView taxObjectId="demo-tax-object-id" returnId="demo-return-id" />
             )}
-            {activeView === 'settings' && <SettingsView />}
-            {activeView === 'admin' && isSuperadmin && <AdminPanel />}
-            {activeView === 'admin' && !isSuperadmin && (
-              <div className="p-8 text-red-500 text-sm">Access denied.</div>
+            {!isSuperadmin && activeView === 'settings' && <SettingsView />}
+
+            {/* Superadmin-only: admin sections driven by global nav, no internal tab bar */}
+            {isSuperadmin && activeAdminSection !== null && (
+              <AdminPanel activeSection={activeAdminSection} />
             )}
           </div>
         </div>
@@ -208,41 +285,49 @@ function App() {
         className="sm:hidden fixed bottom-0 inset-x-0 z-20 bg-white border-t border-surface-200 flex items-center justify-around h-16"
         aria-label="Bottom navigation"
       >
-        <button
-          onClick={() => setActiveView('tax-situation')}
-          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'tax-situation' ? 'text-accent-500' : 'text-surface-400'}`}
-          aria-current={activeView === 'tax-situation' ? 'page' : undefined}
-        >
-          <FileText size={22} strokeWidth={2} />
-          <span>Tax</span>
-        </button>
-        <button
-          onClick={() => setActiveView('tier-results')}
-          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'tier-results' ? 'text-accent-500' : 'text-surface-400'}`}
-          aria-current={activeView === 'tier-results' ? 'page' : undefined}
-          data-testid="tier-results-nav-item-mobile"
-        >
-          <BarChart2 size={22} strokeWidth={2} />
-          <span>Tiers</span>
-        </button>
-        <button
-          onClick={() => setActiveView('settings')}
-          className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'settings' ? 'text-accent-500' : 'text-surface-400'}`}
-          aria-current={activeView === 'settings' ? 'page' : undefined}
-        >
-          <Settings size={22} strokeWidth={2} />
-          <span>Settings</span>
-        </button>
-        {isSuperadmin && (
-          <button
-            onClick={() => setActiveView('admin')}
-            className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'admin' ? 'text-accent-500' : 'text-surface-400'}`}
-            aria-current={activeView === 'admin' ? 'page' : undefined}
-            data-testid="admin-nav-item-mobile"
-          >
-            <ShieldAlert size={22} strokeWidth={2} />
-            <span>Admin</span>
-          </button>
+        {isSuperadmin ? (
+          // Superadmin mobile nav: six admin section icons
+          ADMIN_NAV_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveView(item.id)}
+              className={`flex flex-col items-center gap-0.5 px-2 py-2 text-xs transition-colors ${activeView === item.id ? 'text-accent-500' : 'text-surface-400'}`}
+              aria-current={activeView === item.id ? 'page' : undefined}
+              data-testid={`admin-nav-${item.id}-mobile`}
+            >
+              {item.iconMobile}
+              <span>{item.label}</span>
+            </button>
+          ))
+        ) : (
+          // Filer mobile nav: tax, tiers, settings
+          <>
+            <button
+              onClick={() => setActiveView('tax-situation')}
+              className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'tax-situation' ? 'text-accent-500' : 'text-surface-400'}`}
+              aria-current={activeView === 'tax-situation' ? 'page' : undefined}
+            >
+              <FileText size={22} strokeWidth={2} />
+              <span>Tax</span>
+            </button>
+            <button
+              onClick={() => setActiveView('tier-results')}
+              className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'tier-results' ? 'text-accent-500' : 'text-surface-400'}`}
+              aria-current={activeView === 'tier-results' ? 'page' : undefined}
+              data-testid="tier-results-nav-item-mobile"
+            >
+              <BarChart2 size={22} strokeWidth={2} />
+              <span>Tiers</span>
+            </button>
+            <button
+              onClick={() => setActiveView('settings')}
+              className={`flex flex-col items-center gap-0.5 px-4 py-2 text-xs transition-colors ${activeView === 'settings' ? 'text-accent-500' : 'text-surface-400'}`}
+              aria-current={activeView === 'settings' ? 'page' : undefined}
+            >
+              <Settings size={22} strokeWidth={2} />
+              <span>Settings</span>
+            </button>
+          </>
         )}
       </nav>
 
