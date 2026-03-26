@@ -3,7 +3,12 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import { pathToFileURL } from 'url';
 import { describe, expect, it } from 'vitest';
-import { resolveDatabaseUrls, resolveSchemaSqlPath, splitSqlStatements } from './index';
+import {
+  resolveDatabaseUrls,
+  resolveAuditSchemaSqlPath,
+  resolveSchemaSqlPath,
+  splitSqlStatements,
+} from './index';
 
 describe('resolveDatabaseUrls', () => {
   it('uses localhost defaults when only DATABASE_URL is unset', () => {
@@ -89,6 +94,29 @@ describe('resolveSchemaSqlPath', () => {
     try {
       expect(resolveSchemaSqlPath(pathToFileURL(join(distDir, 'server.js')).href, root)).toBe(
         join(packagedDir, 'schema.sql'),
+      );
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('resolveAuditSchemaSqlPath', () => {
+  it('prefers audit-schema.sql adjacent to the module', () => {
+    expect(resolveAuditSchemaSqlPath(import.meta.url)).toMatch(/packages\/db\/audit-schema\.sql$/);
+  });
+
+  it('falls back to packaged audit-schema.sql when running from a bundled dist directory', () => {
+    const root = mkdtempSync(join(tmpdir(), 'tea-tax-audit-schema-path-'));
+    const distDir = join(root, 'dist');
+    const packagedDir = join(root, 'packages', 'db');
+    mkdirSync(distDir, { recursive: true });
+    mkdirSync(packagedDir, { recursive: true });
+    writeFileSync(join(packagedDir, 'audit-schema.sql'), '-- test audit schema');
+
+    try {
+      expect(resolveAuditSchemaSqlPath(pathToFileURL(join(distDir, 'server.js')).href, root)).toBe(
+        join(packagedDir, 'audit-schema.sql'),
       );
     } finally {
       rmSync(root, { recursive: true, force: true });
