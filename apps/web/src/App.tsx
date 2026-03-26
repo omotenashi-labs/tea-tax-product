@@ -4,8 +4,10 @@ import { Login } from './components/Login';
 import { Settings, User, Receipt, FileText, ShieldAlert } from 'lucide-react';
 import { DemoFlow } from './components/demo/demo-flow';
 import { TaxSituationForm } from './components/TaxSituationForm';
+import { W2CaptureZone } from './components/W2CaptureZone';
 import { RegisterPasskeyButton } from './components/PasskeyButton';
 import { AdminPanel } from './components/AdminPanel';
+import type { W2ExtractedData } from 'core';
 
 function App() {
   const { user, logout, loading } = useAuth();
@@ -18,12 +20,25 @@ function App() {
     defaultView as 'demo' | 'tax-situation' | 'settings' | 'admin',
   );
 
+  // W-2 extraction state: null = not yet extracted, data = confirmed extraction
+  const [w2Data, setW2Data] = useState<W2ExtractedData | null>(null);
+  // Whether the W2CaptureZone step has been completed (skipped or confirmed)
+  const [w2StepDone, setW2StepDone] = useState(false);
+
   // Redirect non-superadmin users away from the admin view if they somehow land there
   useEffect(() => {
     if (activeView === 'admin' && !isSuperadmin) {
       setActiveView('tax-situation');
     }
   }, [activeView, isSuperadmin]);
+
+  // Reset W-2 capture state when navigating away from tax-situation
+  useEffect(() => {
+    if (activeView !== 'tax-situation') {
+      setW2Data(null);
+      setW2StepDone(false);
+    }
+  }, [activeView]);
 
   if (loading) {
     return (
@@ -106,8 +121,24 @@ function App() {
           {/* Content */}
           <div className="flex-1 overflow-hidden overflow-y-auto">
             {activeView === 'demo' && <DemoFlow onExit={() => setActiveView('tax-situation')} />}
-            {activeView === 'tax-situation' && (
-              <TaxSituationForm taxObjectId="demo-tax-object-id" returnId="demo-return-id" />
+            {activeView === 'tax-situation' && !w2StepDone && (
+              <W2CaptureZone
+                onExtracted={(data) => {
+                  setW2Data(data);
+                  setW2StepDone(true);
+                }}
+                onSkip={() => {
+                  setW2Data(null);
+                  setW2StepDone(true);
+                }}
+              />
+            )}
+            {activeView === 'tax-situation' && w2StepDone && (
+              <TaxSituationForm
+                taxObjectId="demo-tax-object-id"
+                returnId="demo-return-id"
+                w2Data={w2Data}
+              />
             )}
             {activeView === 'settings' && (
               <div className="p-8 max-w-sm space-y-4">
