@@ -24,7 +24,7 @@ import {
 } from '@simplewebauthn/server';
 import type { RegistrationResponseJSON, AuthenticationResponseJSON } from '@simplewebauthn/server';
 import type { AppState } from '../index';
-import { getCorsHeaders } from './auth';
+import { getCorsHeaders, getAuthenticatedUser } from './auth';
 import { signJwt } from '../auth/jwt';
 
 const RP_NAME = process.env.RP_NAME ?? 'Tea Tax';
@@ -325,6 +325,58 @@ export async function handlePasskeyRequest(
       });
     } catch (err) {
       console.error('PASSKEY LOGIN COMPLETE ERROR:', err);
+      return json({ error: 'Internal Server Error' }, 500, corsHeaders);
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // GET /api/auth/passkey/credentials
+  // Lists all passkey credentials for the authenticated user.
+  // ------------------------------------------------------------------
+  if (req.method === 'GET' && url.pathname === '/api/auth/passkey/credentials') {
+    try {
+      const user = await getAuthenticatedUser(req);
+      if (!user) return json({ error: 'Unauthorized' }, 401, corsHeaders);
+
+      const rows = await sql`
+        SELECT id, credential_id, created_at, last_used_at
+        FROM passkey_credentials
+        WHERE user_id = ${user.id}
+        ORDER BY created_at DESC
+      `;
+
+      return json(rows, 200, corsHeaders);
+    } catch (err) {
+      console.error('PASSKEY CREDENTIALS LIST ERROR:', err);
+      return json({ error: 'Internal Server Error' }, 500, corsHeaders);
+    }
+  }
+
+  // ------------------------------------------------------------------
+  // DELETE /api/auth/passkey/credentials/:id
+  // Removes a passkey credential owned by the authenticated user.
+  // ------------------------------------------------------------------
+  if (req.method === 'DELETE' && url.pathname.match(/^\/api\/auth\/passkey\/credentials\/[^/]+$/)) {
+    try {
+      const user = await getAuthenticatedUser(req);
+      if (!user) return json({ error: 'Unauthorized' }, 401, corsHeaders);
+
+      const credId = url.pathname.split('/').pop()!;
+
+      // Verify ownership before deleting
+      const existing = await sql`
+        SELECT id FROM passkey_credentials
+        WHERE id = ${credId} AND user_id = ${user.id}
+      `;
+      if ((existing as unknown[]).length === 0) {
+        return json({ error: 'Not found' }, 404, corsHeaders);
+      }
+
+      await sql`DELETE FROM passkey_credentials WHERE id = ${credId}`;
+
+      return json({ success: true }, 200, corsHeaders);
+    } catch (err) {
+      console.error('PASSKEY CREDENTIALS DELETE ERROR:', err);
       return json({ error: 'Internal Server Error' }, 500, corsHeaders);
     }
   }
