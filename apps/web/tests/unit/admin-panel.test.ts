@@ -76,3 +76,81 @@ describe('completeness_score derivation', () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// Task Queue — WebSocket pub/sub state reducer logic
+// ---------------------------------------------------------------------------
+
+/**
+ * Pure reducer that mirrors the setTasks logic in TaskQueueTab.
+ * Extracted here for unit-testing without a DOM or React.
+ */
+interface TaskRow {
+  id: string;
+  job_type: string;
+  status: string;
+}
+
+function applyTaskEvent(prev: TaskRow[], event: string, data: TaskRow): TaskRow[] {
+  if (event === 'task.created') {
+    const exists = prev.some((t) => t.id === data.id);
+    return exists ? prev : [data, ...prev];
+  }
+  if (event === 'task.updated') {
+    return prev.map((t) => (t.id === data.id ? data : t));
+  }
+  if (event === 'task.deleted') {
+    return prev.filter((t) => t.id !== data.id);
+  }
+  return prev;
+}
+
+describe('TaskQueueTab WebSocket pub/sub state reducer', () => {
+  const existing: TaskRow = { id: 'task-1', job_type: 'validation-sweep', status: 'pending' };
+
+  test('task.created prepends a new task', () => {
+    const newTask: TaskRow = { id: 'task-2', job_type: 'audit-digest', status: 'pending' };
+    const result = applyTaskEvent([existing], 'task.created', newTask);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual(newTask);
+  });
+
+  test('task.created is idempotent when task already exists', () => {
+    const duplicate: TaskRow = { id: 'task-1', job_type: 'validation-sweep', status: 'pending' };
+    const result = applyTaskEvent([existing], 'task.created', duplicate);
+    expect(result).toHaveLength(1);
+  });
+
+  test('task.updated replaces the matching task in place', () => {
+    const updated: TaskRow = { id: 'task-1', job_type: 'validation-sweep', status: 'completed' };
+    const result = applyTaskEvent([existing], 'task.updated', updated);
+    expect(result).toHaveLength(1);
+    expect(result[0].status).toBe('completed');
+  });
+
+  test('task.updated leaves list unchanged when id is not found', () => {
+    const unknown: TaskRow = { id: 'task-99', job_type: 'other', status: 'completed' };
+    const result = applyTaskEvent([existing], 'task.updated', unknown);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(existing);
+  });
+
+  test('task.deleted removes the matching task', () => {
+    const toDelete: TaskRow = { id: 'task-1', job_type: 'validation-sweep', status: 'dead' };
+    const result = applyTaskEvent([existing], 'task.deleted', toDelete);
+    expect(result).toHaveLength(0);
+  });
+
+  test('task.deleted is a no-op when id is not found', () => {
+    const unknown: TaskRow = { id: 'task-99', job_type: 'other', status: 'dead' };
+    const result = applyTaskEvent([existing], 'task.deleted', unknown);
+    expect(result).toHaveLength(1);
+  });
+
+  test('unknown event type leaves list unchanged', () => {
+    const irrelevant: TaskRow = { id: 'task-1', job_type: 'validation-sweep', status: 'running' };
+    const result = applyTaskEvent([existing], 'user.updated', irrelevant);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(existing);
+  });
+});
