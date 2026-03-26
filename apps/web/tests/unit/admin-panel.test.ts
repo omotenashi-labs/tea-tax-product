@@ -154,3 +154,81 @@ describe('TaskQueueTab WebSocket pub/sub state reducer', () => {
     expect(result[0]).toEqual(existing);
   });
 });
+
+// ---------------------------------------------------------------------------
+// WebSocket cleanup guard — readyState check logic
+// ---------------------------------------------------------------------------
+
+/**
+ * Pure helper that mirrors the cleanup guard in TaskQueueTab.
+ * Returns the action that should be taken given the current readyState:
+ *   'close-immediate'  — socket is OPEN or CLOSING; safe to call ws.close() now
+ *   'close-on-open'    — socket is still CONNECTING; schedule ws.close() via 'open' event
+ *   'noop'             — socket is already CLOSED; nothing to do
+ */
+type WsCleanupAction = 'close-immediate' | 'close-on-open' | 'noop';
+
+function wsCleanupAction(readyState: number): WsCleanupAction {
+  if (readyState === WebSocket.CONNECTING) return 'close-on-open';
+  if (readyState === WebSocket.CLOSED) return 'noop';
+  return 'close-immediate';
+}
+
+describe('WebSocket cleanup guard', () => {
+  test('returns close-on-open when socket is CONNECTING (readyState 0)', () => {
+    expect(wsCleanupAction(WebSocket.CONNECTING)).toBe('close-on-open');
+  });
+
+  test('returns close-immediate when socket is OPEN (readyState 1)', () => {
+    expect(wsCleanupAction(WebSocket.OPEN)).toBe('close-immediate');
+  });
+
+  test('returns close-immediate when socket is CLOSING (readyState 2)', () => {
+    expect(wsCleanupAction(WebSocket.CLOSING)).toBe('close-immediate');
+  });
+
+  test('returns noop when socket is already CLOSED (readyState 3)', () => {
+    expect(wsCleanupAction(WebSocket.CLOSED)).toBe('noop');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AuthContext — /api/auth/me 401 silent handling
+// ---------------------------------------------------------------------------
+
+/**
+ * Pure helper that mirrors the response handling logic in AuthContext.
+ * Returns the action to take for a given HTTP status code:
+ *   'set-user'     — response was ok (2xx), extract and set user
+ *   'silent-guest' — 401, user is not authenticated; treat as signed-out silently
+ *   'warn'         — any other error status; emit a console.warn
+ */
+type AuthMeAction = 'set-user' | 'silent-guest' | 'warn';
+
+function authMeAction(status: number, ok: boolean): AuthMeAction {
+  if (ok) return 'set-user';
+  if (status === 401) return 'silent-guest';
+  return 'warn';
+}
+
+describe('AuthContext /api/auth/me response handling', () => {
+  test('200 OK triggers set-user', () => {
+    expect(authMeAction(200, true)).toBe('set-user');
+  });
+
+  test('401 triggers silent-guest — no console error or warning', () => {
+    expect(authMeAction(401, false)).toBe('silent-guest');
+  });
+
+  test('403 triggers warn', () => {
+    expect(authMeAction(403, false)).toBe('warn');
+  });
+
+  test('500 triggers warn', () => {
+    expect(authMeAction(500, false)).toBe('warn');
+  });
+
+  test('503 triggers warn', () => {
+    expect(authMeAction(503, false)).toBe('warn');
+  });
+});

@@ -14,6 +14,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { getCsrfToken } from '../lib/csrf';
+import { useAuth } from '../context/AuthContext';
 import { Check, X } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -565,6 +566,7 @@ function TaskQueueTab() {
   const [tasks, setTasks] = useState<TaskQueueRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -586,8 +588,12 @@ function TaskQueueTab() {
   }, [fetchTasks]);
 
   // Subscribe to real-time task events via WebSocket pub/sub.
-  // Replaces the previous setInterval polling every 5 seconds.
+  // Only opens the connection when the user is confirmed authenticated to avoid
+  // spurious WebSocket errors on unauthenticated page loads.
   useEffect(() => {
+    // Gate: do not open a WebSocket connection until the user is authenticated.
+    if (!user) return;
+
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
     const ws = new WebSocket(wsUrl);
@@ -621,9 +627,21 @@ function TaskQueueTab() {
     });
 
     return () => {
-      ws.close();
+      // Guard against closing a socket that is still in CONNECTING state
+      // (readyState === 0). Calling ws.close() on a CONNECTING socket triggers
+      // the browser warning "WebSocket is closed before the connection is
+      // established". Instead, register the close to fire once OPEN, or abort
+      // via the error path if the open never arrives.
+      if (ws.readyState === WebSocket.CONNECTING) {
+        ws.addEventListener('open', () => ws.close());
+        ws.addEventListener('error', () => {
+          /* connection failed — nothing to close */
+        });
+      } else {
+        ws.close();
+      }
     };
-  }, []);
+  }, [user]);
 
   if (loading) return <div className="p-6 text-surface-400 text-sm">Loading task queue...</div>;
   if (error) return <div className="p-6 text-red-500 text-sm">Error: {error}</div>;
