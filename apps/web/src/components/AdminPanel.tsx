@@ -575,13 +575,45 @@ function TaskQueueTab() {
     void fetchTasks();
   }, [fetchTasks]);
 
-  // Auto-refresh every 5 seconds (acceptance criteria: auto-refresh without manual reload)
+  // Subscribe to real-time task events via WebSocket pub/sub.
+  // Replaces the previous setInterval polling every 5 seconds.
   useEffect(() => {
-    const interval = setInterval(() => {
-      void fetchTasks();
-    }, 5_000);
-    return () => clearInterval(interval);
-  }, [fetchTasks]);
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws`;
+    const ws = new WebSocket(wsUrl);
+
+    ws.addEventListener('message', (event: MessageEvent) => {
+      try {
+        const msg = JSON.parse(event.data as string) as { event: string; data: TaskQueueRow };
+        if (
+          msg.event === 'task.created' ||
+          msg.event === 'task.updated' ||
+          msg.event === 'task.deleted'
+        ) {
+          setTasks((prev) => {
+            if (msg.event === 'task.created') {
+              // Prepend if not already present (idempotent)
+              const exists = prev.some((t) => t.id === msg.data.id);
+              return exists ? prev : [msg.data, ...prev];
+            }
+            if (msg.event === 'task.updated') {
+              return prev.map((t) => (t.id === msg.data.id ? msg.data : t));
+            }
+            if (msg.event === 'task.deleted') {
+              return prev.filter((t) => t.id !== msg.data.id);
+            }
+            return prev;
+          });
+        }
+      } catch {
+        // Ignore malformed messages
+      }
+    });
+
+    return () => {
+      ws.close();
+    };
+  }, []);
 
   if (loading) return <div className="p-6 text-surface-400 text-sm">Loading task queue...</div>;
   if (error) return <div className="p-6 text-red-500 text-sm">Error: {error}</div>;
@@ -601,7 +633,7 @@ function TaskQueueTab() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-surface-900">
-          Task Queue ({tasks.length} tasks — auto-refreshing every 5s)
+          Task Queue ({tasks.length} tasks)
         </h2>
         <button
           onClick={() => void fetchTasks()}
