@@ -387,16 +387,13 @@ export async function handleAuthRequest(
   }
 
   // 3. GET /api/auth/me
-  // Validates the session cookie or Bearer API key and returns user profile
+  // Validates the session cookie or Bearer API key and returns user profile.
+  // Returns 200 { user: null } when no session exists so that browsers do not
+  // emit a red console error for every unauthenticated page load.  Callers
+  // should check data.user !== null to detect authenticated state.
   if (req.method === 'GET' && url.pathname === '/api/auth/me') {
     const user = await getAuthenticatedUserOrApiKey(req);
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    return new Response(JSON.stringify({ user }), {
+    return new Response(JSON.stringify({ user: user ?? null }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

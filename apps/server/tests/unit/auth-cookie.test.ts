@@ -304,3 +304,45 @@ describe('auth cookie — deployed HTTPS (SECURE_COOKIES=true)', () => {
     expect(authCookie).not.toMatch(/Domain=/i);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Tests — GET /api/auth/me response shape
+// ---------------------------------------------------------------------------
+
+describe('GET /api/auth/me — response shape', () => {
+  beforeEach(() => {
+    delete process.env.SECURE_COOKIES;
+    _fakeHashStore.clear();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    delete process.env.SECURE_COOKIES;
+  });
+
+  test('returns HTTP 200 with { user: null } when no session cookie is present', async () => {
+    // No Cookie header — getAuthenticatedUser returns null without calling verifyJwt.
+    // authenticateApiKey mock already returns null.
+    const appState = makeAppState();
+    const req = new Request('http://localhost/api/auth/me', { method: 'GET' });
+    const res = await handleAuthRequest(req, new URL(req.url), appState);
+    expect(res!.status).toBe(200);
+    const body = await res!.json();
+    expect(body).toEqual({ user: null });
+  });
+
+  test('returns HTTP 200 with { user: { id, username } } when a valid session cookie is present', async () => {
+    // verifyJwt module mock resolves to { id: 'mock-id', username: 'testuser' } by default.
+    const appState = makeAppState();
+    const req = new Request('http://localhost/api/auth/me', {
+      method: 'GET',
+      headers: { Cookie: 'tea_tax_auth=valid-token' },
+    });
+    const res = await handleAuthRequest(req, new URL(req.url), appState);
+    expect(res!.status).toBe(200);
+    const body = await res!.json();
+    expect(body.user).not.toBeNull();
+    expect(body.user.id).toBe('mock-id');
+    expect(body.user.username).toBe('testuser');
+  });
+});
