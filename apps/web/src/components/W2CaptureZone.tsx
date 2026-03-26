@@ -320,7 +320,7 @@ export function W2CaptureZone({
             onClick={onSkip}
             className="text-sm text-surface-400 hover:text-surface-600 text-left transition-colors mt-1"
           >
-            Skip — I'll enter my information manually →
+            Skip — I&apos;ll enter my information manually →
           </button>
         </div>
       )}
