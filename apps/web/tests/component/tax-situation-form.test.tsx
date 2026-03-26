@@ -51,7 +51,12 @@ function mockMatchMedia(matches: Record<string, boolean>) {
 
 function renderForm(props?: Partial<React.ComponentProps<typeof TaxSituationForm>>) {
   return render(
-    <TaxSituationForm taxObjectId="test-obj-id" returnId="test-return-id" {...props} />,
+    <TaxSituationForm
+      taxObjectId="test-obj-id"
+      returnId="test-return-id"
+      initialSituation={{}}
+      {...props}
+    />,
   );
 }
 
