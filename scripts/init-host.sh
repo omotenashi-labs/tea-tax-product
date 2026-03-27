@@ -560,6 +560,13 @@ spec:
 EOF
 
     echo "    Waiting for postgres to be ready..."
+    # kubectl wait exits immediately with "no matching resources" if the pod has
+    # not been scheduled yet. Poll until at least one pod exists before waiting.
+    for i in $(seq 1 30); do
+      kubectl get pod --namespace="${NAMESPACE}" --selector=app=postgres \
+        --no-headers 2>/dev/null | grep -q . && break
+      sleep 2
+    done
     if ! kubectl wait --for=condition=Ready pod \
         --namespace="${NAMESPACE}" \
         --selector=app=postgres \
