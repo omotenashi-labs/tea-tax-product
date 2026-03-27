@@ -1,37 +1,12 @@
 /**
  * Unit tests for the usePlatform hook's pure helper functions.
  *
- * Because the helpers are not exported from use-platform.ts directly we
- * re-implement the equivalent inline logic here rather than reaching into
- * internal module boundaries. The public contract under test is:
- *
- * 1. detectOs — classifies a user-agent string into one of the known OS tokens
- * 2. detectBrowser — classifies a user-agent string into one of the known browser tokens
- * 3. The hook exports a PlatformInfo object with the expected shape
+ * The helpers `detectOs` and `detectBrowser` are now exported from
+ * use-platform.ts for direct unit testing.
  */
 
 import { describe, test, expect } from 'vitest';
-
-// ---------------------------------------------------------------------------
-// Pure helper logic mirrored from use-platform.ts for isolated unit testing
-// ---------------------------------------------------------------------------
-
-function detectOs(ua: string): 'android' | 'ios' | 'windows' | 'macos' | 'linux' | 'unknown' {
-  if (/android/i.test(ua)) return 'android';
-  if (/iphone|ipad|ipod/i.test(ua)) return 'ios';
-  if (/windows/i.test(ua)) return 'windows';
-  if (/macintosh|mac os x/i.test(ua)) return 'macos';
-  if (/linux/i.test(ua)) return 'linux';
-  return 'unknown';
-}
-
-function detectBrowser(ua: string): 'chrome' | 'safari' | 'firefox' | 'edge' | 'unknown' {
-  if (/edg\//i.test(ua)) return 'edge';
-  if (/chrome|chromium|crios/i.test(ua)) return 'chrome';
-  if (/firefox|fxios/i.test(ua)) return 'firefox';
-  if (/safari/i.test(ua)) return 'safari';
-  return 'unknown';
-}
+import { detectOs, detectBrowser } from '../../src/hooks/use-platform.js';
 
 // ---------------------------------------------------------------------------
 // OS detection
@@ -54,12 +29,48 @@ describe('detectOs', () => {
     ).toBe('ios');
   });
 
-  test('detects iOS (iPad)', () => {
+  test('detects iOS (iPad pre-13)', () => {
     expect(
       detectOs(
-        'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Version/17.0 Mobile/15E148 Safari/604.1',
+        'Mozilla/5.0 (iPad; CPU OS 12_0 like Mac OS X) AppleWebKit/605.1.15 Version/12.0 Mobile/15E148 Safari/604.1',
       ),
     ).toBe('ios');
+  });
+
+  test('detects iPadOS 13+ (Macintosh UA + maxTouchPoints > 1) as ios', () => {
+    // iPadOS 13+ sends a Macintosh UA identical to desktop Safari
+    expect(
+      detectOs(
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+        5, // iPadOS typically reports maxTouchPoints=5
+      ),
+    ).toBe('ios');
+  });
+
+  test('real macOS (maxTouchPoints=0) detects as macos, not ios', () => {
+    expect(
+      detectOs(
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/17.0 Safari/605.1.15',
+        0,
+      ),
+    ).toBe('macos');
+  });
+
+  test('macOS without explicit maxTouchPoints defaults to macos', () => {
+    expect(
+      detectOs(
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/17.0 Safari/605.1.15',
+      ),
+    ).toBe('macos');
+  });
+
+  test('maxTouchPoints=1 is not treated as iPad (only > 1)', () => {
+    expect(
+      detectOs(
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/17.0 Safari/605.1.15',
+        1,
+      ),
+    ).toBe('macos');
   });
 
   test('detects Windows', () => {
@@ -68,14 +79,6 @@ describe('detectOs', () => {
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/113.0.0.0 Safari/537.36',
       ),
     ).toBe('windows');
-  });
-
-  test('detects macOS', () => {
-    expect(
-      detectOs(
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/17.0 Safari/605.1.15',
-      ),
-    ).toBe('macos');
   });
 
   test('detects Linux', () => {
@@ -91,7 +94,6 @@ describe('detectOs', () => {
   });
 
   test('Android takes precedence over Linux', () => {
-    // Android UA strings contain "Linux" but should match Android first
     const androidUa =
       'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 Chrome/113.0 Mobile Safari/537.36';
     expect(detectOs(androidUa)).toBe('android');
@@ -119,6 +121,22 @@ describe('detectBrowser', () => {
     ).toBe('safari');
   });
 
+  test('detects Chrome on iOS (CriOS)', () => {
+    expect(
+      detectBrowser(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/119.0.6045.169 Mobile/15E148 Safari/604.1',
+      ),
+    ).toBe('chrome');
+  });
+
+  test('detects Firefox on iOS (FxiOS)', () => {
+    expect(
+      detectBrowser(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/119.0 Mobile/15E148 Safari/605.1.15',
+      ),
+    ).toBe('firefox');
+  });
+
   test('detects Firefox', () => {
     expect(
       detectBrowser(
@@ -136,7 +154,6 @@ describe('detectBrowser', () => {
   });
 
   test('Edge takes precedence over Chrome when UA contains both', () => {
-    // Edge UA typically includes "Chrome" — Edge must be detected first
     const edgeUa =
       'Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1';
     expect(detectBrowser(edgeUa)).toBe('edge');
@@ -155,5 +172,15 @@ describe('use-platform module exports', () => {
   test('usePlatform is exported from the module', async () => {
     const mod = await import('../../src/hooks/use-platform.js');
     expect(typeof mod.usePlatform).toBe('function');
+  });
+
+  test('detectOs is exported from the module', async () => {
+    const mod = await import('../../src/hooks/use-platform.js');
+    expect(typeof mod.detectOs).toBe('function');
+  });
+
+  test('detectBrowser is exported from the module', async () => {
+    const mod = await import('../../src/hooks/use-platform.js');
+    expect(typeof mod.detectBrowser).toBe('function');
   });
 });

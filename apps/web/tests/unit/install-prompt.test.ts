@@ -1,116 +1,170 @@
 /**
- * Unit tests for the install prompt component's eligibility logic.
- *
- * The component's rendering depends on:
- *   1. Whether the app is already in standalone mode (always non-eligible)
- *   2. Whether the user previously dismissed (stored in localStorage)
- *   3. OS / browser combination for iOS guided overlay
- *   4. Presence of a deferred BeforeInstallPromptEvent (Android banner)
- *
- * We test the state-transition rules without mounting the React component.
+ * Unit tests for the install prompt component's exported logic:
+ * - isDismissalActive: TTL-based dismissal with legacy 'true' handling
+ * - resolveInstallPath: feature-detection-driven install path resolution
  */
 
 import { describe, test, expect } from 'vitest';
+import {
+  isDismissalActive,
+  DISMISS_TTL_MS,
+  resolveInstallPath,
+} from '../../src/components/pwa/install-prompt.js';
 
-const DISMISSED_KEY = 'tea-tax:pwa-install-dismissed';
+// ---------------------------------------------------------------------------
+// isDismissalActive
+// ---------------------------------------------------------------------------
 
-/** Mirrors the eligibility decision from InstallPrompt */
-function resolveEligibility(opts: {
-  isStandalone: boolean;
-  wasDismissed: boolean;
-  hasBeforeInstallPrompt: boolean;
-  os: string;
-  browser: string;
-}): 'not-eligible' | 'eligible' | 'installed' {
-  if (opts.isStandalone) return 'installed';
-  if (opts.wasDismissed) return 'not-eligible';
-  if (opts.hasBeforeInstallPrompt) return 'eligible';
-  if (opts.os === 'ios' && opts.browser === 'safari') return 'eligible';
-  return 'not-eligible';
-}
+describe('isDismissalActive', () => {
+  test('null stored value returns false', () => {
+    expect(isDismissalActive(null)).toBe(false);
+  });
 
-describe('InstallPrompt eligibility logic', () => {
-  test('returns installed when already standalone', () => {
+  test('legacy permanent "true" is treated as expired (returns false)', () => {
+    expect(isDismissalActive('true')).toBe(false);
+  });
+
+  test('recent timestamp returns true', () => {
+    const now = Date.now();
+    const recentTs = String(now - 1000); // 1 second ago
+    expect(isDismissalActive(recentTs, now)).toBe(true);
+  });
+
+  test('expired timestamp (> 90 days) returns false', () => {
+    const now = Date.now();
+    const expiredTs = String(now - DISMISS_TTL_MS - 1); // just over 90 days ago
+    expect(isDismissalActive(expiredTs, now)).toBe(false);
+  });
+
+  test('boundary: exactly at TTL returns false (not strictly less than)', () => {
+    const now = Date.now();
+    const boundaryTs = String(now - DISMISS_TTL_MS); // exactly 90 days ago
+    expect(isDismissalActive(boundaryTs, now)).toBe(false);
+  });
+
+  test('boundary: 1ms before TTL expiry returns true', () => {
+    const now = Date.now();
+    const almostExpired = String(now - DISMISS_TTL_MS + 1);
+    expect(isDismissalActive(almostExpired, now)).toBe(true);
+  });
+
+  test('non-numeric garbage string returns false', () => {
+    expect(isDismissalActive('garbage')).toBe(false);
+  });
+
+  test('empty string returns false', () => {
+    expect(isDismissalActive('')).toBe(false);
+  });
+
+  test('NaN-producing string returns false', () => {
+    expect(isDismissalActive('NaN')).toBe(false);
+  });
+
+  test('Infinity string returns false', () => {
+    expect(isDismissalActive('Infinity')).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// resolveInstallPath
+// ---------------------------------------------------------------------------
+
+describe('resolveInstallPath', () => {
+  test('standalone mode returns "none" regardless of other flags', () => {
     expect(
-      resolveEligibility({
+      resolveInstallPath({
+        supportsBeforeInstallPrompt: true,
         isStandalone: true,
-        wasDismissed: false,
-        hasBeforeInstallPrompt: false,
         os: 'android',
         browser: 'chrome',
       }),
-    ).toBe('installed');
+    ).toBe('none');
   });
 
-  test('returns not-eligible when previously dismissed', () => {
+  test('browser with beforeinstallprompt support returns "native-prompt"', () => {
     expect(
-      resolveEligibility({
+      resolveInstallPath({
+        supportsBeforeInstallPrompt: true,
         isStandalone: false,
-        wasDismissed: true,
-        hasBeforeInstallPrompt: true,
         os: 'android',
         browser: 'chrome',
       }),
-    ).toBe('not-eligible');
+    ).toBe('native-prompt');
   });
 
-  test('returns eligible when beforeinstallprompt captured on Android', () => {
+  test('iOS Safari without beforeinstallprompt returns "ios-safari"', () => {
     expect(
-      resolveEligibility({
+      resolveInstallPath({
+        supportsBeforeInstallPrompt: false,
         isStandalone: false,
-        wasDismissed: false,
-        hasBeforeInstallPrompt: true,
-        os: 'android',
-        browser: 'chrome',
-      }),
-    ).toBe('eligible');
-  });
-
-  test('returns eligible when iOS Safari and not dismissed', () => {
-    expect(
-      resolveEligibility({
-        isStandalone: false,
-        wasDismissed: false,
-        hasBeforeInstallPrompt: false,
         os: 'ios',
         browser: 'safari',
       }),
-    ).toBe('eligible');
+    ).toBe('ios-safari');
   });
 
-  test('returns not-eligible when iOS Safari but dismissed', () => {
+  test('iOS Chrome (CriOS) returns "ios-non-safari"', () => {
     expect(
-      resolveEligibility({
+      resolveInstallPath({
+        supportsBeforeInstallPrompt: false,
         isStandalone: false,
-        wasDismissed: true,
-        hasBeforeInstallPrompt: false,
         os: 'ios',
-        browser: 'safari',
+        browser: 'chrome',
       }),
-    ).toBe('not-eligible');
+    ).toBe('ios-non-safari');
   });
 
-  test('returns not-eligible on desktop Chrome with no prompt event', () => {
+  test('iOS Firefox (FxiOS) returns "ios-non-safari"', () => {
     expect(
-      resolveEligibility({
+      resolveInstallPath({
+        supportsBeforeInstallPrompt: false,
         isStandalone: false,
-        wasDismissed: false,
-        hasBeforeInstallPrompt: false,
+        os: 'ios',
+        browser: 'firefox',
+      }),
+    ).toBe('ios-non-safari');
+  });
+
+  test('desktop Chrome without beforeinstallprompt returns "none"', () => {
+    expect(
+      resolveInstallPath({
+        supportsBeforeInstallPrompt: false,
+        isStandalone: false,
         os: 'windows',
         browser: 'chrome',
       }),
-    ).toBe('not-eligible');
+    ).toBe('none');
   });
 
-  test('dismissed key name is stable (used in localStorage)', () => {
-    // Verifies the constant is exported-compatible for localStorage usage
-    expect(DISMISSED_KEY).toBe('tea-tax:pwa-install-dismissed');
+  test('desktop Edge with beforeinstallprompt returns "native-prompt"', () => {
+    expect(
+      resolveInstallPath({
+        supportsBeforeInstallPrompt: true,
+        isStandalone: false,
+        os: 'windows',
+        browser: 'edge',
+      }),
+    ).toBe('native-prompt');
   });
 });
+
+// ---------------------------------------------------------------------------
+// Module exports
+// ---------------------------------------------------------------------------
 
 describe('InstallPrompt module exports', () => {
   test('InstallPrompt is exported from the module', async () => {
     const mod = await import('../../src/components/pwa/install-prompt.js');
     expect(typeof mod.InstallPrompt).toBe('function');
+  });
+
+  test('DISMISSED_KEY constant is stable', async () => {
+    const mod = await import('../../src/components/pwa/install-prompt.js');
+    expect(mod.DISMISSED_KEY).toBe('tea-tax:pwa-install-dismissed');
+  });
+
+  test('DISMISS_TTL_MS is 90 days in milliseconds', async () => {
+    const mod = await import('../../src/components/pwa/install-prompt.js');
+    expect(mod.DISMISS_TTL_MS).toBe(90 * 24 * 60 * 60 * 1000);
   });
 });
