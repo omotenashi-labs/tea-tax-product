@@ -560,7 +560,22 @@ spec:
 EOF
 
     echo "    Waiting for postgres to be ready..."
-    kubectl rollout status statefulset/postgres --namespace="${NAMESPACE}" --timeout=120s
+    # kubectl wait exits immediately with "no matching resources" if the pod has
+    # not been scheduled yet. Poll until at least one pod exists before waiting.
+    for i in $(seq 1 30); do
+      kubectl get pod --namespace="${NAMESPACE}" --selector=app=postgres \
+        --no-headers 2>/dev/null | grep -q . && break
+      sleep 2
+    done
+    if ! kubectl wait --for=condition=Ready pod \
+        --namespace="${NAMESPACE}" \
+        --selector=app=postgres \
+        --timeout=180s; then
+      echo "    ERROR: postgres pod did not become ready within 180s." >&2
+      kubectl describe pods --namespace="${NAMESPACE}" --selector=app=postgres >&2 || true
+      kubectl logs --namespace="${NAMESPACE}" --selector=app=postgres --tail=50 >&2 || true
+      exit 1
+    fi
   fi
 
   kubectl delete job calypso-db-init --namespace="${NAMESPACE}" --ignore-not-found
