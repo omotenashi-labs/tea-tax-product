@@ -7,7 +7,7 @@
  * DELETE /api/admin/keys/:id    — revokes an API key
  *
  * New superadmin panel routes:
- * GET    /api/admin/users             — paginated user list with role and status
+ * GET    /api/admin/users             — paginated user list with optional role filter and ?q= search
  * PATCH  /api/admin/users/:id         — role change and deactivate/reactivate
  * GET    /api/admin/registrations     — sign-up timeline ordered by created_at
  * GET    /api/admin/tax-activity      — tax returns grouped by user
@@ -57,32 +57,130 @@ export async function handleAdminRequest(
   // ── New superadmin panel routes ──────────────────────────────────────────
   // These routes use role-based access control (role === 'superadmin' in JWT).
 
-  // GET /api/admin/users — paginated user list
+  // GET /api/admin/users — paginated user list with optional role filter and ?q= search
+  //
+  // Query parameters:
+  //   ?q=<string>     — case-insensitive partial match on username, email, or display_name
+  //   ?role=<string>  — exact match on properties.role
+  //   ?page=<number>  — 1-based page number (default 1)
+  //   ?limit=<number> — page size (default 20, max 100)
   if (req.method === 'GET' && url.pathname === '/api/admin/users') {
     if (!isSuperadmin(user)) return json({ error: 'Forbidden' }, 403);
 
     const page = Math.max(1, Number(url.searchParams.get('page') ?? '1'));
-    const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit') ?? '50')));
+    const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit') ?? '20')));
     const offset = (page - 1) * limit;
+    const roleFilter = url.searchParams.get('role') ?? null;
+    const searchTerm = url.searchParams.get('q')?.trim() ?? null;
+    // Treat empty string as absent so ?q= behaves the same as no q parameter
+    const effectiveSearch = searchTerm === '' ? null : searchTerm;
 
-    const users = await sql<
-      { id: string; username: string; role: string; active: string; created_at: string }[]
-    >`
-      SELECT
-        id,
-        properties->>'username'  AS username,
-        COALESCE(properties->>'role', 'tax_filer')  AS role,
-        COALESCE(properties->>'active', 'true')     AS active,
-        created_at
-      FROM entities
-      WHERE type = 'user'
-      ORDER BY created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `;
+    interface UserRow {
+      id: string;
+      username: string;
+      role: string;
+      active: string;
+      created_at: string;
+    }
 
-    const [{ count }] = await sql<{ count: string }[]>`
-      SELECT COUNT(*) AS count FROM entities WHERE type = 'user'
-    `;
+    let users: UserRow[];
+    let totalCount: string;
+
+    if (effectiveSearch && roleFilter) {
+      const pattern = `%${effectiveSearch}%`;
+      users = await sql<UserRow[]>`
+        SELECT
+          id,
+          properties->>'username'                    AS username,
+          COALESCE(properties->>'role', 'tax_filer') AS role,
+          COALESCE(properties->>'active', 'true')    AS active,
+          created_at
+        FROM entities
+        WHERE type = 'user'
+          AND properties->>'role' = ${roleFilter}
+          AND (
+            LOWER(properties->>'username')     LIKE LOWER(${pattern})
+            OR LOWER(properties->>'email')     LIKE LOWER(${pattern})
+            OR LOWER(properties->>'display_name') LIKE LOWER(${pattern})
+          )
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      [{ count: totalCount }] = await sql<{ count: string }[]>`
+        SELECT COUNT(*) AS count
+        FROM entities
+        WHERE type = 'user'
+          AND properties->>'role' = ${roleFilter}
+          AND (
+            LOWER(properties->>'username')        LIKE LOWER(${pattern})
+            OR LOWER(properties->>'email')        LIKE LOWER(${pattern})
+            OR LOWER(properties->>'display_name') LIKE LOWER(${pattern})
+          )
+      `;
+    } else if (effectiveSearch) {
+      const pattern = `%${effectiveSearch}%`;
+      users = await sql<UserRow[]>`
+        SELECT
+          id,
+          properties->>'username'                    AS username,
+          COALESCE(properties->>'role', 'tax_filer') AS role,
+          COALESCE(properties->>'active', 'true')    AS active,
+          created_at
+        FROM entities
+        WHERE type = 'user'
+          AND (
+            LOWER(properties->>'username')        LIKE LOWER(${pattern})
+            OR LOWER(properties->>'email')        LIKE LOWER(${pattern})
+            OR LOWER(properties->>'display_name') LIKE LOWER(${pattern})
+          )
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      [{ count: totalCount }] = await sql<{ count: string }[]>`
+        SELECT COUNT(*) AS count
+        FROM entities
+        WHERE type = 'user'
+          AND (
+            LOWER(properties->>'username')        LIKE LOWER(${pattern})
+            OR LOWER(properties->>'email')        LIKE LOWER(${pattern})
+            OR LOWER(properties->>'display_name') LIKE LOWER(${pattern})
+          )
+      `;
+    } else if (roleFilter) {
+      users = await sql<UserRow[]>`
+        SELECT
+          id,
+          properties->>'username'                    AS username,
+          COALESCE(properties->>'role', 'tax_filer') AS role,
+          COALESCE(properties->>'active', 'true')    AS active,
+          created_at
+        FROM entities
+        WHERE type = 'user'
+          AND properties->>'role' = ${roleFilter}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      [{ count: totalCount }] = await sql<{ count: string }[]>`
+        SELECT COUNT(*) AS count FROM entities
+        WHERE type = 'user' AND properties->>'role' = ${roleFilter}
+      `;
+    } else {
+      users = await sql<UserRow[]>`
+        SELECT
+          id,
+          properties->>'username'                    AS username,
+          COALESCE(properties->>'role', 'tax_filer') AS role,
+          COALESCE(properties->>'active', 'true')    AS active,
+          created_at
+        FROM entities
+        WHERE type = 'user'
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+      [{ count: totalCount }] = await sql<{ count: string }[]>`
+        SELECT COUNT(*) AS count FROM entities WHERE type = 'user'
+      `;
+    }
 
     return json({
       users: users.map((u) => ({
@@ -92,7 +190,7 @@ export async function handleAdminRequest(
         active: u.active !== 'false',
         created_at: u.created_at,
       })),
-      total: Number(count),
+      total: Number(totalCount),
       page,
       limit,
     });
