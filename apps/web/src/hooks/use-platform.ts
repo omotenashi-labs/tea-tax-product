@@ -62,10 +62,18 @@ export interface PlatformInfo {
   };
 }
 
-/** Parse operating system from user-agent string */
-function detectOs(ua: string): PlatformInfo['os'] {
+/**
+ * Parse operating system from user-agent string.
+ *
+ * iPadOS 13+ sends a Macintosh UA string identical to desktop Safari. To
+ * disambiguate, pass `maxTouchPoints` from `navigator.maxTouchPoints`. Real
+ * macOS devices report 0; iPadOS reports a value > 1 (typically 5).
+ */
+export function detectOs(ua: string, maxTouchPoints = 0): PlatformInfo['os'] {
   if (/android/i.test(ua)) return 'android';
   if (/iphone|ipad|ipod/i.test(ua)) return 'ios';
+  // iPadOS 13+ sends a Macintosh UA — detect via touch points
+  if (/macintosh|mac os x/i.test(ua) && maxTouchPoints > 1) return 'ios';
   if (/windows/i.test(ua)) return 'windows';
   if (/macintosh|mac os x/i.test(ua)) return 'macos';
   if (/linux/i.test(ua)) return 'linux';
@@ -73,7 +81,7 @@ function detectOs(ua: string): PlatformInfo['os'] {
 }
 
 /** Parse browser from user-agent string */
-function detectBrowser(ua: string): PlatformInfo['browser'] {
+export function detectBrowser(ua: string): PlatformInfo['browser'] {
   // Order matters: Edge includes "Chrome" in its UA, so check Edge first.
   if (/edg\//i.test(ua)) return 'edge';
   if (/chrome|chromium|crios/i.test(ua)) return 'chrome';
@@ -96,9 +104,10 @@ function detectStandalone(): boolean {
 /** Build the full PlatformInfo snapshot for the current browser environment */
 function buildPlatformInfo(): PlatformInfo {
   const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+  const maxTouchPoints = typeof navigator !== 'undefined' ? (navigator.maxTouchPoints ?? 0) : 0;
 
   return {
-    os: detectOs(ua),
+    os: detectOs(ua, maxTouchPoints),
     browser: detectBrowser(ua),
     isStandalone: detectStandalone(),
     supports: {
