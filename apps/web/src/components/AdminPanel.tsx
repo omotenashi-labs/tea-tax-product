@@ -12,10 +12,13 @@
  * Non-superadmin users are not shown this component (App.tsx guards routing).
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { getCsrfToken } from '../lib/csrf';
 import { useAuth } from '../context/AuthContext';
-import { Check, X } from 'lucide-react';
+import { Check, X, Search } from 'lucide-react';
+
+/** Debounce delay for user search input (milliseconds). */
+const SEARCH_DEBOUNCE_MS = 300;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -140,28 +143,59 @@ function TabButton({
 
 function UsersTab() {
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [userTotal, setUserTotal] = useState(0);
+  const [userPage, setUserPage] = useState(1);
+  const [userLimit] = useState(20);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/admin/users', { credentials: 'include' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      setUsers(data.users ?? []);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load users');
-    } finally {
-      setLoading(false);
-    }
+  const fetchUsers = useCallback(
+    async (page: number, q: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams({ page: String(page), limit: String(userLimit) });
+        if (q) params.set('q', q);
+        const res = await fetch(`/api/admin/users?${params.toString()}`, {
+          credentials: 'include',
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setUsers(data.users ?? []);
+        setUserTotal(data.total ?? 0);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : 'Failed to load users');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [userLimit],
+  );
+
+  // Re-fetch when page or committed search query changes
+  useEffect(() => {
+    void fetchUsers(userPage, searchQuery);
+  }, [fetchUsers, userPage, searchQuery]);
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, []);
 
-  useEffect(() => {
-    void fetchUsers();
-  }, [fetchUsers]);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchInput(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setSearchQuery(value);
+      setUserPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+  };
 
   const handleRoleChange = async (id: string, role: string) => {
     try {
@@ -172,7 +206,7 @@ function UsersTab() {
         body: JSON.stringify({ role }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      await fetchUsers();
+      await fetchUsers(userPage, searchQuery);
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Failed to update role');
     }
@@ -187,17 +221,15 @@ function UsersTab() {
         body: JSON.stringify({ active }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      await fetchUsers();
+      await fetchUsers(userPage, searchQuery);
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Failed to update user');
     }
   };
 
-  const filtered = users.filter(
-    (u) =>
-      u.username.toLowerCase().includes(search.toLowerCase()) ||
-      u.role.toLowerCase().includes(search.toLowerCase()),
-  );
+  const totalPages = Math.max(1, Math.ceil(userTotal / userLimit));
+  const pageStart = userTotal === 0 ? 0 : (userPage - 1) * userLimit + 1;
+  const pageEnd = Math.min(userPage * userLimit, userTotal);
 
   if (loading) return <div className="p-6 text-surface-400 text-sm">Loading users...</div>;
   if (error) return <div className="p-6 text-red-500 text-sm">Error: {error}</div>;
@@ -215,14 +247,21 @@ function UsersTab() {
         <span>Tax situation data is user-encrypted and not accessible from this panel.</span>
       </div>
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold text-surface-900">Users ({users.length})</h2>
-        <input
-          type="text"
-          placeholder="Search by username or role..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="text-sm border border-surface-200 rounded px-3 py-1.5 w-64 focus:outline-none focus:ring-2 focus:ring-accent-500"
-        />
+        <h2 className="text-base font-semibold text-surface-900">Users ({userTotal})</h2>
+        <div className="relative">
+          <Search
+            size={13}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-surface-400 pointer-events-none"
+          />
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={searchInput}
+            onChange={handleSearchChange}
+            aria-label="Search users"
+            className="pl-8 pr-3 py-1.5 text-sm border border-surface-200 rounded px-3 w-64 focus:outline-none focus:ring-2 focus:ring-accent-500"
+          />
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -237,7 +276,7 @@ function UsersTab() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((u) => (
+            {users.map((u) => (
               <tr key={u.id} className="border-b border-surface-100 hover:bg-surface-50">
                 <td className="py-2 pr-4 font-mono text-xs text-surface-700">{u.username}</td>
                 <td className="py-2 pr-4">
@@ -278,10 +317,40 @@ function UsersTab() {
             ))}
           </tbody>
         </table>
-        {filtered.length === 0 && (
-          <p className="text-surface-400 text-sm py-4 text-center">No users found.</p>
+        {users.length === 0 && (
+          <p className="text-surface-400 text-sm py-4 text-center">
+            {searchQuery ? `No users match "${searchQuery}".` : 'No users found.'}
+          </p>
         )}
       </div>
+
+      {/* Pagination footer */}
+      {userTotal > 0 && (
+        <div className="flex items-center justify-between pt-2">
+          <span className="text-xs text-surface-500">
+            {pageStart}–{pageEnd} of {userTotal} user{userTotal !== 1 ? 's' : ''}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setUserPage((p) => Math.max(1, p - 1))}
+              disabled={userPage <= 1}
+              className="px-2 py-1 text-xs font-medium text-surface-600 border border-surface-200 rounded hover:bg-surface-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Previous
+            </button>
+            <span className="text-xs text-surface-500">
+              Page {userPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setUserPage((p) => Math.min(totalPages, p + 1))}
+              disabled={userPage >= totalPages}
+              className="px-2 py-1 text-xs font-medium text-surface-600 border border-surface-200 rounded hover:bg-surface-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
