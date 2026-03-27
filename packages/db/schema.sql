@@ -133,6 +133,9 @@ CREATE TABLE IF NOT EXISTS task_queue (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Idempotent fix: ensure id column has a default for existing databases
+ALTER TABLE task_queue ALTER COLUMN id SET DEFAULT gen_random_uuid()::TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_task_queue_poll
     ON task_queue (agent_type, status, priority, created_at)
     WHERE status = 'pending';
