@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Moon, Sun } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { PasskeyLoginButton } from './PasskeyButton';
 
@@ -15,6 +16,11 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,10 +83,19 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-surface-50 flex flex-col justify-center items-center font-sans px-4">
-      <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-surface-200 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-surface-800 mb-2 text-center">Tea Tax</h1>
-        <p className="text-surface-500 text-center mb-8">
+    <div className="min-h-screen bg-surface-50 dark:bg-surface-900 flex flex-col justify-center items-center font-sans px-4">
+      <div className="bg-white dark:bg-surface-800 p-6 sm:p-8 rounded-2xl shadow-sm border border-surface-200 dark:border-surface-700 w-full max-w-md">
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-1.5 rounded-md text-surface-400 hover:text-surface-600 dark:text-surface-400 dark:hover:text-surface-200 transition-colors"
+            aria-label="Toggle dark mode"
+          >
+            {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+        </div>
+        <h1 className="text-3xl font-bold text-surface-800 dark:text-surface-50 mb-1 text-center">Tea Tax</h1>
+        <p className="text-surface-500 dark:text-surface-400 text-center mb-8">
           {isRegister ? 'Create an account' : 'Sign in to your account'}
         </p>
 
@@ -92,22 +107,22 @@ export const Login: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-surface-700 mb-1">Username</label>
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">Username</label>
             <input
               type="text"
               required
-              className="w-full px-4 py-3 border border-surface-300 rounded-md focus:ring-2 focus:ring-accent-500 focus:border-accent-500 outline-none transition-shadow"
+              className="w-full px-4 py-3 border border-surface-300 dark:border-surface-600 rounded-md focus:ring-2 focus:ring-accent-500 focus:border-accent-500 outline-none transition-shadow bg-white dark:bg-surface-700 text-surface-800 dark:text-surface-100 placeholder-surface-400 dark:placeholder-surface-500"
               placeholder="e.g. yourname"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-surface-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">Password</label>
             <input
               type="password"
               required
-              className="w-full px-4 py-3 border border-surface-300 rounded-md focus:ring-2 focus:ring-accent-500 focus:border-accent-500 outline-none transition-shadow"
+              className="w-full px-4 py-3 border border-surface-300 dark:border-surface-600 rounded-md focus:ring-2 focus:ring-accent-500 focus:border-accent-500 outline-none transition-shadow bg-white dark:bg-surface-700 text-surface-800 dark:text-surface-100 placeholder-surface-400 dark:placeholder-surface-500"
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -165,7 +180,7 @@ export const Login: React.FC = () => {
               setIsRegister(!isRegister);
               setError('');
             }}
-            className="text-accent-500 hover:text-accent-700 hover:underline transition-colors"
+            className="text-accent-500 hover:text-accent-600 hover:underline transition-colors"
           >
             {isRegister ? 'Already have an account? Sign In' : 'Need an account? Register'}
           </button>
