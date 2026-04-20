@@ -112,7 +112,7 @@ jobs:
           echo "Login response: $LOGIN_RESPONSE"
 
           # List tasks using the auth cookie
-          TASKS=$(curl -sf -b /tmp/smoke_cookies.txt "$BASE/api/tasks")
+          TASKS=$(curl -sf -b /tmp/smoke_cookies.txt "$BASE/api/tasks-queue")
           echo "Tasks response: $TASKS"
 
       - name: Stop and remove container
