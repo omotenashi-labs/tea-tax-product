@@ -176,6 +176,19 @@ export async function submitTaskResult(options: SubmitResultOptions): Promise<Ta
   return rows[0] ?? null;
 }
 
+/**
+ * Lists tasks created by the given user, most recent first.
+ */
+export async function listTasksForUser(userId: string, limit = 50): Promise<TaskQueueRow[]> {
+  return await sql<TaskQueueRow[]>`
+    SELECT *
+    FROM task_queue
+    WHERE created_by = ${userId}
+    ORDER BY created_at DESC
+    LIMIT ${limit}
+  `;
+}
+
 export interface RecoveredTaskRow {
   id: string;
   status: TaskQueueStatus;
