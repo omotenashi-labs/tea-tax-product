@@ -16,6 +16,7 @@ import { verifyDelegatedToken } from '../auth/delegated-token';
 import {
   enqueueTask,
   claimNextTask,
+  listTasksForUser,
   updateTaskStatus,
   submitTaskResult,
   type TaskQueueStatus,
@@ -93,6 +94,7 @@ export async function handleTaskQueueResultRequest(
 
 /**
  * Session-authenticated task-queue CRUD (issue #43, TQ-D-001):
+ *   GET  /api/tasks-queue            — list caller's tasks
  *   POST /api/tasks-queue            — idempotent enqueue   (TQ-P-003)
  *   POST /api/tasks-queue/claim      — atomic claim          (TQ-P-001)
  *   PATCH /api/tasks-queue/:id       — status update
@@ -112,6 +114,12 @@ export async function handleTasksQueueRequest(
 
   const user = await getAuthenticatedUser(req);
   if (!user) return json({ error: 'Unauthorized' }, 401);
+
+  // GET /api/tasks-queue — list tasks for the authenticated user
+  if (req.method === 'GET' && url.pathname === '/api/tasks-queue') {
+    const tasks = await listTasksForUser(user.id);
+    return json({ tasks });
+  }
 
   // POST /api/tasks-queue — idempotent enqueue (TQ-P-003)
   if (req.method === 'POST' && url.pathname === '/api/tasks-queue') {
