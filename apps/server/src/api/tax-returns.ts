@@ -3,9 +3,7 @@
  * Tax-return CRUD API endpoints, scoped under a parent tax_object.
  *
  * Canonical docs:
- *   - docs/prd-v0.md
- *   - docs/implementation-plan.md
- *   - docs/requirements/users-tax-objects-ownership-access-spec.md
+ *   - requirements/users-tax-objects-ownership-access-spec.md
  *
  * Endpoints (all under /api/tax-objects/:id/returns):
  *

@@ -3,9 +3,7 @@
  * Tax-object CRUD API endpoints.
  *
  * Canonical docs:
- *   - docs/prd-v0.md
- *   - docs/implementation-plan.md
- *   - docs/requirements/users-tax-objects-ownership-access-spec.md
+ *   - requirements/users-tax-objects-ownership-access-spec.md
  *
  * Endpoints:
  *
